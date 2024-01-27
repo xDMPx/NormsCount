@@ -12,6 +12,7 @@ import com.xdmpx.normscount.ui.theme.NormsCountTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         val counter = Counter()
 
         setContent {

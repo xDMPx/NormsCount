@@ -1,13 +1,13 @@
 package com.xdmpx.normscount
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
@@ -26,7 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 class Counter {
-    private var count: MutableState<Int> = mutableStateOf(0)
+    val TAG_DEBUG = "Counter"
+    private var count: MutableState<Int> = mutableStateOf(1000000)
 
     @Composable
     @Preview
@@ -34,14 +35,18 @@ class Counter {
         var count by remember { count }
 
         Column(modifier = modifier) {
-            Box(
-                contentAlignment = Alignment.Center, modifier = modifier
+            LazyRow(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
                     .fillMaxSize()
                     .weight(0.7f)
             ) {
-                Text(
-                    text = "$count", fontSize = 50.sp, modifier = Modifier.padding(10.dp)
-                )
+                item {
+                    Text(
+                        text = "$count", fontSize = 150.sp, modifier = Modifier.padding(10.dp)
+                    )
+                }
             }
             Column(
                 verticalArrangement = Arrangement.spacedBy(
