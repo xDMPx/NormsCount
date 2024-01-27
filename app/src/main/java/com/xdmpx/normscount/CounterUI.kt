@@ -1,0 +1,72 @@
+package com.xdmpx.normscount
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+class Counter {
+    private var count: MutableState<Int> = mutableStateOf(0)
+
+    @Composable
+    @Preview
+    fun CounterUI(modifier: Modifier = Modifier) {
+        var count by remember { count }
+
+        Column(modifier = modifier) {
+            Box(
+                contentAlignment = Alignment.Center, modifier = modifier
+                    .fillMaxSize()
+                    .weight(0.7f)
+            ) {
+                Text(
+                    text = "$count", fontSize = 50.sp, modifier = Modifier.padding(10.dp)
+                )
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(
+                    space = 10.dp, alignment = Alignment.Bottom
+                ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(0.3f)
+            ) {
+                Button(
+                    onClick = { count++ },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(height = 110.dp)
+                ) {
+                    Icon(Icons.Rounded.Add, contentDescription = null)
+                }
+                Button(
+                    onClick = { count-- }, modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    Text(text = "-", fontSize = 45.sp)
+                }
+                Spacer(modifier = modifier.height(10.dp))
+            }
+        }
+    }
+}
