@@ -1,5 +1,7 @@
 package com.xdmpx.normscount
 
+import android.os.VibrationEffect
+import android.os.Vibrator
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,18 +23,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 class Counter {
     val TAG_DEBUG = "Counter"
-    private var count: MutableState<Int> = mutableStateOf(1000000)
+    private var count: MutableState<Int> = mutableStateOf(0)
 
     @Composable
     @Preview
     fun CounterUI(modifier: Modifier = Modifier) {
         var count by remember { count }
+
+        val context = LocalContext.current
+        val vibrator = context.getSystemService(Vibrator::class.java)
+        val onClickFeedback =
+            { vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)) }
 
         Column(modifier = modifier) {
             LazyRow(
@@ -58,15 +66,20 @@ class Counter {
                     .weight(0.3f)
             ) {
                 Button(
-                    onClick = { count++ },
-                    modifier = Modifier
+                    onClick = {
+                        count++
+                        onClickFeedback()
+                    }, modifier = Modifier
                         .fillMaxWidth(0.9f)
                         .height(height = 110.dp)
                 ) {
                     Icon(Icons.Rounded.Add, contentDescription = null)
                 }
                 Button(
-                    onClick = { count-- }, modifier = Modifier.fillMaxWidth(0.9f)
+                    onClick = {
+                        count--
+                        onClickFeedback()
+                    }, modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
                     Text(text = "-", fontSize = 45.sp)
                 }
