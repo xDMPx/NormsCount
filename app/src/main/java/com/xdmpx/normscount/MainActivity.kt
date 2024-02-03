@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "main") {
                         composable("main") { MainUI() { navController.navigate("settings") } }
-                        composable("settings") { Settings() { navController.navigate("main") } }
+                        composable("settings") { Settings.SettingsUI() { navController.navigate("main") } }
                     }
                 }
             }
@@ -46,15 +46,6 @@ class MainActivity : ComponentActivity() {
             Box(Modifier.padding(innerPadding)) {
                 counter.CounterUI()
             }
-        }
-    }
-
-    @Composable
-    fun Settings(onNavigateToMain: () -> Unit) {
-        Scaffold(
-            topBar = { },
-        ) { innerPadding ->
-            Box(Modifier.padding(innerPadding)) {}
         }
     }
 

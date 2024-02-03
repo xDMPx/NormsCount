@@ -49,8 +49,13 @@ class Counter {
 
         val context = LocalContext.current
         val vibrator = context.getSystemService(Vibrator::class.java)
-        val onClickFeedback =
-            { vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)) }
+        val onClickFeedback = {
+            if (Settings.vibrateOnValueChange) vibrator.vibrate(
+                VibrationEffect.createPredefined(
+                    VibrationEffect.EFFECT_CLICK
+                )
+            )
+        }
 
         Column(modifier = modifier) {
             LazyRow(
