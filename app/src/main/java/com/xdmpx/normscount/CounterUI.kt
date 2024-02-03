@@ -37,10 +37,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.xdmpx.normscount.settings.Settings
 
 class Counter {
     val TAG_DEBUG = "Counter"
     private var count: MutableState<Int> = mutableIntStateOf(0)
+    private val settings = Settings.getInstance()
 
     @Composable
     @Preview
@@ -50,7 +52,7 @@ class Counter {
         val context = LocalContext.current
         val vibrator = context.getSystemService(Vibrator::class.java)
         val onClickFeedback = {
-            if (Settings.vibrateOnValueChange) vibrator.vibrate(
+            if (settings.vibrateOnValueChange) vibrator.vibrate(
                 VibrationEffect.createPredefined(
                     VibrationEffect.EFFECT_CLICK
                 )
