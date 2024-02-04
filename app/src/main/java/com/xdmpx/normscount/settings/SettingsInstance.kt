@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 class SettingsInstance {
 
     var vibrateOnValueChange = true
+    var tapCounterValueToIncrement = true
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -42,7 +43,12 @@ class SettingsInstance {
                     .fillMaxSize()
             ) {
                 Column {
-                    Setting("Vibrate on value change ") { vibrateOnValueChange = it }
+                    Setting(
+                        "Vibrate on value change ", vibrateOnValueChange
+                    ) { vibrateOnValueChange = it }
+                    Setting(
+                        "Tap counter value to increment", tapCounterValueToIncrement
+                    ) { tapCounterValueToIncrement = it }
                 }
             }
         }
@@ -70,9 +76,10 @@ class SettingsInstance {
     @Composable
     fun Setting(
         text: String,
+        checked: Boolean,
         onCheckedChange: (Boolean) -> Unit,
     ) {
-        var checked by remember { mutableStateOf(vibrateOnValueChange) }
+        var checked by remember { mutableStateOf(checked) }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,

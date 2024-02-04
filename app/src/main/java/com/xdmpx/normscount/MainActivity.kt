@@ -18,6 +18,8 @@ import com.xdmpx.normscount.settings.Settings
 import com.xdmpx.normscount.ui.theme.NormsCountTheme
 
 class MainActivity : ComponentActivity() {
+    private var counter = Counter()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -41,8 +43,6 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MainUI(onNavigateToSettings: () -> Unit) {
-        val counter = Counter()
-
         Scaffold(
             topBar = { counter.CounterTopAppBar(onNavigateToSettings) },
         ) { innerPadding ->

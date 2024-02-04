@@ -2,6 +2,7 @@ package com.xdmpx.normscount
 
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -59,6 +60,14 @@ class Counter {
             )
         }
 
+        val textModifier = if (settings.tapCounterValueToIncrement) {
+            Modifier.clickable {
+                count++
+                onClickFeedback()
+            }
+        } else {
+            Modifier
+        }
         Column(modifier = modifier) {
             LazyRow(
                 horizontalArrangement = Arrangement.Center,
@@ -69,7 +78,7 @@ class Counter {
             ) {
                 item {
                     Text(
-                        text = "$count", fontSize = 150.sp, modifier = Modifier.padding(10.dp)
+                        text = "$count", fontSize = 150.sp, modifier = textModifier.padding(10.dp)
                     )
                 }
             }
