@@ -147,4 +147,12 @@ class Counter {
         }
     }
 
+    fun increment() {
+        count.value++
+    }
+
+    fun decrement() {
+        count.value--
+    }
+
 }

@@ -1,6 +1,8 @@
 package com.xdmpx.normscount
 
 import android.os.Bundle
+import android.util.Log
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -19,6 +21,8 @@ import com.xdmpx.normscount.ui.theme.NormsCountTheme
 
 class MainActivity : ComponentActivity() {
     private var counter = Counter()
+    private var overrideOnKeyDown = true
+    private val settings = Settings.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,9 +35,16 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "main") {
-                        composable("main") { MainUI() { navController.navigate("settings") } }
+                        composable("main") {
+                            MainUI() {
+                                navController.navigate("settings")
+                            }
+                        }
                         composable("settings") {
-                            Settings.getInstance().SettingsUI { navController.navigate("main") }
+                            overrideOnKeyDown = false
+                            settings.SettingsUI {
+                                navController.navigate("main")
+                            }
                         }
                     }
                 }
@@ -43,12 +54,29 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MainUI(onNavigateToSettings: () -> Unit) {
+        overrideOnKeyDown = true
+
         Scaffold(
             topBar = { counter.CounterTopAppBar(onNavigateToSettings) },
         ) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
                 counter.CounterUI()
             }
+        }
+    }
+
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        Log.d("MAIN", "$keyCode $overrideOnKeyDown")
+        if (settings.changeCounterValueVolumeButtons && overrideOnKeyDown) {
+            when (keyCode) {
+                KeyEvent.KEYCODE_VOLUME_DOWN -> counter.decrement()
+                KeyEvent.KEYCODE_VOLUME_UP -> counter.increment()
+                else -> return super.onKeyDown(keyCode, event)
+            }
+            return true
+        } else {
+            return super.onKeyDown(keyCode, event)
         }
     }
 

@@ -31,6 +31,7 @@ class SettingsInstance {
 
     var vibrateOnValueChange = true
     var tapCounterValueToIncrement = true
+    var changeCounterValueVolumeButtons = true
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -49,6 +50,9 @@ class SettingsInstance {
                     Setting(
                         "Tap counter value to increment", tapCounterValueToIncrement
                     ) { tapCounterValueToIncrement = it }
+                    Setting(
+                        "Change counter value using hardware volume buttons", changeCounterValueVolumeButtons
+                    ) {changeCounterValueVolumeButtons = it }
                 }
             }
         }
