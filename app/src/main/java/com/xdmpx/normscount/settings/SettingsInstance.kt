@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.magnifier
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Checkbox
@@ -32,6 +33,7 @@ class SettingsInstance {
     var vibrateOnValueChange = true
     var tapCounterValueToIncrement = true
     var changeCounterValueVolumeButtons = true
+    var confirmationDialogReset = true
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -51,8 +53,12 @@ class SettingsInstance {
                         "Tap counter value to increment", tapCounterValueToIncrement
                     ) { tapCounterValueToIncrement = it }
                     Setting(
-                        "Change counter value using hardware volume buttons", changeCounterValueVolumeButtons
-                    ) {changeCounterValueVolumeButtons = it }
+                        "Change counter value using hardware volume buttons",
+                        changeCounterValueVolumeButtons
+                    ) { changeCounterValueVolumeButtons = it }
+                    Setting(
+                        "Enable reset confirmation dialog", confirmationDialogReset
+                    ) { confirmationDialogReset = it }
                 }
             }
         }
@@ -94,8 +100,18 @@ class SettingsInstance {
                     onCheckedChange(checked)
                 },
         ) {
-            Text(text = text)
-            Box(contentAlignment = Alignment.CenterEnd, modifier = Modifier.fillMaxWidth()) {
+            Text(
+                text = text,
+                Modifier
+                    .fillMaxWidth()
+                    .weight(0.75f)
+            )
+            Box(
+                contentAlignment = Alignment.CenterEnd,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.25f)
+            ) {
                 Checkbox(checked = checked, onCheckedChange = {
                     checked = it
                     onCheckedChange(it)

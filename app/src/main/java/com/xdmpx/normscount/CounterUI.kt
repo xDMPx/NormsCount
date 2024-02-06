@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenu
@@ -23,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -132,7 +135,16 @@ class Counter {
     @Composable
     fun TopAppBarMenu(onNavigateToSettings: () -> Unit) {
         var expanded by remember { mutableStateOf(false) }
+        var openResetAlertDialog by remember { mutableStateOf(false) }
 
+        IconButton(onClick = {
+            if (!settings.confirmationDialogReset) reset()
+            else openResetAlertDialog = true
+        }) {
+            Icon(
+                imageVector = Icons.Filled.Refresh, contentDescription = "Reset counter"
+            )
+        }
         IconButton(onClick = { expanded = !expanded }) {
             Icon(
                 imageVector = Icons.Filled.Menu, contentDescription = "Top Bar Menu"
@@ -145,6 +157,39 @@ class Counter {
                 onNavigateToSettings()
             })
         }
+
+        if (openResetAlertDialog) {
+            ResetAlertDialog(onDismissRequest = { openResetAlertDialog = false }) {
+                openResetAlertDialog = false
+                reset()
+            }
+        }
+
+    }
+
+    @Composable
+    private fun ResetAlertDialog(onDismissRequest: () -> Unit, onConfirmation: () -> Unit) {
+        AlertDialog(text = {
+            Text(text = "Are you sure you want to reset the counter value? This action cannot be undone.")
+        }, onDismissRequest = {
+            onDismissRequest()
+        }, confirmButton = {
+            TextButton(onClick = {
+                onConfirmation()
+            }) {
+                Text("Confirm")
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                onDismissRequest()
+            }) {
+                Text("Cancel")
+            }
+        })
+    }
+
+    private fun reset() {
+        count.value = 0
     }
 
     fun increment() {
