@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.xdmpx.normscount.settings.Settings
 
-class Counter {
+class Counter() {
     val TAG_DEBUG = "Counter"
     private var count: MutableState<Int> = mutableIntStateOf(0)
     private val settings = Settings.getInstance()
@@ -198,6 +198,12 @@ class Counter {
 
     fun decrement() {
         count.value--
+    }
+
+    fun getCount() = count.value
+
+    fun setCount(count: Int) {
+        this.count.value = count
     }
 
 }
