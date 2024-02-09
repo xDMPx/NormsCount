@@ -7,15 +7,32 @@ import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -40,7 +57,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 
 class MainActivity : ComponentActivity() {
     private val TAG_DEBUG = "MainActivity"
-    private var counters: List<Counter> = listOf()
+    private var counters = mutableStateListOf<Counter>()
     private lateinit var counter: MutableState<Counter>
     private var counterIndex = 0
     private var overrideOnKeyDown = true
@@ -62,9 +79,13 @@ class MainActivity : ComponentActivity() {
             if (counters.isEmpty()) {
                 val counter = CounterEntity(value = 0)
                 CounterDatabase.getInstance(this@MainActivity).counterDatabase.insert(counter)
-                counters = listOf(Counter(counter, this@MainActivity))
+                counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
+                    .map { counterEntity -> Counter(counterEntity, this@MainActivity) }
             }
-            this@MainActivity.counters = counters
+            this@MainActivity.counters.clear()
+            counters.forEach {
+                this@MainActivity.counters.add(it)
+            }
             counterIndex = savedCounterIndex.first()
             counter.value = counters[counterIndex]
             Log.d(TAG_DEBUG, "onCrate -> counterIndex: $counterIndex")
@@ -96,8 +117,33 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun addCounter() {
+        this.lifecycle.coroutineScope.launch {
+            val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
+            val counter = CounterEntity(value = 0)
+            database.insert(counter)
+            counters.add(Counter(database.getAll().last(), this@MainActivity))
+            counterIndex = counters.lastIndex
+            this@MainActivity.counter.value = counters.last()
+        }
+    }
+
     @Composable
-    fun MainUI(onNavigateToSettings: () -> Unit) {
+    fun MainUI(
+        onNavigateToSettings: () -> Unit
+    ) {
+        ModalNavigationDrawer(
+            gesturesEnabled = true,
+            drawerState = rememberDrawerState(initialValue = DrawerValue.Open),
+            drawerContent = { NavigationDrawerContent(Modifier.fillMaxWidth(0.7f)) },
+        ) {
+            // Screen content
+            MainUIScreen(onNavigateToSettings)
+        }
+    }
+
+    @Composable
+    fun MainUIScreen(onNavigateToSettings: () -> Unit) {
         overrideOnKeyDown = true
 
         Scaffold(
@@ -105,6 +151,33 @@ class MainActivity : ComponentActivity() {
         ) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
                 counter.value.CounterUI()
+            }
+        }
+    }
+
+    @Composable
+    fun NavigationDrawerContent(modifier: Modifier) {
+        ModalDrawerSheet(modifier = modifier) {
+            Row {
+                Text(
+                    "Counters", modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(0.8f)
+                )
+                IconButton(onClick = { addCounter() }) {
+                    Icon(Icons.Filled.Add, null)
+                }
+            }
+            Divider()
+            LazyColumn {
+                itemsIndexed(counters) { index, counter ->
+                    NavigationDrawerItem(label = { Text(text = "Counter #${counter.getCounterId()}") },
+                        selected = false,
+                        onClick = {
+                            this@MainActivity.counter.value = counter
+                            this@MainActivity.counterIndex = index
+                        })
+                }
             }
         }
     }
@@ -125,7 +198,7 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         this.lifecycle.coroutineScope.launch {
             saveCounterIndex()
-            counters[counterIndex].updateDatabase()
+            counters.forEach { it.updateDatabase() }
         }
 
         super.onStop()

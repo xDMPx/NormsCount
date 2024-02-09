@@ -213,6 +213,8 @@ class Counter(private val counterEntity: CounterEntity, context: Context) {
         this.count.value = count
     }
 
+    fun getCounterId() = counterEntity.id
+
     fun updateDatabase() {
         Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> ${count.value}")
         counterEntity.value = count.value
