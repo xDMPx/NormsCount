@@ -1,7 +1,9 @@
 package com.xdmpx.normscount
 
+import android.content.Context
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,7 +32,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,21 +40,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.xdmpx.normscount.database.CounterDatabase
+import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.settings.Settings
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class Counter() {
-    val TAG_DEBUG = "Counter"
-    private var count: MutableState<Int> = mutableIntStateOf(0)
+class Counter(private val counterEntity: CounterEntity, context: Context) {
+    private val TAG_DEBUG = "Counter"
+    private var count: MutableState<Long> = mutableLongStateOf(counterEntity.value)
     private val settings = Settings.getInstance()
+    private val database = CounterDatabase.getInstance(context).counterDatabase
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     @Composable
-    @Preview
     fun CounterUI(modifier: Modifier = Modifier) {
-        var count by remember { count }
-
         val context = LocalContext.current
         val vibrator = context.getSystemService(Vibrator::class.java)
         val onClickFeedback = {
@@ -65,7 +70,7 @@ class Counter() {
 
         val textModifier = if (settings.tapCounterValueToIncrement) {
             Modifier.clickable {
-                count++
+                count.value++
                 onClickFeedback()
             }
         } else {
@@ -81,7 +86,9 @@ class Counter() {
             ) {
                 item {
                     Text(
-                        text = "$count", fontSize = 150.sp, modifier = textModifier.padding(10.dp)
+                        text = "${count.value}",
+                        fontSize = 150.sp,
+                        modifier = textModifier.padding(10.dp)
                     )
                 }
             }
@@ -96,7 +103,7 @@ class Counter() {
             ) {
                 Button(
                     onClick = {
-                        count++
+                        count.value++
                         onClickFeedback()
                     }, modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -106,7 +113,7 @@ class Counter() {
                 }
                 Button(
                     onClick = {
-                        count--
+                        count.value--
                         onClickFeedback()
                     }, modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
@@ -202,8 +209,17 @@ class Counter() {
 
     fun getCount() = count.value
 
-    fun setCount(count: Int) {
+    fun setCount(count: Long) {
         this.count.value = count
+    }
+
+    fun updateDatabase() {
+        Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> ${count.value}")
+        counterEntity.value = count.value
+        scope.launch {
+            Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> $counterEntity")
+            database.update(counterEntity)
+        }
     }
 
 }
