@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -59,9 +60,9 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 
 class MainActivity : ComponentActivity() {
     private val TAG_DEBUG = "MainActivity"
-    private var counters = mutableStateListOf<Counter>()
+    private var counters = mutableStateListOf<Counter?>()
     private lateinit var counter: MutableState<Counter>
-    private var counterIndex = 0
+    private var counterID = 0
     private var overrideOnKeyDown = true
     private val settings = Settings.getInstance()
 
@@ -70,9 +71,9 @@ class MainActivity : ComponentActivity() {
 
         counter = mutableStateOf(Counter(CounterEntity(value = 0), this@MainActivity))
 
-        val counterValueKey = intPreferencesKey("counter_index")
-        val savedCounterIndex: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
-            preferences[counterValueKey] ?: 0
+        val counterIDKey = intPreferencesKey("counter_id")
+        val savedCounterID: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
+            preferences[counterIDKey] ?: 1
         }
 
         this.lifecycle.coroutineScope.launch {
@@ -88,9 +89,9 @@ class MainActivity : ComponentActivity() {
             counters.forEach {
                 this@MainActivity.counters.add(it)
             }
-            counterIndex = savedCounterIndex.first()
-            counter.value = counters[counterIndex]
-            Log.d(TAG_DEBUG, "onCrate -> counterIndex: $counterIndex")
+            counterID = savedCounterID.first()
+            counter.value = counters.find { counter -> counterID == counter.getCounterId() }!!
+            Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
             Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size}")
         }
 
@@ -124,9 +125,11 @@ class MainActivity : ComponentActivity() {
             val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
             val counter = CounterEntity(value = 0)
             database.insert(counter)
-            counters.add(Counter(database.getAll().last(), this@MainActivity))
-            counterIndex = counters.lastIndex
-            this@MainActivity.counter.value = counters.last()
+            // TODO: implement getLast
+            val counterEntity = database.getAll().last()
+            counters.add(Counter(counterEntity, this@MainActivity))
+            counterID = counterEntity.id
+            this@MainActivity.counter.value = counters.last()!!
         }
     }
 
@@ -187,18 +190,22 @@ class MainActivity : ComponentActivity() {
                         .padding(16.dp)
                         .fillMaxWidth(0.8f)
                 )
-                IconButton(onClick = { addCounter() }) {
+                IconButton(onClick = {
+                    addCounter()
+                    closeDrawer()
+                }) {
                     Icon(Icons.Filled.Add, null)
                 }
             }
             Divider()
             LazyColumn {
-                itemsIndexed(counters) { index, counter ->
+                items(counters) { counter ->
+                    if (counter == null) return@items
                     NavigationDrawerItem(label = { Text(text = "Counter #${counter.getCounterId()}") },
                         selected = false,
                         onClick = {
                             this@MainActivity.counter.value = counter
-                            this@MainActivity.counterIndex = index
+                            this@MainActivity.counterID = counter.getCounterId()
                             closeDrawer()
                         })
                 }
@@ -221,18 +228,20 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         this.lifecycle.coroutineScope.launch {
-            saveCounterIndex()
-            counters.forEach { it.updateDatabase() }
+            saveCounterID()
+            counters.forEach {
+                it?.updateDatabase()
+            }
         }
 
         super.onStop()
     }
 
-    private suspend fun saveCounterIndex() {
-        val counterIndexKey = intPreferencesKey("counter_index")
+    private suspend fun saveCounterID() {
+        val counterIDKey = intPreferencesKey("counter_id")
         this@MainActivity.dataStore.edit { settings ->
-            Log.d(TAG_DEBUG, "saveCounterIndex -> counterIndex: $counterIndex")
-            settings[counterIndexKey] = counterIndex
+            Log.d(TAG_DEBUG, "saveCounterID -> counterID: $counterID")
+            settings[counterIDKey] = counterID
         }
     }
 
