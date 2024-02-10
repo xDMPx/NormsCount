@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
@@ -132,22 +134,41 @@ class MainActivity : ComponentActivity() {
     fun MainUI(
         onNavigateToSettings: () -> Unit
     ) {
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+        val scope = rememberCoroutineScope()
+
+        val closeDrawer: () -> Unit = {
+            scope.launch {
+                drawerState.close()
+            }
+        }
+
+        val openDrawer: () -> Unit = {
+            scope.launch {
+                drawerState.open()
+            }
+        }
+
         ModalNavigationDrawer(
             gesturesEnabled = true,
-            drawerState = rememberDrawerState(initialValue = DrawerValue.Open),
-            drawerContent = { NavigationDrawerContent(Modifier.fillMaxWidth(0.7f)) },
+            drawerState = drawerState,
+            drawerContent = { NavigationDrawerContent(closeDrawer, Modifier.fillMaxWidth(0.7f)) },
         ) {
             // Screen content
-            MainUIScreen(onNavigateToSettings)
+            MainUIScreen(openDrawer, onNavigateToSettings)
         }
     }
 
     @Composable
-    fun MainUIScreen(onNavigateToSettings: () -> Unit) {
+    fun MainUIScreen(onNavigationIconClick: () -> Unit, onNavigateToSettings: () -> Unit) {
         overrideOnKeyDown = true
 
         Scaffold(
-            topBar = { counter.value.CounterTopAppBar(onNavigateToSettings) },
+            topBar = {
+                counter.value.CounterTopAppBar(
+                    onNavigationIconClick, onNavigateToSettings
+                )
+            },
         ) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
                 counter.value.CounterUI()
@@ -156,7 +177,9 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    fun NavigationDrawerContent(modifier: Modifier) {
+    fun NavigationDrawerContent(
+        closeDrawer: () -> Unit, modifier: Modifier
+    ) {
         ModalDrawerSheet(modifier = modifier) {
             Row {
                 Text(
@@ -176,6 +199,7 @@ class MainActivity : ComponentActivity() {
                         onClick = {
                             this@MainActivity.counter.value = counter
                             this@MainActivity.counterIndex = index
+                            closeDrawer()
                         })
                 }
             }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AlertDialog
@@ -126,7 +127,7 @@ class Counter(private val counterEntity: CounterEntity, context: Context) {
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun CounterTopAppBar(onNavigateToSettings: () -> Unit) {
+    fun CounterTopAppBar(onNavigationIconClick: () -> Unit, onNavigateToSettings: () -> Unit) {
         CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
@@ -134,6 +135,10 @@ class Counter(private val counterEntity: CounterEntity, context: Context) {
             Text(
                 "NormsCount", maxLines = 1, overflow = TextOverflow.Ellipsis
             )
+        }, navigationIcon = {
+            IconButton(onClick = onNavigationIconClick) {
+                Icon(imageVector = Icons.Filled.Menu, contentDescription = null)
+            }
         }, actions = {
             TopAppBarMenu(onNavigateToSettings)
         })
@@ -154,7 +159,7 @@ class Counter(private val counterEntity: CounterEntity, context: Context) {
         }
         IconButton(onClick = { expanded = !expanded }) {
             Icon(
-                imageVector = Icons.Filled.Menu, contentDescription = "Top Bar Menu"
+                imageVector = Icons.Filled.MoreVert, contentDescription = "Top Bar Menu"
             )
         }
 
