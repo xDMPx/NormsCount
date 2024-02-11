@@ -69,7 +69,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        counter = mutableStateOf(Counter(CounterEntity(value = 0), this@MainActivity))
+        counter = mutableStateOf(
+            Counter(
+                CounterEntity(value = 0), { deleteCounter(it) }, this@MainActivity
+            )
+        )
 
         val counterIDKey = intPreferencesKey("counter_id")
         val savedCounterID: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
@@ -78,12 +82,20 @@ class MainActivity : ComponentActivity() {
 
         this.lifecycle.coroutineScope.launch {
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
-                .map { counterEntity -> Counter(counterEntity, this@MainActivity) }
+                .map { counterEntity ->
+                    Counter(
+                        counterEntity, { deleteCounter(it) }, this@MainActivity
+                    )
+                }
             if (counters.isEmpty()) {
                 val counter = CounterEntity(value = 0)
                 CounterDatabase.getInstance(this@MainActivity).counterDatabase.insert(counter)
                 counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
-                    .map { counterEntity -> Counter(counterEntity, this@MainActivity) }
+                    .map { counterEntity ->
+                        Counter(
+                            counterEntity, { deleteCounter(it) }, this@MainActivity
+                        )
+                    }
             }
             this@MainActivity.counters.clear()
             counters.forEach {
@@ -127,9 +139,25 @@ class MainActivity : ComponentActivity() {
             database.insert(counter)
             // TODO: implement getLast
             val counterEntity = database.getAll().last()
-            counters.add(Counter(counterEntity, this@MainActivity))
+            counters.add(Counter(counterEntity, { deleteCounter(it) }, this@MainActivity))
             counterID = counterEntity.id
             this@MainActivity.counter.value = counters.last()!!
+        }
+    }
+
+    private fun deleteCounter(counter: Counter) {
+        this.lifecycle.coroutineScope.launch {
+            var index = counters.indexOf(counter)
+            counters[index] = null
+            index = if (index > 0) index - 1 else 0
+            while (index != 0 && counters[index] == null) index -= 1
+            while (index != counters.size && counters[index] == null) index += 1
+            if (index == counters.size) {
+                addCounter()
+            } else {
+                this@MainActivity.counter.value = counters[index]!!
+                counterID = this@MainActivity.counter.value.getCounterId()
+            }
         }
     }
 

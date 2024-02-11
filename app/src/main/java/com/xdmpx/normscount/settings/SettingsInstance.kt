@@ -34,6 +34,7 @@ class SettingsInstance {
     var tapCounterValueToIncrement = true
     var changeCounterValueVolumeButtons = true
     var confirmationDialogReset = true
+    var confirmationDialogDelete = true
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -59,6 +60,9 @@ class SettingsInstance {
                     Setting(
                         "Enable reset confirmation dialog", confirmationDialogReset
                     ) { confirmationDialogReset = it }
+                    Setting(
+                        "Enable delete confirmation dialog", confirmationDialogDelete
+                    ) { confirmationDialogDelete = it }
                 }
             }
         }

@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.room.Delete
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.settings.Settings
@@ -50,7 +51,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class Counter(private val counterEntity: CounterEntity, context: Context) {
+class Counter(
+    private val counterEntity: CounterEntity,
+    private val onDelete: (Counter) -> Unit,
+    context: Context
+) {
     private val TAG_DEBUG = "Counter"
     private var count: MutableState<Long> = mutableLongStateOf(counterEntity.value)
     private val settings = Settings.getInstance()
@@ -148,6 +153,7 @@ class Counter(private val counterEntity: CounterEntity, context: Context) {
     fun TopAppBarMenu(onNavigateToSettings: () -> Unit) {
         var expanded by remember { mutableStateOf(false) }
         var openResetAlertDialog by remember { mutableStateOf(false) }
+        var openDeleteAlertDialog by remember { mutableStateOf(false) }
 
         IconButton(onClick = {
             if (!settings.confirmationDialogReset) reset()
@@ -164,6 +170,13 @@ class Counter(private val counterEntity: CounterEntity, context: Context) {
         }
 
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(text = { Text(text = "Delete") }, onClick = {
+                expanded = false
+                if (!settings.confirmationDialogDelete) {
+                    this@Counter.onDelete(this@Counter)
+                    delete()
+                } else openDeleteAlertDialog = true
+            })
             DropdownMenuItem(text = { Text(text = "Settings") }, onClick = {
                 expanded = false
                 onNavigateToSettings()
@@ -177,12 +190,41 @@ class Counter(private val counterEntity: CounterEntity, context: Context) {
             }
         }
 
+        if (openDeleteAlertDialog) {
+            DeleteAlertDialog(onDismissRequest = { openDeleteAlertDialog = false }) {
+                openDeleteAlertDialog = false
+                this@Counter.onDelete(this@Counter)
+                delete()
+            }
+        }
+
     }
 
     @Composable
     private fun ResetAlertDialog(onDismissRequest: () -> Unit, onConfirmation: () -> Unit) {
         AlertDialog(text = {
             Text(text = "Are you sure you want to reset the counter value? This action cannot be undone.")
+        }, onDismissRequest = {
+            onDismissRequest()
+        }, confirmButton = {
+            TextButton(onClick = {
+                onConfirmation()
+            }) {
+                Text("Confirm")
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                onDismissRequest()
+            }) {
+                Text("Cancel")
+            }
+        })
+    }
+
+    @Composable
+    private fun DeleteAlertDialog(onDismissRequest: () -> Unit, onConfirmation: () -> Unit) {
+        AlertDialog(text = {
+            Text(text = "Are you sure you want to delete the counter? This action cannot be undone.")
         }, onDismissRequest = {
             onDismissRequest()
         }, confirmButton = {
@@ -226,6 +268,13 @@ class Counter(private val counterEntity: CounterEntity, context: Context) {
         scope.launch {
             Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> $counterEntity")
             database.update(counterEntity)
+        }
+    }
+
+    private fun delete() {
+        scope.launch {
+            Log.d(TAG_DEBUG, "${this.hashCode()}::delete -> $counterEntity")
+            database.delete(counterEntity)
         }
     }
 
