@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
     private val TAG_DEBUG = "MainActivity"
     private var counters = mutableStateListOf<Counter?>()
     private lateinit var counter: MutableState<Counter>
-    private var counterID = 0
+    private var counterID = 1
     private var overrideOnKeyDown = true
     private val settings = Settings.getInstance()
 
@@ -102,7 +102,9 @@ class MainActivity : ComponentActivity() {
                 this@MainActivity.counters.add(it)
             }
             counterID = savedCounterID.first()
-            counter.value = counters.find { counter -> counterID == counter.getCounterId() }!!
+            counter.value =
+                counters.find { counter -> counterID == counter.getCounterId() } ?: counters.first()
+                    .also { counterID = it.getCounterId() }
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
             Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size}")
         }
