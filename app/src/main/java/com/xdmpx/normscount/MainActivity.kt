@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
@@ -68,7 +69,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        setKeepScreenOnFlag()
         counter = mutableStateOf(
             Counter(
                 CounterEntity(value = 0), { deleteCounter(it) }, this@MainActivity
@@ -126,11 +127,21 @@ class MainActivity : ComponentActivity() {
                             overrideOnKeyDown = false
                             settings.SettingsUI {
                                 navController.navigate("main")
+                                setKeepScreenOnFlag()
                             }
                         }
                     }
                 }
             }
+        }
+    }
+
+    private fun setKeepScreenOnFlag() {
+        Log.d(TAG_DEBUG, "setKeepScreenOnFlag -> ${settings.keepScreenOn} ")
+        if (settings.keepScreenOn) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
 
