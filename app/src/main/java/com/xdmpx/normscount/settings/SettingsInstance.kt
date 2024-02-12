@@ -1,5 +1,6 @@
 package com.xdmpx.normscount.settings
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
+import com.xdmpx.normscount.datastore.SettingsProto
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
+
+val Context.settingsDataStore: DataStore<SettingsProto> by dataStore(
+    fileName = "settings.pb", serializer = SettingsSerializer
+)
 
 class SettingsInstance {
 
@@ -68,6 +78,30 @@ class SettingsInstance {
                     ) { keepScreenOn = it }
                 }
             }
+        }
+    }
+
+    suspend fun loadSettings(context: Context) {
+        val settingsData = context.settingsDataStore.data.catch { }.first()
+        this.vibrateOnValueChange = settingsData.vibrateOnValueChange
+        this.tapCounterValueToIncrement = settingsData.tapCounterValueToIncrement
+        this.changeCounterValueVolumeButtons = settingsData.changeCounterValueVolumeButtons
+        this.confirmationDialogReset = settingsData.confirmationDialogReset
+        this.confirmationDialogDelete = settingsData.confirmationDialogDelete
+        this.keepScreenOn = settingsData.keepScreenOn
+    }
+
+    suspend fun saveSettings(context: Context) {
+        context.settingsDataStore.updateData {
+            it.toBuilder().apply {
+                vibrateOnValueChange = this@SettingsInstance.vibrateOnValueChange
+                tapCounterValueToIncrement = this@SettingsInstance.tapCounterValueToIncrement
+                changeCounterValueVolumeButtons =
+                    this@SettingsInstance.changeCounterValueVolumeButtons
+                confirmationDialogReset = this@SettingsInstance.confirmationDialogReset
+                confirmationDialogDelete = this@SettingsInstance.confirmationDialogDelete
+                keepScreenOn = this@SettingsInstance.keepScreenOn
+            }.build()
         }
     }
 

@@ -1,8 +1,12 @@
+import com.google.protobuf.gradle.id
+import com.google.protobuf.gradle.remove
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
     id("androidx.room")
+    id("com.google.protobuf")
 }
 
 android {
@@ -54,6 +58,23 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.2"
+    }
+    generateProtoTasks {
+        all().forEach {
+            it.builtins {
+                create("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
+}
+
+
 dependencies {
 
     implementation("androidx.core:core-ktx:1.12.0")
@@ -74,6 +95,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("com.google.protobuf:protobuf-kotlin-lite:3.25.2")
 
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")

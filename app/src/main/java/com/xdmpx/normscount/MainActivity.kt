@@ -14,11 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -82,6 +80,9 @@ class MainActivity : ComponentActivity() {
         }
 
         this.lifecycle.coroutineScope.launch {
+            settings.loadSettings(this@MainActivity)
+            setKeepScreenOnFlag()
+
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
                 .map { counterEntity ->
                     Counter(
@@ -270,6 +271,7 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         this.lifecycle.coroutineScope.launch {
             saveCounterID()
+            settings.saveSettings(this@MainActivity)
             counters.forEach {
                 it?.updateDatabase()
             }

@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "com.xdmpx.normscount.datastore";
+option java_multiple_files = true;
+
+message SettingsProto {
+    bool vibrate_on_value_change = 1;
+    bool tap_counter_value_to_increment = 2;
+    bool change_counter_value_volume_buttons = 3;
+    bool confirmation_dialog_reset = 4;
+    bool confirmation_dialog_delete = 5;
+    bool keep_screen_on = 6;
+}
