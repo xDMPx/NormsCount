@@ -56,7 +56,6 @@ import kotlinx.coroutines.launch
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-
 class MainActivity : ComponentActivity() {
     private val TAG_DEBUG = "MainActivity"
     private var counters = mutableStateListOf<Counter?>()
@@ -243,7 +242,7 @@ class MainActivity : ComponentActivity() {
             LazyColumn {
                 items(counters) { counter ->
                     if (counter == null) return@items
-                    NavigationDrawerItem(label = { Text(text = "Counter #${counter.getCounterId()}") },
+                    NavigationDrawerItem(label = { counter.CounterName() },
                         selected = false,
                         onClick = {
                             this@MainActivity.counter.value = counter

@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
@@ -27,8 +29,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -40,10 +44,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.room.Delete
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.settings.Settings
@@ -58,6 +62,7 @@ class Counter(
 ) {
     private val TAG_DEBUG = "Counter"
     private var count: MutableState<Long> = mutableLongStateOf(counterEntity.value)
+    private var name: MutableState<String> = mutableStateOf(counterEntity.name)
     private val settings = Settings.getInstance()
     private val database = CounterDatabase.getInstance(context).counterDatabase
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -130,15 +135,51 @@ class Counter(
         }
     }
 
+    @Composable
+    fun CounterName() {
+        val nameWeight = 0.725f
+        Row() {
+            LazyRow(
+                modifier = Modifier
+                    .weight(nameWeight)
+                    .fillMaxWidth()
+            ) {
+                item {
+                    name.value = counterNameText()
+                    Text(name.value)
+                }
+            }
+            LazyRow(
+                modifier = Modifier
+                    .weight(1f - nameWeight)
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                item {
+                    Text(text = "${count.value}", textAlign = TextAlign.End)
+                }
+            }
+        }
+    }
+
+    private fun counterNameText(): String {
+        return if (counterEntity.name == "Counter #") {
+            "Counter #${counterEntity.id}"
+        } else {
+            counterEntity.name
+        }
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CounterTopAppBar(onNavigationIconClick: () -> Unit, onNavigateToSettings: () -> Unit) {
-        CenterAlignedTopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ), title = {
+            name.value = counterNameText()
             Text(
-                "NormsCount", maxLines = 1, overflow = TextOverflow.Ellipsis
+                name.value, maxLines = 1, overflow = TextOverflow.Ellipsis
             )
         }, navigationIcon = {
             IconButton(onClick = onNavigationIconClick) {
@@ -154,6 +195,7 @@ class Counter(
         var expanded by remember { mutableStateOf(false) }
         var openResetAlertDialog by remember { mutableStateOf(false) }
         var openDeleteAlertDialog by remember { mutableStateOf(false) }
+        var openEditDialog by remember { mutableStateOf(false) }
 
         IconButton(onClick = {
             if (!settings.confirmationDialogReset) reset()
@@ -161,6 +203,13 @@ class Counter(
         }) {
             Icon(
                 imageVector = Icons.Filled.Refresh, contentDescription = "Reset counter"
+            )
+        }
+        IconButton(onClick = {
+            openEditDialog = true
+        }) {
+            Icon(
+                imageVector = Icons.Filled.Create, contentDescription = "Edit counter"
             )
         }
         IconButton(onClick = { expanded = !expanded }) {
@@ -198,6 +247,14 @@ class Counter(
             }
         }
 
+        if (openEditDialog) {
+            EditAlertDialog(onDismissRequest = { openEditDialog = false }) {
+                openEditDialog = false
+                counterEntity.name = it
+                name.value = it
+            }
+        }
+
     }
 
     @Composable
@@ -230,6 +287,34 @@ class Counter(
         }, confirmButton = {
             TextButton(onClick = {
                 onConfirmation()
+            }) {
+                Text("Confirm")
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                onDismissRequest()
+            }) {
+                Text("Cancel")
+            }
+        })
+    }
+
+    @Composable
+    private fun EditAlertDialog(onDismissRequest: () -> Unit, onConfirmation: (String) -> Unit) {
+        var value by remember { mutableStateOf(counterNameText()) }
+
+        AlertDialog(text = {
+            OutlinedTextField(
+                value = value,
+                onValueChange = { value = it },
+                maxLines = 1,
+                label = { Text("Counter Name") },
+            )
+        }, onDismissRequest = {
+            onDismissRequest()
+        }, confirmButton = {
+            TextButton(onClick = {
+                onConfirmation(value)
             }) {
                 Text("Confirm")
             }
