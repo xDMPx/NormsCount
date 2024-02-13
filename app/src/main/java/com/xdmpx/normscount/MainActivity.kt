@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -24,15 +25,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
@@ -61,6 +67,7 @@ class MainActivity : ComponentActivity() {
     private var counters = mutableStateListOf<Counter?>()
     private lateinit var counter: MutableState<Counter>
     private var counterID = 1
+    private var lastCounterID = 1
     private var overrideOnKeyDown = true
     private val settings = Settings.getInstance()
 
@@ -106,7 +113,11 @@ class MainActivity : ComponentActivity() {
             counter.value =
                 counters.find { counter -> counterID == counter.getCounterId() } ?: counters.first()
                     .also { counterID = it.getCounterId() }
+
+            this@MainActivity.lastCounterID =
+                CounterDatabase.getInstance(this@MainActivity).counterDatabase.getLastID() ?: 1
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
+            Log.d(TAG_DEBUG, "onCrate -> lastCounterID: $lastCounterID")
             Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size}")
         }
 
@@ -145,15 +156,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun addCounter() {
+    private fun addCounter(name: String = "Counter #", value: Long = 0) {
         this.lifecycle.coroutineScope.launch {
             val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
-            val counter = CounterEntity(value = 0)
+            val counter = CounterEntity(name = name, value = value)
             database.insert(counter)
-            // TODO: implement getLast
-            val counterEntity = database.getAll().last()
+            val counterEntity = database.getLast()!!
             counters.add(Counter(counterEntity, { deleteCounter(it) }, this@MainActivity))
             counterID = counterEntity.id
+            lastCounterID = counterID
             this@MainActivity.counter.value = counters.last()!!
         }
     }
@@ -224,6 +235,8 @@ class MainActivity : ComponentActivity() {
     fun NavigationDrawerContent(
         closeDrawer: () -> Unit, modifier: Modifier
     ) {
+        var openEditDialog by remember { mutableStateOf(false) }
+
         ModalDrawerSheet(modifier = modifier) {
             Row {
                 Text(
@@ -232,7 +245,11 @@ class MainActivity : ComponentActivity() {
                         .fillMaxWidth(0.8f)
                 )
                 IconButton(onClick = {
-                    addCounter()
+                    if (settings.askForInitialValuesWhenNewCounter) {
+                        openEditDialog = true
+                    } else {
+                        addCounter()
+                    }
                     closeDrawer()
                 }) {
                     Icon(Icons.Filled.Add, null)
@@ -250,6 +267,16 @@ class MainActivity : ComponentActivity() {
                             closeDrawer()
                         })
                 }
+            }
+        }
+
+        if (openEditDialog) {
+            CounterUIHelper.EditAlertDialog(
+                "Counter #${lastCounterID + 1}",
+                0,
+                onDismissRequest = { openEditDialog = false }) { name, value ->
+                openEditDialog = false
+                addCounter(name, value)
             }
         }
     }

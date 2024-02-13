@@ -33,6 +33,7 @@ object SettingsSerializer : Serializer<SettingsProto> {
             confirmationDialogReset = true
             confirmationDialogDelete = true
             keepScreenOn = true
+            askForInitialValuesWhenNewCounter = true
         }.build()
 
     override suspend fun readFrom(input: InputStream): SettingsProto {

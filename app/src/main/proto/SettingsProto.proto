@@ -10,4 +10,5 @@ message SettingsProto {
     bool confirmation_dialog_reset = 4;
     bool confirmation_dialog_delete = 5;
     bool keep_screen_on = 6;
+    bool ask_for_initial_values_when_new_counter = 7;
 }

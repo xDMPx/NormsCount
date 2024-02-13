@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Menu
@@ -44,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -248,10 +250,12 @@ class Counter(
         }
 
         if (openEditDialog) {
-            EditAlertDialog(onDismissRequest = { openEditDialog = false }) {
+            EditAlertDialog(onDismissRequest = { openEditDialog = false }) { name, value ->
                 openEditDialog = false
-                counterEntity.name = it
-                name.value = it
+                counterEntity.name = name
+                this@Counter.name.value = name
+                counterEntity.value = value
+                this@Counter.count.value = value
             }
         }
 
@@ -300,31 +304,12 @@ class Counter(
     }
 
     @Composable
-    private fun EditAlertDialog(onDismissRequest: () -> Unit, onConfirmation: (String) -> Unit) {
-        var value by remember { mutableStateOf(counterNameText()) }
-
-        AlertDialog(text = {
-            OutlinedTextField(
-                value = value,
-                onValueChange = { value = it },
-                maxLines = 1,
-                label = { Text("Counter Name") },
-            )
-        }, onDismissRequest = {
-            onDismissRequest()
-        }, confirmButton = {
-            TextButton(onClick = {
-                onConfirmation(value)
-            }) {
-                Text("Confirm")
-            }
-        }, dismissButton = {
-            TextButton(onClick = {
-                onDismissRequest()
-            }) {
-                Text("Cancel")
-            }
-        })
+    private fun EditAlertDialog(
+        onDismissRequest: () -> Unit, onConfirmation: (String, Long) -> Unit
+    ) {
+        CounterUIHelper.EditAlertDialog(
+            counterNameText(), count.value, onDismissRequest, onConfirmation
+        )
     }
 
     private fun reset() {

@@ -45,6 +45,7 @@ class SettingsInstance {
     var confirmationDialogReset = true
     var confirmationDialogDelete = true
     var keepScreenOn = true
+    var askForInitialValuesWhenNewCounter = true
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -76,6 +77,13 @@ class SettingsInstance {
                     Setting(
                         "Keep the screen on", keepScreenOn
                     ) { keepScreenOn = it }
+                    Setting(
+                        "Keep the screen on", keepScreenOn
+                    ) { keepScreenOn = it }
+                    Setting(
+                        "Ask for initial value and name when initializing counter",
+                        askForInitialValuesWhenNewCounter
+                    ) { askForInitialValuesWhenNewCounter = it }
                 }
             }
         }
@@ -89,6 +97,7 @@ class SettingsInstance {
         this.confirmationDialogReset = settingsData.confirmationDialogReset
         this.confirmationDialogDelete = settingsData.confirmationDialogDelete
         this.keepScreenOn = settingsData.keepScreenOn
+        this.askForInitialValuesWhenNewCounter = settingsData.askForInitialValuesWhenNewCounter
     }
 
     suspend fun saveSettings(context: Context) {
@@ -101,6 +110,8 @@ class SettingsInstance {
                 confirmationDialogReset = this@SettingsInstance.confirmationDialogReset
                 confirmationDialogDelete = this@SettingsInstance.confirmationDialogDelete
                 keepScreenOn = this@SettingsInstance.keepScreenOn
+                askForInitialValuesWhenNewCounter =
+                    this@SettingsInstance.askForInitialValuesWhenNewCounter
             }.build()
         }
     }
