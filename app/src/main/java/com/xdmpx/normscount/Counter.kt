@@ -341,7 +341,7 @@ class Counter(
         }
     }
 
-    private fun delete() {
+    fun delete() {
         scope.launch {
             Log.d(TAG_DEBUG, "${this.hashCode()}::delete -> $counterEntity")
             database.delete(counterEntity)

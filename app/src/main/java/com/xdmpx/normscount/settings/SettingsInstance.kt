@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -51,9 +53,12 @@ class SettingsInstance {
 
     private lateinit var onExportClick: () -> Unit
     private lateinit var onImportClick: () -> Unit
+    private lateinit var onDeleteAllClick: () -> Unit
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
+        var showDeleteAllConfirmationDialog by remember { mutableStateOf(false) }
+
         Scaffold(
             topBar = { SettingsTopAppBar(onNavigateToMain) },
         ) { innerPadding ->
@@ -95,9 +100,41 @@ class SettingsInstance {
                     SettingButton(
                         "Import counters from a JSON file",
                     ) { onImportClick() }
+                    SettingButton(
+                        "Delete all counters",
+                    ) { showDeleteAllConfirmationDialog = true }
                 }
             }
         }
+
+        if (showDeleteAllConfirmationDialog) {
+            DeleteAllAlertDialog(onDismissRequest = { showDeleteAllConfirmationDialog = false }) {
+                showDeleteAllConfirmationDialog = false
+                onDeleteAllClick()
+            }
+        }
+
+    }
+
+    @Composable
+    private fun DeleteAllAlertDialog(onDismissRequest: () -> Unit, onConfirmation: () -> Unit) {
+        AlertDialog(text = {
+            Text(text = "Are you sure you want to delete all counters? This action cannot be undone.")
+        }, onDismissRequest = {
+            onDismissRequest()
+        }, confirmButton = {
+            TextButton(onClick = {
+                onConfirmation()
+            }) {
+                Text("Confirm")
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                onDismissRequest()
+            }) {
+                Text("Cancel")
+            }
+        })
     }
 
     fun registerOnExportClick(onExportClick: () -> Unit) {
@@ -106,6 +143,10 @@ class SettingsInstance {
 
     fun registerOnImportClick(onImportClick: () -> Unit) {
         this@SettingsInstance.onImportClick = onImportClick
+    }
+
+    fun registerOnDeleteAllClick(onDeleteAllClick: () -> Unit) {
+        this@SettingsInstance.onDeleteAllClick = onDeleteAllClick
     }
 
     suspend fun loadSettings(context: Context) {

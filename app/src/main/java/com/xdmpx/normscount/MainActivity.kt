@@ -107,6 +107,7 @@ class MainActivity : ComponentActivity() {
     init {
         settings.registerOnExportClick { this@MainActivity.exportToJson() }
         settings.registerOnImportClick { this@MainActivity.importFromJson() }
+        settings.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -364,6 +365,13 @@ class MainActivity : ComponentActivity() {
 
     private fun importFromJson() {
         openDocument.launch(arrayOf("application/json"))
+    }
+
+    private fun deleteAll() {
+        counters.filterNotNull().forEach {
+            it.delete()
+            deleteCounter(it)
+        }
     }
 
 }
