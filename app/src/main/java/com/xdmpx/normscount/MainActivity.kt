@@ -7,6 +7,7 @@ import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,7 +17,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -25,11 +25,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -50,15 +48,19 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.xdmpx.normscount.Utils.ShortToast
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.settings.Settings
 import com.xdmpx.normscount.ui.theme.NormsCountTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -70,6 +72,24 @@ class MainActivity : ComponentActivity() {
     private var lastCounterID = 1
     private var overrideOnKeyDown = true
     private val settings = Settings.getInstance()
+
+    private val scopeIO = CoroutineScope(Dispatchers.IO)
+    private val createDocument =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
+            if (uri != null) {
+                scopeIO.launch {
+                    if (Utils.exportToJson(this@MainActivity, uri)) {
+                        runOnUiThread { ShortToast(this@MainActivity, "Counters exported") }
+                    } else {
+                        runOnUiThread { ShortToast(this@MainActivity, "Error exporting data") }
+                    }
+                }
+            }
+        }
+
+    init {
+        settings.registerOnExportClick { this@MainActivity.exportToJson() }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -312,6 +332,16 @@ class MainActivity : ComponentActivity() {
             Log.d(TAG_DEBUG, "saveCounterID -> counterID: $counterID")
             settings[counterIDKey] = counterID
         }
+    }
+
+    private fun exportToJson() {
+        Log.d(TAG_DEBUG, "exportToJson")
+
+        val date = LocalDate.now()
+        val year = date.year
+        val month = String.format("%02d", date.monthValue)
+        val day = date.dayOfMonth
+        createDocument.launch("counters_export_${year}_${month}_$day.json")
     }
 
 }

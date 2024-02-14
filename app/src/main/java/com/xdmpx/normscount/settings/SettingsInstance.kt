@@ -1,6 +1,8 @@
 package com.xdmpx.normscount.settings
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +49,8 @@ class SettingsInstance {
     var keepScreenOn = true
     var askForInitialValuesWhenNewCounter = true
 
+    private lateinit var onExportClick: () -> Unit
+
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
         Scaffold(
@@ -84,9 +88,16 @@ class SettingsInstance {
                         "Ask for initial value and name when initializing counter",
                         askForInitialValuesWhenNewCounter
                     ) { askForInitialValuesWhenNewCounter = it }
+                    SettingButton(
+                        "Export all counters to a JSON file",
+                    ) { onExportClick() }
                 }
             }
         }
+    }
+
+    fun registerOnExportClick(onExportClick: () -> Unit) {
+        this@SettingsInstance.onExportClick = onExportClick
     }
 
     suspend fun loadSettings(context: Context) {
@@ -169,6 +180,28 @@ class SettingsInstance {
                     onCheckedChange(it)
                 })
             }
+        }
+    }
+
+    @Composable
+    fun SettingButton(
+        text: String,
+        onClick: () -> Unit,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    onClick()
+                },
+        ) {
+            Text(
+                text = text,
+                Modifier
+                    .fillMaxWidth()
+                    .weight(0.75f)
+            )
         }
     }
 
