@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
             if (uri != null) {
                 scopeIO.launch {
-                    if (Utils.exportToJson(this@MainActivity, uri)) {
+                    if (Utils.exportToJSON(this@MainActivity, uri)) {
                         runOnUiThread { ShortToast(this@MainActivity, "Counters exported") }
                     } else {
                         runOnUiThread { ShortToast(this@MainActivity, "Error exporting data") }
@@ -86,9 +86,27 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    private val openDocument =
+        registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+
+            if (uri != null) {
+                scopeIO.launch {
+                    if (Utils.importFromJSON(this@MainActivity, uri) { name, value ->
+                            addCounter(
+                                name, value
+                            )
+                        }) {
+                        runOnUiThread { ShortToast(this@MainActivity, "Counters imported") }
+                    } else {
+                        runOnUiThread { ShortToast(this@MainActivity, "Error importing data") }
+                    }
+                }
+            }
+        }
 
     init {
         settings.registerOnExportClick { this@MainActivity.exportToJson() }
+        settings.registerOnImportClick { this@MainActivity.importFromJson() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -342,6 +360,10 @@ class MainActivity : ComponentActivity() {
         val month = String.format("%02d", date.monthValue)
         val day = date.dayOfMonth
         createDocument.launch("counters_export_${year}_${month}_$day.json")
+    }
+
+    private fun importFromJson() {
+        openDocument.launch(arrayOf("application/json"))
     }
 
 }

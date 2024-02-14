@@ -50,6 +50,7 @@ class SettingsInstance {
     var askForInitialValuesWhenNewCounter = true
 
     private lateinit var onExportClick: () -> Unit
+    private lateinit var onImportClick: () -> Unit
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -91,6 +92,9 @@ class SettingsInstance {
                     SettingButton(
                         "Export all counters to a JSON file",
                     ) { onExportClick() }
+                    SettingButton(
+                        "Import counters from a JSON file",
+                    ) { onImportClick() }
                 }
             }
         }
@@ -98,6 +102,10 @@ class SettingsInstance {
 
     fun registerOnExportClick(onExportClick: () -> Unit) {
         this@SettingsInstance.onExportClick = onExportClick
+    }
+
+    fun registerOnImportClick(onImportClick: () -> Unit) {
+        this@SettingsInstance.onImportClick = onImportClick
     }
 
     suspend fun loadSettings(context: Context) {

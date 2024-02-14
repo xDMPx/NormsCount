@@ -11,6 +11,9 @@ interface CounterDao {
     @Query("SELECT * FROM Counter")
     suspend fun getAll(): List<CounterEntity>
 
+    @Query("SELECT name FROM Counter")
+    suspend fun getNames(): List<String>
+
     @Query("SELECT * FROM Counter ORDER BY id DESC LIMIT 1")
     suspend fun getLast(): CounterEntity?
 
