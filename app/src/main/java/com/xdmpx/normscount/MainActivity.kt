@@ -67,6 +67,7 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 class MainActivity : ComponentActivity() {
     private val TAG_DEBUG = "MainActivity"
     private var counters = mutableStateListOf<Counter?>()
+    private var usePureDark = mutableStateOf(false)
     private lateinit var counter: MutableState<Counter>
     private var counterID = 1
     private var lastCounterID = 1
@@ -108,6 +109,9 @@ class MainActivity : ComponentActivity() {
         settings.registerOnExportClick { this@MainActivity.exportToJson() }
         settings.registerOnImportClick { this@MainActivity.importFromJson() }
         settings.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
+        settings.registerOnThemeUpdate { usePureDark ->
+            this@MainActivity.usePureDark.value = usePureDark
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -126,6 +130,7 @@ class MainActivity : ComponentActivity() {
 
         this.lifecycle.coroutineScope.launch {
             settings.loadSettings(this@MainActivity)
+            usePureDark.value = settings.usePureDark
             setKeepScreenOnFlag()
 
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
@@ -161,7 +166,7 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            NormsCountTheme {
+            NormsCountTheme(pureDarkTheme = usePureDark.value) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background

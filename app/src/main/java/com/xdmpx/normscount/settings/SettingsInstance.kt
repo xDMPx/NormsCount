@@ -50,10 +50,12 @@ class SettingsInstance {
     var confirmationDialogDelete = true
     var keepScreenOn = true
     var askForInitialValuesWhenNewCounter = true
+    var usePureDark = false
 
     private lateinit var onExportClick: () -> Unit
     private lateinit var onImportClick: () -> Unit
     private lateinit var onDeleteAllClick: () -> Unit
+    private lateinit var onThemeUpdate: (Boolean) -> Unit
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -94,6 +96,12 @@ class SettingsInstance {
                         "Ask for initial value and name when initializing counter",
                         askForInitialValuesWhenNewCounter
                     ) { askForInitialValuesWhenNewCounter = it }
+                    Setting(
+                        "Use pure(AMOLED) dark in dark theme", usePureDark
+                    ) {
+                        usePureDark = it
+                        onThemeUpdate(usePureDark)
+                    }
                     SettingButton(
                         "Export all counters to a JSON file",
                     ) { onExportClick() }
@@ -149,6 +157,10 @@ class SettingsInstance {
         this@SettingsInstance.onDeleteAllClick = onDeleteAllClick
     }
 
+    fun registerOnThemeUpdate(onThemeUpdate: (Boolean) -> Unit) {
+        this@SettingsInstance.onThemeUpdate = onThemeUpdate
+    }
+
     suspend fun loadSettings(context: Context) {
         val settingsData = context.settingsDataStore.data.catch { }.first()
         this.vibrateOnValueChange = settingsData.vibrateOnValueChange
@@ -158,6 +170,7 @@ class SettingsInstance {
         this.confirmationDialogDelete = settingsData.confirmationDialogDelete
         this.keepScreenOn = settingsData.keepScreenOn
         this.askForInitialValuesWhenNewCounter = settingsData.askForInitialValuesWhenNewCounter
+        this.usePureDark = settingsData.usePureDark
     }
 
     suspend fun saveSettings(context: Context) {
@@ -172,6 +185,7 @@ class SettingsInstance {
                 keepScreenOn = this@SettingsInstance.keepScreenOn
                 askForInitialValuesWhenNewCounter =
                     this@SettingsInstance.askForInitialValuesWhenNewCounter
+                usePureDark = this@SettingsInstance.usePureDark
             }.build()
         }
     }
