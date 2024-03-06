@@ -5,6 +5,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -82,7 +83,8 @@ class Counter(
         }
 
         val textModifier = if (settings.tapCounterValueToIncrement) {
-            Modifier.clickable {
+            val interactionSource = remember { MutableInteractionSource() }
+            Modifier.clickable(interactionSource,null) {
                 count.value++
                 onClickFeedback()
             }

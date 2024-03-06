@@ -1,8 +1,6 @@
 package com.xdmpx.normscount.settings
 
 import android.content.Context
-import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
@@ -86,9 +85,6 @@ class SettingsInstance {
                     Setting(
                         "Enable delete confirmation dialog", confirmationDialogDelete
                     ) { confirmationDialogDelete = it }
-                    Setting(
-                        "Keep the screen on", keepScreenOn
-                    ) { keepScreenOn = it }
                     Setting(
                         "Keep the screen on", keepScreenOn
                     ) { keepScreenOn = it }
@@ -221,7 +217,7 @@ class SettingsInstance {
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable {
+                .clickable(role = Role.Checkbox) {
                     checked = !checked
                     onCheckedChange(checked)
                 },
@@ -238,10 +234,7 @@ class SettingsInstance {
                     .fillMaxWidth()
                     .weight(0.25f)
             ) {
-                Checkbox(checked = checked, onCheckedChange = {
-                    checked = it
-                    onCheckedChange(it)
-                })
+                Checkbox(checked = checked, onCheckedChange = null)
             }
         }
     }
