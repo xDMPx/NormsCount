@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.core.text.isDigitsOnly
 
 object CounterUIHelper {
 
@@ -29,13 +30,19 @@ object CounterUIHelper {
             Column {
                 OutlinedTextField(
                     value = counterName,
-                    onValueChange = { counterName = it },
+                    onValueChange = { counterName = it.trim('\n') },
                     maxLines = 1,
                     label = { Text("Counter Name") },
                 )
                 OutlinedTextField(
                     value = counterValue,
-                    onValueChange = { counterValue = it },
+                    onValueChange = {
+                        if (it.isDigitsOnly()) {
+                            var num = it.trimStart('0')
+                            if (num.isBlank()) num = "0"
+                            counterValue = num
+                        }
+                    },
                     maxLines = 1,
                     label = { Text("Count") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
@@ -46,7 +53,7 @@ object CounterUIHelper {
         }, confirmButton = {
             TextButton(onClick = {
                 // TODO: Invalid input handling
-                onConfirmation(counterName, counterValue.replace(',', '.').toDouble().toLong())
+                onConfirmation(counterName.trim(' '), counterValue.toLong())
             }) {
                 Text("Confirm")
             }
