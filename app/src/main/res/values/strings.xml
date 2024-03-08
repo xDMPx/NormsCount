@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">NormsCount</string>
+    <string name="confirmation_reset">Are you sure you want to reset the counter value? This action cannot be undone.</string>
+    <string name="confirmation_delete">Are you sure you want to delete the counter? This action cannot be undone.</string>
+    <string name="confirmation_delete_all">Are you sure you want to delete all counters? This action cannot be undone.</string>
 </resources>

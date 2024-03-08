@@ -1,4 +1,4 @@
-package com.xdmpx.normscount
+package com.xdmpx.normscount.counter
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.KeyboardOptions
@@ -54,6 +54,29 @@ object CounterUIHelper {
             TextButton(onClick = {
                 // TODO: Invalid input handling
                 onConfirmation(counterName.trim(' '), counterValue.toLong())
+            }) {
+                Text("Confirm")
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                onDismissRequest()
+            }) {
+                Text("Cancel")
+            }
+        })
+    }
+
+    @Composable
+    fun ConfirmationAlertDialog(
+        text: String, onDismissRequest: () -> Unit, onConfirmation: () -> Unit
+    ) {
+        AlertDialog(text = {
+            Text(text = text)
+        }, onDismissRequest = {
+            onDismissRequest()
+        }, confirmButton = {
+            TextButton(onClick = {
+                onConfirmation()
             }) {
                 Text("Confirm")
             }

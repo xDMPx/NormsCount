@@ -49,6 +49,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.xdmpx.normscount.Utils.ShortToast
+import com.xdmpx.normscount.counter.Counter
+import com.xdmpx.normscount.counter.CounterUIHelper
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.settings.Settings
