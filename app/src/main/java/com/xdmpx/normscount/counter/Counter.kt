@@ -303,13 +303,11 @@ class Counter(
 
     fun getCounterId() = counterEntity.id
 
-    fun updateDatabase() {
+    suspend fun updateDatabase() {
         Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> ${count.value}")
         counterEntity.value = count.value
-        scope.launch {
-            Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> $counterEntity")
-            database.update(counterEntity)
-        }
+        Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> $counterEntity")
+        database.update(counterEntity)
     }
 
     fun delete() {

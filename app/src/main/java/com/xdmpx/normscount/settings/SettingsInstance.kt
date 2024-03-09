@@ -56,11 +56,12 @@ class SettingsInstance {
     var keepScreenOn = true
     var askForInitialValuesWhenNewCounter = true
     var usePureDark = false
+    var useDynamicColor = false
 
     private lateinit var onExportClick: () -> Unit
     private lateinit var onImportClick: () -> Unit
     private lateinit var onDeleteAllClick: () -> Unit
-    private lateinit var onThemeUpdate: (Boolean) -> Unit
+    private lateinit var onThemeUpdate: (Boolean, Boolean) -> Unit
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -115,7 +116,17 @@ class SettingsInstance {
                         )
                     }) {
                         usePureDark = it
-                        onThemeUpdate(usePureDark)
+                        onThemeUpdate(usePureDark, useDynamicColor)
+                    }
+                    Setting("Use dynamic colors in theme", useDynamicColor, icon = { modifier ->
+                        Icon(
+                            painter = painterResource(id = R.drawable.rounded_palette_24),
+                            contentDescription = null,
+                            modifier = modifier
+                        )
+                    }) {
+                        useDynamicColor = it
+                        onThemeUpdate(usePureDark, useDynamicColor)
                     }
 
                     Divider(Modifier.padding(settingPadding))
@@ -186,7 +197,7 @@ class SettingsInstance {
         this@SettingsInstance.onDeleteAllClick = onDeleteAllClick
     }
 
-    fun registerOnThemeUpdate(onThemeUpdate: (Boolean) -> Unit) {
+    fun registerOnThemeUpdate(onThemeUpdate: (Boolean, Boolean) -> Unit) {
         this@SettingsInstance.onThemeUpdate = onThemeUpdate
     }
 
@@ -200,6 +211,7 @@ class SettingsInstance {
         this.keepScreenOn = settingsData.keepScreenOn
         this.askForInitialValuesWhenNewCounter = settingsData.askForInitialValuesWhenNewCounter
         this.usePureDark = settingsData.usePureDark
+        this.useDynamicColor = settingsData.useDynamicColor
     }
 
     suspend fun saveSettings(context: Context) {
@@ -215,6 +227,7 @@ class SettingsInstance {
                 askForInitialValuesWhenNewCounter =
                     this@SettingsInstance.askForInitialValuesWhenNewCounter
                 usePureDark = this@SettingsInstance.usePureDark
+                useDynamicColor = this@SettingsInstance.useDynamicColor
             }.build()
         }
     }

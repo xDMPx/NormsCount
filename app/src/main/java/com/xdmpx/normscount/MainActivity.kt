@@ -70,6 +70,7 @@ class MainActivity : ComponentActivity() {
     private val TAG_DEBUG = "MainActivity"
     private var counters = mutableStateListOf<Counter?>()
     private var usePureDark = mutableStateOf(false)
+    private var useDynamicColor = mutableStateOf(false)
     private lateinit var counter: MutableState<Counter>
     private var counterID = 1
     private var lastCounterID = 1
@@ -111,8 +112,9 @@ class MainActivity : ComponentActivity() {
         settings.registerOnExportClick { this@MainActivity.exportToJson() }
         settings.registerOnImportClick { this@MainActivity.importFromJson() }
         settings.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
-        settings.registerOnThemeUpdate { usePureDark ->
+        settings.registerOnThemeUpdate { usePureDark, useDynamicColor ->
             this@MainActivity.usePureDark.value = usePureDark
+            this@MainActivity.useDynamicColor.value = useDynamicColor
         }
     }
 
@@ -168,7 +170,9 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
-            NormsCountTheme(pureDarkTheme = usePureDark.value) {
+            NormsCountTheme(
+                pureDarkTheme = usePureDark.value, dynamicColor = useDynamicColor.value
+            ) {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
@@ -361,13 +365,18 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun exportToJson() {
-        Log.d(TAG_DEBUG, "exportToJson")
+        scopeIO.launch {
+            counters.forEach {
+                it?.updateDatabase()
+            }
+            Log.d(TAG_DEBUG, "exportToJson")
 
-        val date = LocalDate.now()
-        val year = date.year
-        val month = String.format("%02d", date.monthValue)
-        val day = date.dayOfMonth
-        createDocument.launch("counters_export_${year}_${month}_$day.json")
+            val date = LocalDate.now()
+            val year = date.year
+            val month = String.format("%02d", date.monthValue)
+            val day = date.dayOfMonth
+            createDocument.launch("counters_export_${year}_${month}_$day.json")
+        }
     }
 
     private fun importFromJson() {

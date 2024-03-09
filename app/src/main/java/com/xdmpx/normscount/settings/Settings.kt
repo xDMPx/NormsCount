@@ -35,6 +35,7 @@ object SettingsSerializer : Serializer<SettingsProto> {
             keepScreenOn = true
             askForInitialValuesWhenNewCounter = true
             usePureDark = false
+            useDynamicColor = true
         }.build()
 
     override suspend fun readFrom(input: InputStream): SettingsProto {
