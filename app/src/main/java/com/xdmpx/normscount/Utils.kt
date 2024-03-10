@@ -21,13 +21,13 @@ object Utils {
             jsonObject.put("value", it.value)
         }
         val json = JSONArray(repositories)
-        try {
+        return try {
             context.contentResolver.openOutputStream(uri)?.use { outputStream ->
                 outputStream.write(json.toString().toByteArray())
             }
-            return true
+            true
         } catch (e: Exception) {
-            return false
+            false
         }
     }
 
@@ -42,11 +42,21 @@ object Utils {
                 val importedJson = JSONArray(bufferedReader.readText())
                 inputStream.close()
 
-                val names = database.getNames()
+                val counters = database.getAll()
+                val names =
+                    counters.map { if (it.name == "Counter #") "${it.name}${it.id}" else it.name }
+                val values = counters.map { it.value }
 
                 val toImport =
                     (0 until importedJson.length()).map { importedJson.getJSONObject(it) }
-                        .filter { it.getString("id") !in names }.toList()
+                        .filter { jsonObject ->
+                            val name = jsonObject.getString("name")
+                            if (name !in names) {
+                                true
+                            } else {
+                                values[names.indexOf(name)] != jsonObject.getLong("value")
+                            }
+                        }.toList()
 
                 toImport.forEach {
                     addCounter(it.getString("name"), it.getLong("value"))

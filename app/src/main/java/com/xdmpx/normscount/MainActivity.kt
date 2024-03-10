@@ -44,7 +44,6 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import androidx.lifecycle.coroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -96,6 +95,9 @@ class MainActivity : ComponentActivity() {
                 val addCounter: (String, Long) -> Unit =
                     { name, value -> scopeIO.launch { addCounter(name, value) } }
                 scopeIO.launch {
+                    counters.forEach {
+                        it?.updateDatabase()
+                    }
                     if (Utils.importFromJSON(this@MainActivity, uri) { name, value ->
                             addCounter(
                                 name, value
@@ -386,7 +388,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun importFromJson() {
-
         openDocument.launch(arrayOf("application/json"))
     }
 
