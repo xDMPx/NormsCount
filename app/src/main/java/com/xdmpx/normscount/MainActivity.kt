@@ -92,8 +92,9 @@ class MainActivity : ComponentActivity() {
         }
     private val openDocument =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-
             if (uri != null) {
+                val addCounter: (String, Long) -> Unit =
+                    { name, value -> scopeIO.launch { addCounter(name, value) } }
                 scopeIO.launch {
                     if (Utils.importFromJSON(this@MainActivity, uri) { name, value ->
                             addCounter(
@@ -120,6 +121,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
+
         setKeepScreenOnFlag()
         counter = mutableStateOf(
             Counter(
@@ -132,9 +135,10 @@ class MainActivity : ComponentActivity() {
             preferences[counterIDKey] ?: 1
         }
 
-        this.lifecycle.coroutineScope.launch {
+        scopeIO.launch {
             settings.loadSettings(this@MainActivity)
             usePureDark.value = settings.usePureDark
+            useDynamicColor.value = settings.useDynamicColor
             setKeepScreenOnFlag()
 
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
@@ -206,32 +210,30 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun addCounter(name: String = "Counter #", value: Long = 0) {
-        this.lifecycle.coroutineScope.launch {
-            val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
-            val counter = CounterEntity(name = name, value = value)
-            database.insert(counter)
-            val counterEntity = database.getLast()!!
-            counters.add(Counter(counterEntity, { deleteCounter(it) }, this@MainActivity))
-            counterID = counterEntity.id
-            lastCounterID = counterID
-            this@MainActivity.counter.value = counters.last()!!
-        }
+    private suspend fun addCounter(name: String = "Counter #", value: Long = 0) {
+        val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
+
+        val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
+        val counter = CounterEntity(name = name, value = value)
+        database.insert(counter)
+        val counterEntity = database.getLast()!!
+        counters.add(Counter(counterEntity, { deleteCounter(it) }, this@MainActivity))
+        counterID = counterEntity.id
+        lastCounterID = counterID
+        this@MainActivity.counter.value = counters.last()!!
     }
 
-    private fun deleteCounter(counter: Counter) {
-        this.lifecycle.coroutineScope.launch {
-            var index = counters.indexOf(counter)
-            counters[index] = null
-            index = if (index > 0) index - 1 else 0
-            while (index != 0 && counters[index] == null) index -= 1
-            while (index != counters.size && counters[index] == null) index += 1
-            if (index == counters.size) {
-                addCounter()
-            } else {
-                this@MainActivity.counter.value = counters[index]!!
-                counterID = this@MainActivity.counter.value.getCounterId()
-            }
+    private suspend fun deleteCounter(counter: Counter) {
+        var index = counters.indexOf(counter)
+        counters[index] = null
+        index = if (index > 0) index - 1 else 0
+        while (index != 0 && counters[index] == null) index -= 1
+        while (index != counters.size && counters[index] == null) index += 1
+        if (index == counters.size) {
+            addCounter()
+        } else {
+            this@MainActivity.counter.value = counters[index]!!
+            counterID = this@MainActivity.counter.value.getCounterId()
         }
     }
 
@@ -298,7 +300,9 @@ class MainActivity : ComponentActivity() {
                     if (settings.askForInitialValuesWhenNewCounter) {
                         openEditDialog = true
                     } else {
-                        addCounter()
+                        scopeIO.launch {
+                            addCounter()
+                        }
                     }
                     closeDrawer()
                 }) {
@@ -326,7 +330,9 @@ class MainActivity : ComponentActivity() {
                 0,
                 onDismissRequest = { openEditDialog = false }) { name, value ->
                 openEditDialog = false
-                addCounter(name, value)
+                scopeIO.launch {
+                    addCounter(name, value)
+                }
             }
         }
     }
@@ -345,7 +351,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onStop() {
-        this.lifecycle.coroutineScope.launch {
+        scopeIO.launch {
             saveCounterID()
             settings.saveSettings(this@MainActivity)
             counters.forEach {
@@ -380,13 +386,16 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun importFromJson() {
+
         openDocument.launch(arrayOf("application/json"))
     }
 
     private fun deleteAll() {
         counters.filterNotNull().forEach {
             it.delete()
-            deleteCounter(it)
+            scopeIO.launch {
+                deleteCounter(it)
+            }
         }
     }
 
