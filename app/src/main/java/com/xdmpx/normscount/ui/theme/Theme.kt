@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.xdmpx.normscount.datastore.ThemeType
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80
@@ -44,10 +45,15 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun NormsCountTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(), pureDarkTheme: Boolean = false,
+    theme: ThemeType = ThemeType.SYSTEM, pureDarkTheme: Boolean = false,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true, content: @Composable () -> Unit
 ) {
+    val darkTheme = when (theme) {
+        ThemeType.SYSTEM, ThemeType.UNRECOGNIZED -> isSystemInDarkTheme()
+        ThemeType.DARK -> true
+        ThemeType.LIGHT -> false
+    }
 
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {

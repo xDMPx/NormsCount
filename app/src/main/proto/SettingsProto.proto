@@ -3,14 +3,21 @@ syntax = "proto3";
 option java_package = "com.xdmpx.normscount.datastore";
 option java_multiple_files = true;
 
+enum ThemeType{
+  SYSTEM = 0;
+  DARK = 1;
+  LIGHT = 2;
+}
+
 message SettingsProto {
-    bool vibrate_on_value_change = 1;
-    bool tap_counter_value_to_increment = 2;
-    bool change_counter_value_volume_buttons = 3;
-    bool confirmation_dialog_reset = 4;
-    bool confirmation_dialog_delete = 5;
-    bool keep_screen_on = 6;
-    bool ask_for_initial_values_when_new_counter = 7;
-    bool use_pure_dark = 8;
-    bool use_dynamic_color = 9;
+  bool vibrate_on_value_change = 1;
+  bool tap_counter_value_to_increment = 2;
+  bool change_counter_value_volume_buttons = 3;
+  bool confirmation_dialog_reset = 4;
+  bool confirmation_dialog_delete = 5;
+  bool keep_screen_on = 6;
+  bool ask_for_initial_values_when_new_counter = 7;
+  bool use_pure_dark = 8;
+  bool use_dynamic_color = 9;
+  ThemeType theme = 10;
 }

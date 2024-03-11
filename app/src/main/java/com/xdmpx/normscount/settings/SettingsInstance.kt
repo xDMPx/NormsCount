@@ -4,18 +4,23 @@ import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -30,13 +35,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.datastore.core.DataStore
 import androidx.datastore.dataStore
 import com.xdmpx.normscount.R
 import com.xdmpx.normscount.counter.CounterUIHelper.ConfirmationAlertDialog
 import com.xdmpx.normscount.datastore.SettingsProto
+import com.xdmpx.normscount.datastore.ThemeType
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 
@@ -46,7 +54,7 @@ val Context.settingsDataStore: DataStore<SettingsProto> by dataStore(
 
 class SettingsInstance {
 
-    val settingPadding = 10.dp
+    private val settingPadding = 10.dp
 
     var vibrateOnValueChange = true
     var tapCounterValueToIncrement = true
@@ -57,11 +65,12 @@ class SettingsInstance {
     var askForInitialValuesWhenNewCounter = true
     var usePureDark = false
     var useDynamicColor = false
+    var theme = ThemeType.SYSTEM
 
     private lateinit var onExportClick: () -> Unit
     private lateinit var onImportClick: () -> Unit
     private lateinit var onDeleteAllClick: () -> Unit
-    private lateinit var onThemeUpdate: (Boolean, Boolean) -> Unit
+    private lateinit var onThemeUpdate: (Boolean, Boolean, ThemeType) -> Unit
 
     @Composable
     fun SettingsUI(onNavigateToMain: () -> Unit) {
@@ -108,6 +117,10 @@ class SettingsInstance {
                             modifier = modifier
                         )
                     }) { keepScreenOn = it }
+                    ThemeSelectorSetting("Theme", theme) {
+                        theme = it
+                        onThemeUpdate(usePureDark, useDynamicColor, theme)
+                    }
                     Setting("Use pure(AMOLED) dark in dark theme", usePureDark, icon = { modifier ->
                         Icon(
                             painter = painterResource(id = R.drawable.rounded_invert_colors_24),
@@ -116,7 +129,7 @@ class SettingsInstance {
                         )
                     }) {
                         usePureDark = it
-                        onThemeUpdate(usePureDark, useDynamicColor)
+                        onThemeUpdate(usePureDark, useDynamicColor, theme)
                     }
                     Setting("Use dynamic colors in theme", useDynamicColor, icon = { modifier ->
                         Icon(
@@ -126,8 +139,9 @@ class SettingsInstance {
                         )
                     }) {
                         useDynamicColor = it
-                        onThemeUpdate(usePureDark, useDynamicColor)
+                        onThemeUpdate(usePureDark, useDynamicColor, theme)
                     }
+
 
                     Divider(Modifier.padding(settingPadding))
 
@@ -197,7 +211,7 @@ class SettingsInstance {
         this@SettingsInstance.onDeleteAllClick = onDeleteAllClick
     }
 
-    fun registerOnThemeUpdate(onThemeUpdate: (Boolean, Boolean) -> Unit) {
+    fun registerOnThemeUpdate(onThemeUpdate: (Boolean, Boolean, ThemeType) -> Unit) {
         this@SettingsInstance.onThemeUpdate = onThemeUpdate
     }
 
@@ -212,6 +226,7 @@ class SettingsInstance {
         this.askForInitialValuesWhenNewCounter = settingsData.askForInitialValuesWhenNewCounter
         this.usePureDark = settingsData.usePureDark
         this.useDynamicColor = settingsData.useDynamicColor
+        this.theme = settingsData.theme
     }
 
     suspend fun saveSettings(context: Context) {
@@ -228,6 +243,7 @@ class SettingsInstance {
                     this@SettingsInstance.askForInitialValuesWhenNewCounter
                 usePureDark = this@SettingsInstance.usePureDark
                 useDynamicColor = this@SettingsInstance.useDynamicColor
+                theme = this@SettingsInstance.theme
             }.build()
         }
     }
@@ -313,6 +329,120 @@ class SettingsInstance {
                     .weight(0.75f)
                     .padding(settingPadding)
             )
+        }
+    }
+
+    @Composable
+    fun ThemeSelectorSetting(
+        text: String,
+        theme: ThemeType,
+        onChange: (ThemeType) -> Unit,
+    ) {
+        var openDialog by remember { mutableStateOf(false) }
+
+        var themeText by remember { mutableStateOf("") }
+
+        val modifier = Modifier.padding(settingPadding)
+        val icon: @Composable () -> Unit = when (theme) {
+            ThemeType.SYSTEM, ThemeType.UNRECOGNIZED -> {
+                {
+                    Icon(
+                        painter = painterResource(id = R.drawable.rounded_brightness_auto_24),
+                        contentDescription = null,
+                        modifier = modifier
+                    )
+                    themeText = "System"
+                }
+            }
+
+            ThemeType.DARK -> {
+                {
+                    Icon(
+                        painter = painterResource(id = R.drawable.rounded_dark_mode_24),
+                        contentDescription = null,
+                        modifier = modifier
+                    )
+                    themeText = "Dark"
+                }
+            }
+
+            ThemeType.LIGHT -> {
+                {
+                    Icon(
+                        painter = painterResource(id = R.drawable.rounded_light_mode_24),
+                        contentDescription = null,
+                        modifier = modifier
+                    )
+                    themeText = "Light"
+                }
+            }
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    openDialog = !openDialog
+                },
+        ) {
+            icon()
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .weight(0.75f)
+                    .padding(settingPadding)
+            ) {
+                Text(text = text)
+                Text(
+                    text = themeText,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        if (openDialog) {
+            ThemeSelectorDialog(theme, onDismissRequest = { openDialog = !openDialog }) {
+                onChange(it)
+                openDialog = !openDialog
+            }
+        }
+    }
+
+    @Composable
+    fun ThemeSelectorDialog(
+        theme: ThemeType, onDismissRequest: () -> Unit, onSelect: (ThemeType) -> Unit
+    ) {
+        Dialog(onDismissRequest = { onDismissRequest() }) {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                RadioTextButton(text = "System", selected = theme == ThemeType.SYSTEM) {
+                    onSelect(ThemeType.SYSTEM)
+                }
+                RadioTextButton(text = "Dark", selected = theme == ThemeType.DARK) {
+                    onSelect(ThemeType.DARK)
+                }
+                RadioTextButton(text = "Light", selected = theme == ThemeType.LIGHT) {
+                    onSelect(ThemeType.LIGHT)
+                }
+
+            }
+        }
+    }
+
+    @Composable
+    fun RadioTextButton(text: String, selected: Boolean, onClick: () -> Unit) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(selected = selected, onClick = {
+                onClick()
+            })
+            Text(text = text)
         }
     }
 

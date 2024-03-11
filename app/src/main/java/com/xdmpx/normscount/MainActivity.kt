@@ -52,6 +52,7 @@ import com.xdmpx.normscount.counter.Counter
 import com.xdmpx.normscount.counter.CounterUIHelper
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
+import com.xdmpx.normscount.datastore.ThemeType
 import com.xdmpx.normscount.settings.Settings
 import com.xdmpx.normscount.ui.theme.NormsCountTheme
 import kotlinx.coroutines.CoroutineScope
@@ -70,6 +71,7 @@ class MainActivity : ComponentActivity() {
     private var counters = mutableStateListOf<Counter?>()
     private var usePureDark = mutableStateOf(false)
     private var useDynamicColor = mutableStateOf(false)
+    private var theme = mutableStateOf(ThemeType.SYSTEM)
     private lateinit var counter: MutableState<Counter>
     private var counterID = 1
     private var lastCounterID = 1
@@ -115,9 +117,10 @@ class MainActivity : ComponentActivity() {
         settings.registerOnExportClick { this@MainActivity.exportToJson() }
         settings.registerOnImportClick { this@MainActivity.importFromJson() }
         settings.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
-        settings.registerOnThemeUpdate { usePureDark, useDynamicColor ->
+        settings.registerOnThemeUpdate { usePureDark, useDynamicColor, theme ->
             this@MainActivity.usePureDark.value = usePureDark
             this@MainActivity.useDynamicColor.value = useDynamicColor
+            this@MainActivity.theme.value = theme
         }
     }
 
@@ -141,6 +144,7 @@ class MainActivity : ComponentActivity() {
             settings.loadSettings(this@MainActivity)
             usePureDark.value = settings.usePureDark
             useDynamicColor.value = settings.useDynamicColor
+            theme.value = settings.theme
             setKeepScreenOnFlag()
 
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
@@ -177,7 +181,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             NormsCountTheme(
-                pureDarkTheme = usePureDark.value, dynamicColor = useDynamicColor.value
+                theme = theme.value,
+                pureDarkTheme = usePureDark.value,
+                dynamicColor = useDynamicColor.value
             ) {
                 // A surface container using the 'background' color from the theme
                 Surface(

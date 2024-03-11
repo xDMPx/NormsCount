@@ -4,6 +4,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import androidx.datastore.preferences.protobuf.InvalidProtocolBufferException
 import com.xdmpx.normscount.datastore.SettingsProto
+import com.xdmpx.normscount.datastore.ThemeType
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -36,6 +37,7 @@ object SettingsSerializer : Serializer<SettingsProto> {
             askForInitialValuesWhenNewCounter = true
             usePureDark = false
             useDynamicColor = true
+            theme = ThemeType.SYSTEM
         }.build()
 
     override suspend fun readFrom(input: InputStream): SettingsProto {
