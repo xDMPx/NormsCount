@@ -11,8 +11,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.core.text.isDigitsOnly
+import com.xdmpx.normscount.R
 
 object CounterUIHelper {
 
@@ -32,7 +34,7 @@ object CounterUIHelper {
                     value = counterName,
                     onValueChange = { counterName = it.trim('\n') },
                     maxLines = 1,
-                    label = { Text("Counter Name") },
+                    label = { Text(stringResource(R.string.counter_editalerteialog_name)) },
                 )
                 OutlinedTextField(
                     value = counterValue,
@@ -44,7 +46,7 @@ object CounterUIHelper {
                         }
                     },
                     maxLines = 1,
-                    label = { Text("Count") },
+                    label = { Text(stringResource(R.string.counter_editalerteialog_count)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
                 )
             }
@@ -55,13 +57,13 @@ object CounterUIHelper {
                 // TODO: Invalid input handling
                 onConfirmation(counterName.trim(' '), counterValue.toLong())
             }) {
-                Text("Confirm")
+                Text(stringResource(R.string.dialog_confirm))
             }
         }, dismissButton = {
             TextButton(onClick = {
                 onDismissRequest()
             }) {
-                Text("Cancel")
+                Text(stringResource(R.string.dialog_cancel))
             }
         })
     }
@@ -78,13 +80,13 @@ object CounterUIHelper {
             TextButton(onClick = {
                 onConfirmation()
             }) {
-                Text("Confirm")
+                Text(stringResource(R.string.dialog_confirm))
             }
         }, dismissButton = {
             TextButton(onClick = {
                 onDismissRequest()
             }) {
-                Text("Cancel")
+                Text(stringResource(R.string.dialog_cancel))
             }
         })
     }

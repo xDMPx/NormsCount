@@ -24,10 +24,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import com.xdmpx.normscount.BuildConfig
+import com.xdmpx.normscount.R
 
 object About {
 
@@ -46,16 +48,15 @@ object About {
                     .fillMaxSize()
             ) {
                 Column {
-                    AboutButton(text = "Version v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})") {
+                    AboutButton(text = "${stringResource(R.string.about_version)} v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})") {}
+                    AboutButton(text = stringResource(R.string.about_source_code)) {
+                        openURL(context, "https://github.com/xDMPx/NormsCount")
                     }
-                    AboutButton(text = "Source code") {
-                        openURL(context,"https://github.com/xDMPx/NormsCount")
+                    AboutButton(text = stringResource(R.string.about_author)) {
+                        openURL(context, "https://github.com/xDMPx")
                     }
-                    AboutButton(text = "Author") {
-                        openURL(context,"https://github.com/xDMPx")
-                    }
-                    AboutButton(text = "License") {
-                        openURL(context,"https://github.com/xDMPx/NormsCount/blob/main/LICENSE")
+                    AboutButton(text = stringResource(R.string.about_license)) {
+                        openURL(context, "https://github.com/xDMPx/NormsCount/blob/main/LICENSE")
                     }
                 }
             }
@@ -76,7 +77,9 @@ object About {
             }
         }, title = {
             Text(
-                "About", maxLines = 1, overflow = TextOverflow.Ellipsis
+                stringResource(R.string.about_screen),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }, actions = {})
     }
@@ -107,7 +110,7 @@ object About {
         }
     }
 
-    private fun openURL(context: Context, url: String){
+    private fun openURL(context: Context, url: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
         startActivity(context, browserIntent, null)
     }

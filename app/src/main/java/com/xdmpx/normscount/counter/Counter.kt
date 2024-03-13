@@ -207,38 +207,44 @@ class Counter(
             else openResetAlertDialog = true
         }) {
             Icon(
-                imageVector = Icons.Filled.Refresh, contentDescription = "Reset counter"
+                imageVector = Icons.Filled.Refresh,
+                contentDescription = stringResource(R.string.counter_topappbar_reset)
             )
         }
         IconButton(onClick = {
             openEditDialog = true
         }) {
             Icon(
-                imageVector = Icons.Filled.Create, contentDescription = "Edit counter"
+                imageVector = Icons.Filled.Create,
+                contentDescription = stringResource(R.string.counter_topappbar_edit)
             )
         }
         IconButton(onClick = { expanded = !expanded }) {
             Icon(
-                imageVector = Icons.Filled.MoreVert, contentDescription = "Top Bar Menu"
+                imageVector = Icons.Filled.MoreVert,
+                contentDescription = stringResource(R.string.counter_topappbar_menu)
             )
         }
 
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = "Delete") }, onClick = {
-                expanded = false
-                if (!settings.confirmationDialogDelete) {
-                    this@Counter.onDelete(this@Counter)
-                    delete()
-                } else openDeleteAlertDialog = true
-            })
-            DropdownMenuItem(text = { Text(text = "Settings") }, onClick = {
-                expanded = false
-                onNavigateToSettings()
-            })
-            DropdownMenuItem(text = { Text(text = "About") }, onClick = {
-                expanded = false
-                onNavigateToAbout()
-            })
+            DropdownMenuItem(text = { Text(text = stringResource(R.string.counter_topappbar_delete)) },
+                onClick = {
+                    expanded = false
+                    if (!settings.confirmationDialogDelete) {
+                        this@Counter.onDelete(this@Counter)
+                        delete()
+                    } else openDeleteAlertDialog = true
+                })
+            DropdownMenuItem(text = { Text(text = stringResource(R.string.settings_screen)) },
+                onClick = {
+                    expanded = false
+                    onNavigateToSettings()
+                })
+            DropdownMenuItem(text = { Text(text = stringResource(R.string.about_screen)) },
+                onClick = {
+                    expanded = false
+                    onNavigateToAbout()
+                })
         }
 
         if (openResetAlertDialog) {

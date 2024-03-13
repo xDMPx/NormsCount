@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -85,9 +86,17 @@ class MainActivity : ComponentActivity() {
             if (uri != null) {
                 scopeIO.launch {
                     if (Utils.exportToJSON(this@MainActivity, uri)) {
-                        runOnUiThread { ShortToast(this@MainActivity, "Counters exported") }
+                        runOnUiThread {
+                            ShortToast(
+                                this@MainActivity, resources.getString(R.string.export_successful)
+                            )
+                        }
                     } else {
-                        runOnUiThread { ShortToast(this@MainActivity, "Error exporting data") }
+                        runOnUiThread {
+                            ShortToast(
+                                this@MainActivity, resources.getString(R.string.export_failed)
+                            )
+                        }
                     }
                 }
             }
@@ -106,9 +115,17 @@ class MainActivity : ComponentActivity() {
                                 name, value
                             )
                         }) {
-                        runOnUiThread { ShortToast(this@MainActivity, "Counters imported") }
+                        runOnUiThread {
+                            ShortToast(
+                                this@MainActivity, resources.getString(R.string.import_successful)
+                            )
+                        }
                     } else {
-                        runOnUiThread { ShortToast(this@MainActivity, "Error importing data") }
+                        runOnUiThread {
+                            ShortToast(
+                                this@MainActivity, resources.getString(R.string.import_failed)
+                            )
+                        }
                     }
                 }
             }
@@ -312,7 +329,8 @@ class MainActivity : ComponentActivity() {
         ModalDrawerSheet(modifier = modifier) {
             Row {
                 Text(
-                    "Counters", modifier = Modifier
+                    stringResource(R.string.navigation_drawer_title),
+                    modifier = Modifier
                         .padding(16.dp)
                         .fillMaxWidth(0.8f)
                 )

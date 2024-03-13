@@ -1,6 +1,51 @@
 <resources>
     <string name="app_name">NormsCount</string>
+    <string name="about_screen">About</string>
+    <string name="settings_screen">Settings</string>
+
     <string name="confirmation_reset">Are you sure you want to reset the counter value? This action cannot be undone.</string>
     <string name="confirmation_delete">Are you sure you want to delete the counter? This action cannot be undone.</string>
     <string name="confirmation_delete_all">Are you sure you want to delete all counters? This action cannot be undone.</string>
+
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_cancel">Cancel</string>
+
+    <string name="export_successful">Counters exported</string>
+    <string name="export_failed">Error exporting data</string>
+    <string name="import_successful">Counters imported</string>
+    <string name="import_failed">Error importing data</string>
+
+    <string name="navigation_drawer_title">Counters</string>
+
+    <string name="settings_vibrate">Vibrate on value change</string>
+    <string name="settings_tap">Tap counter value to increment</string>
+    <string name="settings_hardware_button">Change counter value using hardware volume buttons</string>
+    <string name="settings_keep_screen">Keep the screen on</string>
+    <string name="settings_pure_dark">Use pure(AMOLED) dark in dark them</string>
+    <string name="settings_dynamic_color">Use dynamic colors in theme</string>
+    <string name="settings_confirmation_dialog">Enable reset confirmation dialog</string>
+    <string name="settings_delete_dialog">Enable delete confirmation dialog</string>
+    <string name="settings_ask_initial_value">Ask for initial value and name when initializing counter</string>
+    <string name="settings_export_json">Export all counters to a JSON file</string>
+    <string name="settings_import_json">"Import counters from a JSON file"</string>
+    <string name="settings_delete_all">Delete all counters</string>
+
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">System</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_theme_light">Light</string>
+
+    <string name="counter_topappbar_delete">Delete</string>
+    <string name="counter_topappbar_reset">Reset counter</string>
+    <string name="counter_topappbar_edit">Edit counter</string>
+    <string name="counter_topappbar_menu">Top Bar Menu</string>
+
+    <string name="counter_editalerteialog_name">Counter Name</string>
+    <string name="counter_editalerteialog_count">Count</string>
+
+    <string name="about_version">Version</string>
+    <string name="about_source_code">Source code</string>
+    <string name="about_author">Author</string>
+    <string name="about_license">License</string>
+
 </resources>

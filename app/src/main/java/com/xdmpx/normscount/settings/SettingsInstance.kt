@@ -85,14 +85,16 @@ class SettingsInstance {
                     .fillMaxSize()
             ) {
                 Column {
-                    Setting("Vibrate on value change ", vibrateOnValueChange, icon = { modifier ->
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_vibration_24),
-                            contentDescription = null,
-                            modifier = modifier
-                        )
-                    }) { vibrateOnValueChange = it }
-                    Setting("Tap counter value to increment",
+                    Setting(stringResource(R.string.settings_vibrate),
+                        vibrateOnValueChange,
+                        icon = { modifier ->
+                            Icon(
+                                painter = painterResource(id = R.drawable.rounded_vibration_24),
+                                contentDescription = null,
+                                modifier = modifier
+                            )
+                        }) { vibrateOnValueChange = it }
+                    Setting(stringResource(R.string.settings_tap),
                         tapCounterValueToIncrement,
                         icon = { modifier ->
                             Icon(
@@ -101,7 +103,7 @@ class SettingsInstance {
                                 modifier = modifier
                             )
                         }) { tapCounterValueToIncrement = it }
-                    Setting("Change counter value using hardware volume buttons",
+                    Setting(stringResource(R.string.settings_hardware_button),
                         changeCounterValueVolumeButtons,
                         icon = { modifier ->
                             Icon(
@@ -110,34 +112,40 @@ class SettingsInstance {
                                 modifier = modifier
                             )
                         }) { changeCounterValueVolumeButtons = it }
-                    Setting("Keep the screen on", keepScreenOn, icon = { modifier ->
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_visibility_lock_24),
-                            contentDescription = null,
-                            modifier = modifier
-                        )
-                    }) { keepScreenOn = it }
-                    ThemeSelectorSetting("Theme", theme) {
+                    Setting(stringResource(R.string.settings_keep_screen),
+                        keepScreenOn,
+                        icon = { modifier ->
+                            Icon(
+                                painter = painterResource(id = R.drawable.rounded_visibility_lock_24),
+                                contentDescription = null,
+                                modifier = modifier
+                            )
+                        }) { keepScreenOn = it }
+                    ThemeSelectorSetting(stringResource(R.string.settings_theme), theme) {
                         theme = it
                         onThemeUpdate(usePureDark, useDynamicColor, theme)
                     }
-                    Setting("Use pure(AMOLED) dark in dark theme", usePureDark, icon = { modifier ->
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_invert_colors_24),
-                            contentDescription = null,
-                            modifier = modifier
-                        )
-                    }) {
+                    Setting(stringResource(R.string.settings_pure_dark),
+                        usePureDark,
+                        icon = { modifier ->
+                            Icon(
+                                painter = painterResource(id = R.drawable.rounded_invert_colors_24),
+                                contentDescription = null,
+                                modifier = modifier
+                            )
+                        }) {
                         usePureDark = it
                         onThemeUpdate(usePureDark, useDynamicColor, theme)
                     }
-                    Setting("Use dynamic colors in theme", useDynamicColor, icon = { modifier ->
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_palette_24),
-                            contentDescription = null,
-                            modifier = modifier
-                        )
-                    }) {
+                    Setting(stringResource(R.string.settings_dynamic_color),
+                        useDynamicColor,
+                        icon = { modifier ->
+                            Icon(
+                                painter = painterResource(id = R.drawable.rounded_palette_24),
+                                contentDescription = null,
+                                modifier = modifier
+                            )
+                        }) {
                         useDynamicColor = it
                         onThemeUpdate(usePureDark, useDynamicColor, theme)
                     }
@@ -146,33 +154,36 @@ class SettingsInstance {
                     Divider(Modifier.padding(settingPadding))
 
                     Setting(
-                        "Enable reset confirmation dialog", confirmationDialogReset
+                        stringResource(R.string.settings_confirmation_dialog),
+                        confirmationDialogReset
                     ) { confirmationDialogReset = it }
                     Setting(
-                        "Enable delete confirmation dialog", confirmationDialogDelete
+                        stringResource(R.string.settings_delete_dialog), confirmationDialogDelete
                     ) { confirmationDialogDelete = it }
                     Setting(
-                        "Ask for initial value and name when initializing counter",
+                        stringResource(R.string.settings_ask_initial_value),
                         askForInitialValuesWhenNewCounter
                     ) { askForInitialValuesWhenNewCounter = it }
 
                     Divider(Modifier.padding(settingPadding))
 
-                    SettingButton("Export all counters to a JSON file", icon = { modifier ->
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_file_save_24),
-                            contentDescription = null,
-                            modifier = modifier
-                        )
-                    }) { onExportClick() }
-                    SettingButton("Import counters from a JSON file", icon = { modifier ->
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_file_open_24),
-                            contentDescription = null,
-                            modifier = modifier
-                        )
-                    }) { onImportClick() }
-                    SettingButton("Delete all counters", icon = { modifier ->
+                    SettingButton(stringResource(R.string.settings_export_json),
+                        icon = { modifier ->
+                            Icon(
+                                painter = painterResource(id = R.drawable.rounded_file_save_24),
+                                contentDescription = null,
+                                modifier = modifier
+                            )
+                        }) { onExportClick() }
+                    SettingButton(stringResource(R.string.settings_import_json),
+                        icon = { modifier ->
+                            Icon(
+                                painter = painterResource(id = R.drawable.rounded_file_open_24),
+                                contentDescription = null,
+                                modifier = modifier
+                            )
+                        }) { onImportClick() }
+                    SettingButton(stringResource(R.string.settings_delete_all), icon = { modifier ->
                         Icon(
                             painter = painterResource(id = R.drawable.rounded_delete_forever_24),
                             contentDescription = null,
@@ -262,7 +273,9 @@ class SettingsInstance {
             }
         }, title = {
             Text(
-                "Settings", maxLines = 1, overflow = TextOverflow.Ellipsis
+                stringResource(R.string.settings_screen),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }, actions = {})
     }
@@ -351,7 +364,7 @@ class SettingsInstance {
                         contentDescription = null,
                         modifier = modifier
                     )
-                    themeText = "System"
+                    themeText = stringResource(R.string.settings_theme_system)
                 }
             }
 
@@ -362,7 +375,7 @@ class SettingsInstance {
                         contentDescription = null,
                         modifier = modifier
                     )
-                    themeText = "Dark"
+                    themeText = stringResource(R.string.settings_theme_dark)
                 }
             }
 
@@ -373,7 +386,7 @@ class SettingsInstance {
                         contentDescription = null,
                         modifier = modifier
                     )
-                    themeText = "Light"
+                    themeText = stringResource(R.string.settings_theme_light)
                 }
             }
         }
@@ -422,13 +435,22 @@ class SettingsInstance {
                     .padding(16.dp),
                 shape = RoundedCornerShape(16.dp),
             ) {
-                RadioTextButton(text = "System", selected = theme == ThemeType.SYSTEM) {
+                RadioTextButton(
+                    text = stringResource(R.string.settings_theme_system),
+                    selected = theme == ThemeType.SYSTEM
+                ) {
                     onSelect(ThemeType.SYSTEM)
                 }
-                RadioTextButton(text = "Dark", selected = theme == ThemeType.DARK) {
+                RadioTextButton(
+                    text = stringResource(R.string.settings_theme_dark),
+                    selected = theme == ThemeType.DARK
+                ) {
                     onSelect(ThemeType.DARK)
                 }
-                RadioTextButton(text = "Light", selected = theme == ThemeType.LIGHT) {
+                RadioTextButton(
+                    text = stringResource(R.string.settings_theme_light),
+                    selected = theme == ThemeType.LIGHT
+                ) {
                     onSelect(ThemeType.LIGHT)
                 }
 
