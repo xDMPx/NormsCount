@@ -173,7 +173,11 @@ class Counter(
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
-    fun CounterTopAppBar(onNavigationIconClick: () -> Unit, onNavigateToSettings: () -> Unit) {
+    fun CounterTopAppBar(
+        onNavigationIconClick: () -> Unit,
+        onNavigateToSettings: () -> Unit,
+        onNavigateToAbout: () -> Unit
+    ) {
         TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
@@ -187,12 +191,12 @@ class Counter(
                 Icon(imageVector = Icons.Filled.Menu, contentDescription = null)
             }
         }, actions = {
-            TopAppBarMenu(onNavigateToSettings)
+            TopAppBarMenu(onNavigateToSettings, onNavigateToAbout)
         })
     }
 
     @Composable
-    fun TopAppBarMenu(onNavigateToSettings: () -> Unit) {
+    fun TopAppBarMenu(onNavigateToSettings: () -> Unit, onNavigateToAbout: () -> Unit) {
         var expanded by remember { mutableStateOf(false) }
         var openResetAlertDialog by remember { mutableStateOf(false) }
         var openDeleteAlertDialog by remember { mutableStateOf(false) }
@@ -230,6 +234,10 @@ class Counter(
             DropdownMenuItem(text = { Text(text = "Settings") }, onClick = {
                 expanded = false
                 onNavigateToSettings()
+            })
+            DropdownMenuItem(text = { Text(text = "About") }, onClick = {
+                expanded = false
+                onNavigateToAbout()
             })
         }
 

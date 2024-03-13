@@ -48,6 +48,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.xdmpx.normscount.Utils.ShortToast
+import com.xdmpx.normscount.about.About
 import com.xdmpx.normscount.counter.Counter
 import com.xdmpx.normscount.counter.CounterUIHelper
 import com.xdmpx.normscount.database.CounterDatabase
@@ -192,13 +193,20 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(navController = navController, startDestination = "main") {
                         composable("main") {
-                            MainUI() {
-                                navController.navigate("settings")
+                            MainUI(onNavigateToSettings = { navController.navigate("settings") }) {
+                                navController.navigate("about")
                             }
                         }
                         composable("settings") {
                             overrideOnKeyDown = false
                             settings.SettingsUI {
+                                navController.navigate("main")
+                                setKeepScreenOnFlag()
+                            }
+                        }
+                        composable("about") {
+                            overrideOnKeyDown = false
+                            About.AboutUI {
                                 navController.navigate("main")
                                 setKeepScreenOnFlag()
                             }
@@ -247,7 +255,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun MainUI(
-        onNavigateToSettings: () -> Unit
+        onNavigateToSettings: () -> Unit, onNavigateToAbout: () -> Unit
     ) {
         val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
         val scope = rememberCoroutineScope()
@@ -270,18 +278,22 @@ class MainActivity : ComponentActivity() {
             drawerContent = { NavigationDrawerContent(closeDrawer, Modifier.fillMaxWidth(0.7f)) },
         ) {
             // Screen content
-            MainUIScreen(openDrawer, onNavigateToSettings)
+            MainUIScreen(openDrawer, onNavigateToSettings, onNavigateToAbout)
         }
     }
 
     @Composable
-    fun MainUIScreen(onNavigationIconClick: () -> Unit, onNavigateToSettings: () -> Unit) {
+    fun MainUIScreen(
+        onNavigationIconClick: () -> Unit,
+        onNavigateToSettings: () -> Unit,
+        onNavigateToAbout: () -> Unit
+    ) {
         overrideOnKeyDown = true
 
         Scaffold(
             topBar = {
                 counter.value.CounterTopAppBar(
-                    onNavigationIconClick, onNavigateToSettings
+                    onNavigationIconClick, onNavigateToSettings, onNavigateToAbout
                 )
             },
         ) { innerPadding ->

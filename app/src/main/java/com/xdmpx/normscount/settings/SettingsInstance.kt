@@ -340,7 +340,7 @@ class SettingsInstance {
     ) {
         var openDialog by remember { mutableStateOf(false) }
 
-        var themeText by remember { mutableStateOf("") }
+        var themeText = ""
 
         val modifier = Modifier.padding(settingPadding)
         val icon: @Composable () -> Unit = when (theme) {
