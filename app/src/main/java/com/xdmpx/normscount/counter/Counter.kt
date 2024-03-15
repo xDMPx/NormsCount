@@ -33,6 +33,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -63,12 +64,13 @@ class Counter(
     private val TAG_DEBUG = "Counter"
     private var count: MutableState<Long> = mutableLongStateOf(counterEntity.value)
     private var name: MutableState<String> = mutableStateOf(counterEntity.name)
-    private val settings = Settings.getInstance()
     private val database = CounterDatabase.getInstance(context).counterDatabase
+    private val settingsInstance = Settings.getInstance()
     private val scope = CoroutineScope(Dispatchers.IO)
 
     @Composable
     fun CounterUI(modifier: Modifier = Modifier) {
+        val settings by settingsInstance.settingsState.collectAsState()
         val context = LocalContext.current
         val vibrator = context.getSystemService(Vibrator::class.java)
         val onClickFeedback = {
@@ -197,6 +199,7 @@ class Counter(
 
     @Composable
     fun TopAppBarMenu(onNavigateToSettings: () -> Unit, onNavigateToAbout: () -> Unit) {
+        val settings by settingsInstance.settingsState.collectAsState()
         var expanded by remember { mutableStateOf(false) }
         var openResetAlertDialog by remember { mutableStateOf(false) }
         var openDeleteAlertDialog by remember { mutableStateOf(false) }

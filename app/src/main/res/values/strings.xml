@@ -23,7 +23,7 @@
     <string name="settings_keep_screen">Keep the screen on</string>
     <string name="settings_pure_dark">Use pure(AMOLED) dark in dark them</string>
     <string name="settings_dynamic_color">Use dynamic colors in theme</string>
-    <string name="settings_confirmation_dialog">Enable reset confirmation dialog</string>
+    <string name="settings_reset_confirmation_dialog">Enable reset confirmation dialog</string>
     <string name="settings_delete_dialog">Enable delete confirmation dialog</string>
     <string name="settings_ask_initial_value">Ask for initial value and name when initializing counter</string>
     <string name="settings_export_json">Export all counters to a JSON file</string>

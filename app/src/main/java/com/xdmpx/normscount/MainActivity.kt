@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,7 @@ import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.datastore.ThemeType
 import com.xdmpx.normscount.settings.Settings
+import com.xdmpx.normscount.settings.SettingsUI
 import com.xdmpx.normscount.ui.theme.NormsCountTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -78,7 +80,7 @@ class MainActivity : ComponentActivity() {
     private var counterID = 1
     private var lastCounterID = 1
     private var overrideOnKeyDown = true
-    private val settings = Settings.getInstance()
+    private val settingsInstance = Settings.getInstance()
 
     private val scopeIO = CoroutineScope(Dispatchers.IO)
     private val createDocument =
@@ -132,10 +134,10 @@ class MainActivity : ComponentActivity() {
         }
 
     init {
-        settings.registerOnExportClick { this@MainActivity.exportToJson() }
-        settings.registerOnImportClick { this@MainActivity.importFromJson() }
-        settings.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
-        settings.registerOnThemeUpdate { usePureDark, useDynamicColor, theme ->
+        settingsInstance.registerOnExportClick { this@MainActivity.exportToJson() }
+        settingsInstance.registerOnImportClick { this@MainActivity.importFromJson() }
+        settingsInstance.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
+        settingsInstance.registerOnThemeUpdate { usePureDark, useDynamicColor, theme ->
             this@MainActivity.usePureDark.value = usePureDark
             this@MainActivity.useDynamicColor.value = useDynamicColor
             this@MainActivity.theme.value = theme
@@ -159,7 +161,8 @@ class MainActivity : ComponentActivity() {
         }
 
         scopeIO.launch {
-            settings.loadSettings(this@MainActivity)
+            settingsInstance.loadSettings(this@MainActivity)
+            val settings = settingsInstance.settingsState.value
             usePureDark.value = settings.usePureDark
             useDynamicColor.value = settings.useDynamicColor
             theme.value = settings.theme
@@ -216,7 +219,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("settings") {
                             overrideOnKeyDown = false
-                            settings.SettingsUI {
+                            SettingsUI.SettingsUI(settingsInstance) {
                                 navController.navigate("main")
                                 setKeepScreenOnFlag()
                             }
@@ -235,6 +238,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun setKeepScreenOnFlag() {
+        val settings = settingsInstance.settingsState.value
         Log.d(TAG_DEBUG, "setKeepScreenOnFlag -> ${settings.keepScreenOn} ")
         if (settings.keepScreenOn) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -324,6 +328,7 @@ class MainActivity : ComponentActivity() {
     fun NavigationDrawerContent(
         closeDrawer: () -> Unit, modifier: Modifier
     ) {
+        val settings by settingsInstance.settingsState.collectAsState()
         var openEditDialog by remember { mutableStateOf(false) }
 
         ModalDrawerSheet(modifier = modifier) {
@@ -376,6 +381,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        val settings = settingsInstance.settingsState.value
         if (settings.changeCounterValueVolumeButtons && overrideOnKeyDown) {
             when (keyCode) {
                 KeyEvent.KEYCODE_VOLUME_DOWN -> counter.value.decrement()
@@ -391,7 +397,7 @@ class MainActivity : ComponentActivity() {
     override fun onStop() {
         scopeIO.launch {
             saveCounterID()
-            settings.saveSettings(this@MainActivity)
+            settingsInstance.saveSettings(this@MainActivity)
             counters.forEach {
                 it?.updateDatabase()
             }

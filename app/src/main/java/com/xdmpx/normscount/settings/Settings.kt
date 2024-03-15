@@ -12,11 +12,11 @@ abstract class Settings {
 
     companion object {
         @Volatile
-        private var INSTANCE: SettingsInstance? = null
+        private var INSTANCE: SettingsViewModel? = null
 
-        fun getInstance(): SettingsInstance {
+        fun getInstance(): SettingsViewModel {
             synchronized(this) {
-                return INSTANCE ?: SettingsInstance(
+                return INSTANCE ?: SettingsViewModel(
                 ).also {
                     INSTANCE = it
                 }

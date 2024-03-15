@@ -1,6 +1,5 @@
 package com.xdmpx.normscount.settings
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,41 +39,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import com.xdmpx.normscount.R
-import com.xdmpx.normscount.counter.CounterUIHelper.ConfirmationAlertDialog
-import com.xdmpx.normscount.datastore.SettingsProto
+import com.xdmpx.normscount.counter.CounterUIHelper
 import com.xdmpx.normscount.datastore.ThemeType
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 
-val Context.settingsDataStore: DataStore<SettingsProto> by dataStore(
-    fileName = "settings.pb", serializer = SettingsSerializer
-)
-
-class SettingsInstance {
+object SettingsUI {
 
     private val settingPadding = 10.dp
 
-    var vibrateOnValueChange = true
-    var tapCounterValueToIncrement = true
-    var changeCounterValueVolumeButtons = true
-    var confirmationDialogReset = true
-    var confirmationDialogDelete = true
-    var keepScreenOn = true
-    var askForInitialValuesWhenNewCounter = true
-    var usePureDark = false
-    var useDynamicColor = false
-    var theme = ThemeType.SYSTEM
-
-    private lateinit var onExportClick: () -> Unit
-    private lateinit var onImportClick: () -> Unit
-    private lateinit var onDeleteAllClick: () -> Unit
-    private lateinit var onThemeUpdate: (Boolean, Boolean, ThemeType) -> Unit
-
     @Composable
-    fun SettingsUI(onNavigateToMain: () -> Unit) {
+    fun SettingsUI(settingsViewModel: SettingsViewModel, onNavigateToMain: () -> Unit) {
+        val settingsState by settingsViewModel.settingsState.collectAsState()
         var showDeleteAllConfirmationDialog by remember { mutableStateOf(false) }
 
         Scaffold(
@@ -86,47 +62,48 @@ class SettingsInstance {
             ) {
                 Column {
                     Setting(stringResource(R.string.settings_vibrate),
-                        vibrateOnValueChange,
+                        settingsState.vibrateOnValueChange,
                         icon = { modifier ->
                             Icon(
                                 painter = painterResource(id = R.drawable.rounded_vibration_24),
                                 contentDescription = null,
                                 modifier = modifier
                             )
-                        }) { vibrateOnValueChange = it }
+                        }) { settingsViewModel.toggleVibrateOnValueChange() }
                     Setting(stringResource(R.string.settings_tap),
-                        tapCounterValueToIncrement,
+                        settingsState.tapCounterValueToIncrement,
                         icon = { modifier ->
                             Icon(
                                 painter = painterResource(id = R.drawable.rounded_touch_app_24),
                                 contentDescription = null,
                                 modifier = modifier
                             )
-                        }) { tapCounterValueToIncrement = it }
+                        }) { settingsViewModel.toggleTapCounterValueToIncrement() }
                     Setting(stringResource(R.string.settings_hardware_button),
-                        changeCounterValueVolumeButtons,
+                        settingsState.changeCounterValueVolumeButtons,
                         icon = { modifier ->
                             Icon(
                                 painter = painterResource(id = R.drawable.rounded_phone_android_24),
                                 contentDescription = null,
                                 modifier = modifier
                             )
-                        }) { changeCounterValueVolumeButtons = it }
+                        }) { settingsViewModel.toggleChangeCounterValueVolumeButtons() }
                     Setting(stringResource(R.string.settings_keep_screen),
-                        keepScreenOn,
+                        settingsState.keepScreenOn,
                         icon = { modifier ->
                             Icon(
                                 painter = painterResource(id = R.drawable.rounded_visibility_lock_24),
                                 contentDescription = null,
                                 modifier = modifier
                             )
-                        }) { keepScreenOn = it }
-                    ThemeSelectorSetting(stringResource(R.string.settings_theme), theme) {
-                        theme = it
-                        onThemeUpdate(usePureDark, useDynamicColor, theme)
+                        }) { settingsViewModel.toggleKeepScreenOn() }
+                    ThemeSelectorSetting(
+                        stringResource(R.string.settings_theme), settingsState.theme
+                    ) {
+                        settingsViewModel.setTheme(it)
                     }
                     Setting(stringResource(R.string.settings_pure_dark),
-                        usePureDark,
+                        settingsState.usePureDark,
                         icon = { modifier ->
                             Icon(
                                 painter = painterResource(id = R.drawable.rounded_invert_colors_24),
@@ -134,11 +111,10 @@ class SettingsInstance {
                                 modifier = modifier
                             )
                         }) {
-                        usePureDark = it
-                        onThemeUpdate(usePureDark, useDynamicColor, theme)
+                        settingsViewModel.toggleUsePureDark()
                     }
                     Setting(stringResource(R.string.settings_dynamic_color),
-                        useDynamicColor,
+                        settingsState.useDynamicColor,
                         icon = { modifier ->
                             Icon(
                                 painter = painterResource(id = R.drawable.rounded_palette_24),
@@ -146,24 +122,24 @@ class SettingsInstance {
                                 modifier = modifier
                             )
                         }) {
-                        useDynamicColor = it
-                        onThemeUpdate(usePureDark, useDynamicColor, theme)
+                        settingsViewModel.toggleUseDynamicColor()
                     }
 
 
                     Divider(Modifier.padding(settingPadding))
 
                     Setting(
-                        stringResource(R.string.settings_confirmation_dialog),
-                        confirmationDialogReset
-                    ) { confirmationDialogReset = it }
+                        stringResource(R.string.settings_reset_confirmation_dialog),
+                        settingsState.confirmationDialogReset
+                    ) { settingsViewModel.toggleConfirmationDialogReset() }
                     Setting(
-                        stringResource(R.string.settings_delete_dialog), confirmationDialogDelete
-                    ) { confirmationDialogDelete = it }
+                        stringResource(R.string.settings_delete_dialog),
+                        settingsState.confirmationDialogDelete
+                    ) { settingsViewModel.toggleConfirmationDialogDelete() }
                     Setting(
                         stringResource(R.string.settings_ask_initial_value),
-                        askForInitialValuesWhenNewCounter
-                    ) { askForInitialValuesWhenNewCounter = it }
+                        settingsState.askForInitialValuesWhenNewCounter
+                    ) { settingsViewModel.toggleAskForInitialValuesWhenNewCounter() }
 
                     Divider(Modifier.padding(settingPadding))
 
@@ -174,7 +150,7 @@ class SettingsInstance {
                                 contentDescription = null,
                                 modifier = modifier
                             )
-                        }) { onExportClick() }
+                        }) { settingsViewModel.onExportClick() }
                     SettingButton(stringResource(R.string.settings_import_json),
                         icon = { modifier ->
                             Icon(
@@ -182,7 +158,7 @@ class SettingsInstance {
                                 contentDescription = null,
                                 modifier = modifier
                             )
-                        }) { onImportClick() }
+                        }) { settingsViewModel.onImportClick() }
                     SettingButton(stringResource(R.string.settings_delete_all), icon = { modifier ->
                         Icon(
                             painter = painterResource(id = R.drawable.rounded_delete_forever_24),
@@ -197,7 +173,7 @@ class SettingsInstance {
         if (showDeleteAllConfirmationDialog) {
             DeleteAllAlertDialog(onDismissRequest = { showDeleteAllConfirmationDialog = false }) {
                 showDeleteAllConfirmationDialog = false
-                onDeleteAllClick()
+                settingsViewModel.onDeleteAllClick()
             }
         }
 
@@ -205,59 +181,11 @@ class SettingsInstance {
 
     @Composable
     private fun DeleteAllAlertDialog(onDismissRequest: () -> Unit, onConfirmation: () -> Unit) {
-        ConfirmationAlertDialog(
+        CounterUIHelper.ConfirmationAlertDialog(
             stringResource(R.string.confirmation_delete_all), onDismissRequest, onConfirmation
         )
     }
 
-    fun registerOnExportClick(onExportClick: () -> Unit) {
-        this@SettingsInstance.onExportClick = onExportClick
-    }
-
-    fun registerOnImportClick(onImportClick: () -> Unit) {
-        this@SettingsInstance.onImportClick = onImportClick
-    }
-
-    fun registerOnDeleteAllClick(onDeleteAllClick: () -> Unit) {
-        this@SettingsInstance.onDeleteAllClick = onDeleteAllClick
-    }
-
-    fun registerOnThemeUpdate(onThemeUpdate: (Boolean, Boolean, ThemeType) -> Unit) {
-        this@SettingsInstance.onThemeUpdate = onThemeUpdate
-    }
-
-    suspend fun loadSettings(context: Context) {
-        val settingsData = context.settingsDataStore.data.catch { }.first()
-        this.vibrateOnValueChange = settingsData.vibrateOnValueChange
-        this.tapCounterValueToIncrement = settingsData.tapCounterValueToIncrement
-        this.changeCounterValueVolumeButtons = settingsData.changeCounterValueVolumeButtons
-        this.confirmationDialogReset = settingsData.confirmationDialogReset
-        this.confirmationDialogDelete = settingsData.confirmationDialogDelete
-        this.keepScreenOn = settingsData.keepScreenOn
-        this.askForInitialValuesWhenNewCounter = settingsData.askForInitialValuesWhenNewCounter
-        this.usePureDark = settingsData.usePureDark
-        this.useDynamicColor = settingsData.useDynamicColor
-        this.theme = settingsData.theme
-    }
-
-    suspend fun saveSettings(context: Context) {
-        context.settingsDataStore.updateData {
-            it.toBuilder().apply {
-                vibrateOnValueChange = this@SettingsInstance.vibrateOnValueChange
-                tapCounterValueToIncrement = this@SettingsInstance.tapCounterValueToIncrement
-                changeCounterValueVolumeButtons =
-                    this@SettingsInstance.changeCounterValueVolumeButtons
-                confirmationDialogReset = this@SettingsInstance.confirmationDialogReset
-                confirmationDialogDelete = this@SettingsInstance.confirmationDialogDelete
-                keepScreenOn = this@SettingsInstance.keepScreenOn
-                askForInitialValuesWhenNewCounter =
-                    this@SettingsInstance.askForInitialValuesWhenNewCounter
-                usePureDark = this@SettingsInstance.usePureDark
-                useDynamicColor = this@SettingsInstance.useDynamicColor
-                theme = this@SettingsInstance.theme
-            }.build()
-        }
-    }
 
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -285,17 +213,15 @@ class SettingsInstance {
         text: String,
         checked: Boolean,
         icon: @Composable (modifier: Modifier) -> Unit = {},
-        onCheckedChange: (Boolean) -> Unit,
+        onCheckedChange: () -> Unit,
     ) {
-        var checked by remember { mutableStateOf(checked) }
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable(role = Role.Checkbox) {
-                    checked = !checked
-                    onCheckedChange(checked)
+                    onCheckedChange()
                 },
         ) {
             Row(
@@ -460,7 +386,10 @@ class SettingsInstance {
 
     @Composable
     fun RadioTextButton(text: String, selected: Boolean, onClick: () -> Unit) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clickable { onClick() }
+                .fillMaxWidth()) {
             RadioButton(selected = selected, onClick = {
                 onClick()
             })
