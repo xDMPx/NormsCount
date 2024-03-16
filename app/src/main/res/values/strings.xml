@@ -43,6 +43,8 @@
     <string name="counter_editalerteialog_name">Counter Name</string>
     <string name="counter_editalerteialog_count">Count</string>
 
+    <string name="about_app_description">A simple counter app for android.</string>
+
     <string name="about_version">Version</string>
     <string name="about_source_code">Source code</string>
     <string name="about_author">Author</string>
