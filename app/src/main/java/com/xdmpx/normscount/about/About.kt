@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -66,14 +67,39 @@ object About {
                     border = BorderStroke(0.25.dp, Color.Gray), modifier = Modifier.padding(12.dp)
                 ) {
                     AppInfo()
-                    AboutButton(text = "${stringResource(R.string.about_version)} v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})") {}
-                    AboutButton(text = stringResource(R.string.about_source_code)) {
+                    AboutButton(text = "${stringResource(R.string.about_version)} v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.rounded_info_24),
+                                contentDescription = stringResource(id = R.string.about_version),
+                                modifier = it
+                            )
+                        }) {}
+                    AboutButton(text = stringResource(R.string.about_source_code), icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.rounded_code_24),
+                            contentDescription = stringResource(id = R.string.about_source_code),
+                            modifier = it
+                        )
+                    }) {
                         openURL(context, getString(context, R.string.about_source_code_url))
                     }
-                    AboutButton(text = stringResource(R.string.about_license)) {
+                    AboutButton(text = stringResource(R.string.about_license), icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.rounded_license_24),
+                            contentDescription = stringResource(id = R.string.about_license),
+                            modifier = it
+                        )
+                    }) {
                         openURL(context, getString(context, R.string.about_license_url))
                     }
-                    AboutButton(text = stringResource(R.string.about_author)) {
+                    AboutButton(text = stringResource(R.string.about_author), icon = {
+                        Icon(
+                            painter = painterResource(id = R.drawable.rounded_account_circle_24),
+                            contentDescription = stringResource(id = R.string.about_author),
+                            modifier = it
+                        )
+                    }) {
                         openURL(context, getString(context, R.string.about_author_url))
                     }
                 }
