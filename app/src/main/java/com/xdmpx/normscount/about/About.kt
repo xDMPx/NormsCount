@@ -40,6 +40,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getString
 import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.drawable.toBitmap
 import com.xdmpx.normscount.BuildConfig
@@ -67,13 +68,13 @@ object About {
                     AppInfo()
                     AboutButton(text = "${stringResource(R.string.about_version)} v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})") {}
                     AboutButton(text = stringResource(R.string.about_source_code)) {
-                        openURL(context, "https://github.com/xDMPx/NormsCount")
+                        openURL(context, getString(context, R.string.about_source_code_url))
                     }
                     AboutButton(text = stringResource(R.string.about_license)) {
-                        openURL(context, "https://github.com/xDMPx/NormsCount/blob/main/LICENSE")
+                        openURL(context, getString(context, R.string.about_license_url))
                     }
                     AboutButton(text = stringResource(R.string.about_author)) {
-                        openURL(context, "https://github.com/xDMPx")
+                        openURL(context, getString(context, R.string.about_author_url))
                     }
                 }
             }

@@ -50,4 +50,8 @@
     <string name="about_author">Author</string>
     <string name="about_license">License</string>
 
+    <string name="about_source_code_url">https://github.com/xDMPx/NormsCount</string>
+    <string name="about_license_url">"https://github.com/xDMPx/NormsCount/blob/main/LICENSE"</string>
+    <string name="about_author_url">https://github.com/xDMPx</string>
+
 </resources>
