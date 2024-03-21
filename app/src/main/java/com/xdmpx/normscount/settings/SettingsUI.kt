@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -60,112 +61,117 @@ object SettingsUI {
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                Column {
-                    Setting(stringResource(R.string.settings_vibrate),
-                        settingsState.vibrateOnValueChange,
-                        icon = { modifier ->
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_vibration_24),
-                                contentDescription = null,
-                                modifier = modifier
-                            )
-                        }) { settingsViewModel.toggleVibrateOnValueChange() }
-                    Setting(stringResource(R.string.settings_tap),
-                        settingsState.tapCounterValueToIncrement,
-                        icon = { modifier ->
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_touch_app_24),
-                                contentDescription = null,
-                                modifier = modifier
-                            )
-                        }) { settingsViewModel.toggleTapCounterValueToIncrement() }
-                    Setting(stringResource(R.string.settings_hardware_button),
-                        settingsState.changeCounterValueVolumeButtons,
-                        icon = { modifier ->
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_phone_android_24),
-                                contentDescription = null,
-                                modifier = modifier
-                            )
-                        }) { settingsViewModel.toggleChangeCounterValueVolumeButtons() }
-                    Setting(stringResource(R.string.settings_keep_screen),
-                        settingsState.keepScreenOn,
-                        icon = { modifier ->
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_visibility_lock_24),
-                                contentDescription = null,
-                                modifier = modifier
-                            )
-                        }) { settingsViewModel.toggleKeepScreenOn() }
-                    ThemeSelectorSetting(
-                        stringResource(R.string.settings_theme), settingsState.theme
-                    ) {
-                        settingsViewModel.setTheme(it)
+                LazyColumn(Modifier.padding(10.dp)) {
+                    item {
+                        Setting(stringResource(R.string.settings_vibrate),
+                            settingsState.vibrateOnValueChange,
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_vibration_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { settingsViewModel.toggleVibrateOnValueChange() }
+                        Setting(stringResource(R.string.settings_tap),
+                            settingsState.tapCounterValueToIncrement,
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_touch_app_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { settingsViewModel.toggleTapCounterValueToIncrement() }
+                        Setting(stringResource(R.string.settings_hardware_button),
+                            settingsState.changeCounterValueVolumeButtons,
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_phone_android_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { settingsViewModel.toggleChangeCounterValueVolumeButtons() }
+                        Setting(stringResource(R.string.settings_keep_screen),
+                            settingsState.keepScreenOn,
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_visibility_lock_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { settingsViewModel.toggleKeepScreenOn() }
+                        ThemeSelectorSetting(
+                            stringResource(R.string.settings_theme), settingsState.theme
+                        ) {
+                            settingsViewModel.setTheme(it)
+                        }
+                        Setting(stringResource(R.string.settings_pure_dark),
+                            settingsState.usePureDark,
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_invert_colors_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) {
+                            settingsViewModel.toggleUsePureDark()
+                        }
+                        Setting(stringResource(R.string.settings_dynamic_color),
+                            settingsState.useDynamicColor,
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_palette_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) {
+                            settingsViewModel.toggleUseDynamicColor()
+                        }
+
+
+                        Divider(Modifier.padding(settingPadding))
+
+                        Setting(
+                            stringResource(R.string.settings_reset_confirmation_dialog),
+                            settingsState.confirmationDialogReset
+                        ) { settingsViewModel.toggleConfirmationDialogReset() }
+                        Setting(
+                            stringResource(R.string.settings_delete_dialog),
+                            settingsState.confirmationDialogDelete
+                        ) { settingsViewModel.toggleConfirmationDialogDelete() }
+                        Setting(
+                            stringResource(R.string.settings_ask_initial_value),
+                            settingsState.askForInitialValuesWhenNewCounter
+                        ) { settingsViewModel.toggleAskForInitialValuesWhenNewCounter() }
+
+                        Divider(Modifier.padding(settingPadding))
+
+                        SettingButton(
+                            stringResource(R.string.settings_export_json),
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_file_save_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { settingsViewModel.onExportClick() }
+                        SettingButton(
+                            stringResource(R.string.settings_import_json),
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_file_open_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { settingsViewModel.onImportClick() }
+                        SettingButton(stringResource(R.string.settings_delete_all),
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_delete_forever_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { showDeleteAllConfirmationDialog = true }
                     }
-                    Setting(stringResource(R.string.settings_pure_dark),
-                        settingsState.usePureDark,
-                        icon = { modifier ->
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_invert_colors_24),
-                                contentDescription = null,
-                                modifier = modifier
-                            )
-                        }) {
-                        settingsViewModel.toggleUsePureDark()
-                    }
-                    Setting(stringResource(R.string.settings_dynamic_color),
-                        settingsState.useDynamicColor,
-                        icon = { modifier ->
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_palette_24),
-                                contentDescription = null,
-                                modifier = modifier
-                            )
-                        }) {
-                        settingsViewModel.toggleUseDynamicColor()
-                    }
-
-
-                    Divider(Modifier.padding(settingPadding))
-
-                    Setting(
-                        stringResource(R.string.settings_reset_confirmation_dialog),
-                        settingsState.confirmationDialogReset
-                    ) { settingsViewModel.toggleConfirmationDialogReset() }
-                    Setting(
-                        stringResource(R.string.settings_delete_dialog),
-                        settingsState.confirmationDialogDelete
-                    ) { settingsViewModel.toggleConfirmationDialogDelete() }
-                    Setting(
-                        stringResource(R.string.settings_ask_initial_value),
-                        settingsState.askForInitialValuesWhenNewCounter
-                    ) { settingsViewModel.toggleAskForInitialValuesWhenNewCounter() }
-
-                    Divider(Modifier.padding(settingPadding))
-
-                    SettingButton(stringResource(R.string.settings_export_json),
-                        icon = { modifier ->
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_file_save_24),
-                                contentDescription = null,
-                                modifier = modifier
-                            )
-                        }) { settingsViewModel.onExportClick() }
-                    SettingButton(stringResource(R.string.settings_import_json),
-                        icon = { modifier ->
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_file_open_24),
-                                contentDescription = null,
-                                modifier = modifier
-                            )
-                        }) { settingsViewModel.onImportClick() }
-                    SettingButton(stringResource(R.string.settings_delete_all), icon = { modifier ->
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_delete_forever_24),
-                            contentDescription = null,
-                            modifier = modifier
-                        )
-                    }) { showDeleteAllConfirmationDialog = true }
                 }
             }
         }
