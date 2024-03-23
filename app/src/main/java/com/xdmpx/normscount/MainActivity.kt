@@ -1,6 +1,7 @@
 package com.xdmpx.normscount
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -39,6 +41,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.datastore.core.DataStore
@@ -293,10 +296,19 @@ class MainActivity : ComponentActivity() {
             }
         }
 
+        val landscapeOrientation =
+            LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+
         ModalNavigationDrawer(
             gesturesEnabled = true,
             drawerState = drawerState,
-            drawerContent = { NavigationDrawerContent(closeDrawer, Modifier.fillMaxWidth(0.7f)) },
+            drawerContent = {
+                if (!landscapeOrientation) {
+                    NavigationDrawerContent(closeDrawer, Modifier.fillMaxWidth(0.7f))
+                } else {
+                    NavigationDrawerContent(closeDrawer, Modifier.requiredWidth(300.dp))
+                }
+            },
         ) {
             // Screen content
             MainUIScreen(openDrawer, onNavigateToSettings, onNavigateToAbout)
