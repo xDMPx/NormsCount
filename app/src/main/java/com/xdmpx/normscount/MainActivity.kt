@@ -17,8 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -352,7 +352,7 @@ class MainActivity : ComponentActivity() {
                     Icon(Icons.Filled.Add, null)
                 }
             }
-            Divider()
+            HorizontalDivider()
             LazyColumn {
                 items(counters) { counter ->
                     if (counter == null) return@items

@@ -2,7 +2,6 @@ package com.xdmpx.normscount.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,8 +14,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -128,7 +127,7 @@ object SettingsUI {
                         }
 
 
-                        Divider(Modifier.padding(settingPadding))
+                        HorizontalDivider(Modifier.padding(settingPadding))
 
                         Setting(
                             stringResource(R.string.settings_reset_confirmation_dialog),
@@ -143,7 +142,7 @@ object SettingsUI {
                             settingsState.askForInitialValuesWhenNewCounter
                         ) { settingsViewModel.toggleAskForInitialValuesWhenNewCounter() }
 
-                        Divider(Modifier.padding(settingPadding))
+                        HorizontalDivider(Modifier.padding(settingPadding))
 
                         SettingButton(
                             stringResource(R.string.settings_export_json),
