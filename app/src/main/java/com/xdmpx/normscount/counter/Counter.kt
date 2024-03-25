@@ -1,6 +1,7 @@
 package com.xdmpx.normscount.counter
 
 import android.content.Context
+import android.content.res.Configuration
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
@@ -41,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -90,6 +92,18 @@ class Counter(
         } else {
             Modifier
         }
+
+        val landscapeOrientation =
+            LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+        if (!landscapeOrientation) CounterUIPortrait(modifier, textModifier, onClickFeedback)
+        else CounterUILandscape(modifier, textModifier, onClickFeedback)
+
+    }
+
+    @Composable
+    private fun CounterUIPortrait(
+        modifier: Modifier = Modifier, textModifier: Modifier, onClickFeedback: () -> Unit
+    ) {
         Column(modifier = modifier) {
             LazyRow(
                 horizontalArrangement = Arrangement.Center,
@@ -109,6 +123,58 @@ class Counter(
             Column(
                 verticalArrangement = Arrangement.spacedBy(
                     space = 10.dp, alignment = Alignment.Bottom
+                ),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(0.3f)
+            ) {
+                Button(
+                    onClick = {
+                        count.value++
+                        onClickFeedback()
+                    }, modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .height(height = 110.dp)
+                ) {
+                    Icon(Icons.Rounded.Add, contentDescription = null)
+                }
+                Button(
+                    onClick = {
+                        count.value--
+                        onClickFeedback()
+                    }, modifier = Modifier.fillMaxWidth(0.9f)
+                ) {
+                    Text(text = "-", fontSize = 45.sp)
+                }
+                Spacer(modifier = modifier.height(10.dp))
+            }
+        }
+    }
+
+    @Composable
+    private fun CounterUILandscape(
+        modifier: Modifier = Modifier, textModifier: Modifier, onClickFeedback: () -> Unit
+    ) {
+        Row(modifier = modifier) {
+            LazyRow(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(0.7f)
+            ) {
+                item {
+                    Text(
+                        text = "${count.value}",
+                        fontSize = 150.sp,
+                        modifier = textModifier.padding(10.dp)
+                    )
+                }
+            }
+            Column(
+                verticalArrangement = Arrangement.spacedBy(
+                    space = 10.dp, alignment = Alignment.CenterVertically
                 ),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
