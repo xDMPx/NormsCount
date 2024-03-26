@@ -16,7 +16,6 @@ object Utils {
 
         val repositories = database.getAll().map {
             val jsonObject = JSONObject()
-            jsonObject.put("id", it.id)
             jsonObject.put("name", if (it.name == "Counter #") "${it.name}${it.id}" else it.name)
             jsonObject.put("value", it.value)
         }
