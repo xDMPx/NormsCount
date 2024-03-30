@@ -33,29 +33,14 @@ object Utils {
     suspend fun importFromJSON(
         context: Context, uri: Uri, addCounter: (String, Long) -> Unit
     ): Boolean {
-        val database = CounterDatabase.getInstance(context).counterDatabase
-
         try {
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
                 val bufferedReader = BufferedReader(InputStreamReader(inputStream))
                 val importedJson = JSONArray(bufferedReader.readText())
                 inputStream.close()
 
-                val counters = database.getAll()
-                val names =
-                    counters.map { if (it.name == "Counter #") "${it.name}${it.id}" else it.name }
-                val values = counters.map { it.value }
-
                 val toImport =
-                    (0 until importedJson.length()).map { importedJson.getJSONObject(it) }
-                        .filter { jsonObject ->
-                            val name = jsonObject.getString("name")
-                            if (name !in names) {
-                                true
-                            } else {
-                                values[names.indexOf(name)] != jsonObject.getLong("value")
-                            }
-                        }.toList()
+                    (0 until importedJson.length()).map { importedJson.getJSONObject(it) }.toList()
 
                 toImport.forEach {
                     addCounter(it.getString("name"), it.getLong("value"))
