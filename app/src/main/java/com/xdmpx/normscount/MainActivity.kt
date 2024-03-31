@@ -109,17 +109,18 @@ class MainActivity : ComponentActivity() {
     private val openDocument =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             if (uri != null) {
-                val addCounter: (String, Long) -> Unit =
-                    { name, value -> scopeIO.launch { addCounter(name, value) } }
+                val addCounters: (Array<Utils.CounterData>) -> Unit = {
+                    scopeIO.launch {
+                        it.forEach {
+                            addCounter(it.name, it.value)
+                        }
+                    }
+                }
                 scopeIO.launch {
                     counters.forEach {
                         it?.updateDatabase()
                     }
-                    if (Utils.importFromJSON(this@MainActivity, uri) { name, value ->
-                            addCounter(
-                                name, value
-                            )
-                        }) {
+                    if (Utils.importFromJSON(this@MainActivity, uri, addCounters)) {
                         runOnUiThread {
                             ShortToast(
                                 this@MainActivity, resources.getString(R.string.import_successful)

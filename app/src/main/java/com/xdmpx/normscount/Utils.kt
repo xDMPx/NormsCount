@@ -30,8 +30,10 @@ object Utils {
         }
     }
 
-    suspend fun importFromJSON(
-        context: Context, uri: Uri, addCounter: (String, Long) -> Unit
+    data class CounterData(val name: String, val value: Long)
+
+    fun importFromJSON(
+        context: Context, uri: Uri, addCounters: (Array<CounterData>) -> Unit
     ): Boolean {
         try {
             context.contentResolver.openInputStream(uri)?.use { inputStream ->
@@ -40,11 +42,11 @@ object Utils {
                 inputStream.close()
 
                 val toImport =
-                    (0 until importedJson.length()).map { importedJson.getJSONObject(it) }.toList()
+                    (0 until importedJson.length()).map { importedJson.getJSONObject(it) }
+                        .map { CounterData(it.getString("name"), it.getLong("value")) }
+                        .toTypedArray()
 
-                toImport.forEach {
-                    addCounter(it.getString("name"), it.getLong("value"))
-                }
+                addCounters(toImport)
             }
             return true
         } catch (e: Exception) {
