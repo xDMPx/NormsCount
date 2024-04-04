@@ -155,7 +155,7 @@ class MainActivity : ComponentActivity() {
         setKeepScreenOnFlag()
         counter = mutableStateOf(
             Counter(
-                CounterEntity(value = 0), { deleteCounter(it) }, this@MainActivity
+                0, 0, "Counter #", { deleteCounter(it) }, this@MainActivity
             )
         )
 
@@ -175,7 +175,11 @@ class MainActivity : ComponentActivity() {
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
                 .map { counterEntity ->
                     Counter(
-                        counterEntity, { deleteCounter(it) }, this@MainActivity
+                        counterEntity.id,
+                        counterEntity.value,
+                        counterEntity.name,
+                        { deleteCounter(it) },
+                        this@MainActivity
                     )
                 }
             if (counters.isEmpty()) {
@@ -184,7 +188,11 @@ class MainActivity : ComponentActivity() {
                 counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
                     .map { counterEntity ->
                         Counter(
-                            counterEntity, { deleteCounter(it) }, this@MainActivity
+                            counterEntity.id,
+                            counterEntity.value,
+                            counterEntity.name,
+                            { deleteCounter(it) },
+                            this@MainActivity
                         )
                     }
             }
@@ -258,7 +266,15 @@ class MainActivity : ComponentActivity() {
         val counter = CounterEntity(name = name, value = value)
         database.insert(counter)
         val counterEntity = database.getLast()!!
-        counters.add(Counter(counterEntity, { deleteCounter(it) }, this@MainActivity))
+        counters.add(
+            Counter(
+                counterEntity.id,
+                counterEntity.value,
+                counterEntity.name,
+                { deleteCounter(it) },
+                this@MainActivity
+            )
+        )
         counterID = counterEntity.id
         lastCounterID = counterID
         this@MainActivity.counter.value = counters.last()!!

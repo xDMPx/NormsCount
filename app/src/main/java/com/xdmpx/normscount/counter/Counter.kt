@@ -49,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.protobuf.value
 import com.xdmpx.normscount.R
 import com.xdmpx.normscount.counter.CounterUIHelper.ConfirmationAlertDialog
 import com.xdmpx.normscount.database.CounterDatabase
@@ -59,13 +60,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class Counter(
-    private val counterEntity: CounterEntity,
+    private val id: Int,
+    value: Long,
+    name: String,
     private val onDelete: (Counter) -> Unit,
     context: Context
 ) {
     private val TAG_DEBUG = "Counter"
-    private var count: MutableState<Long> = mutableLongStateOf(counterEntity.value)
-    private var name: MutableState<String> = mutableStateOf(counterEntity.name)
+    private var count: MutableState<Long> = mutableLongStateOf(value)
+    private var name: MutableState<String> = mutableStateOf(name)
     private val database = CounterDatabase.getInstance(context).counterDatabase
     private val settingsInstance = Settings.getInstance()
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -232,10 +235,10 @@ class Counter(
     }
 
     private fun counterNameText(): String {
-        return if (counterEntity.name == "Counter #") {
-            "Counter #${counterEntity.id}"
+        return if (name.value == "Counter #") {
+            "Counter #${id}"
         } else {
-            counterEntity.name
+            name.value
         }
     }
 
@@ -334,9 +337,7 @@ class Counter(
         if (openEditDialog) {
             EditAlertDialog(onDismissRequest = { openEditDialog = false }) { name, value ->
                 openEditDialog = false
-                counterEntity.name = name
                 this@Counter.name.value = name
-                counterEntity.value = value
                 this@Counter.count.value = value
             }
         }
@@ -384,17 +385,21 @@ class Counter(
         this.count.value = count
     }
 
-    fun getCounterId() = counterEntity.id
+    fun getCounterId() = id
+
+    private fun getCounterEntity() = CounterEntity(id, name.value, count.value)
 
     suspend fun updateDatabase() {
+        val counterEntity = getCounterEntity()
         Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> ${count.value}")
-        counterEntity.value = count.value
         Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> $counterEntity")
         database.update(counterEntity)
     }
 
     fun delete() {
         scope.launch {
+            updateDatabase()
+            val counterEntity = getCounterEntity()
             Log.d(TAG_DEBUG, "${this.hashCode()}::delete -> $counterEntity")
             database.delete(counterEntity)
         }

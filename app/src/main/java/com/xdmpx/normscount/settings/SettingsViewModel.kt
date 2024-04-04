@@ -31,7 +31,6 @@ data class SettingsState(
 
 class SettingsViewModel : ViewModel() {
 
-
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState: StateFlow<SettingsState> = _settingsState.asStateFlow()
 
