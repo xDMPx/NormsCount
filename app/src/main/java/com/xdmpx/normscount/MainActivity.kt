@@ -118,7 +118,7 @@ class MainActivity : ComponentActivity() {
                 }
                 scopeIO.launch {
                     counters.forEach {
-                        it?.updateDatabase()
+                        it?.updateDatabase(this@MainActivity)
                     }
                     if (Utils.importFromJSON(this@MainActivity, uri, addCounters)) {
                         runOnUiThread {
@@ -153,11 +153,9 @@ class MainActivity : ComponentActivity() {
         val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
 
         setKeepScreenOnFlag()
-        counter = mutableStateOf(
-            Counter(
-                0, 0, "Counter #", { deleteCounter(it) }, this@MainActivity
-            )
-        )
+        counter = mutableStateOf(Counter(
+            0, 0, "Counter #"
+        ) { deleteCounter(it) })
 
         val counterIDKey = intPreferencesKey("counter_id")
         val savedCounterID: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
@@ -178,9 +176,7 @@ class MainActivity : ComponentActivity() {
                         counterEntity.id,
                         counterEntity.value,
                         counterEntity.name,
-                        { deleteCounter(it) },
-                        this@MainActivity
-                    )
+                    ) { deleteCounter(it) }
                 }
             if (counters.isEmpty()) {
                 val counter = CounterEntity(value = 0)
@@ -191,9 +187,7 @@ class MainActivity : ComponentActivity() {
                             counterEntity.id,
                             counterEntity.value,
                             counterEntity.name,
-                            { deleteCounter(it) },
-                            this@MainActivity
-                        )
+                        ) { deleteCounter(it) }
                     }
             }
             this@MainActivity.counters.clear()
@@ -266,15 +260,11 @@ class MainActivity : ComponentActivity() {
         val counter = CounterEntity(name = name, value = value)
         database.insert(counter)
         val counterEntity = database.getLast()!!
-        counters.add(
-            Counter(
-                counterEntity.id,
-                counterEntity.value,
-                counterEntity.name,
-                { deleteCounter(it) },
-                this@MainActivity
-            )
-        )
+        counters.add(Counter(
+            counterEntity.id,
+            counterEntity.value,
+            counterEntity.name,
+        ) { deleteCounter(it) })
         counterID = counterEntity.id
         lastCounterID = counterID
         this@MainActivity.counter.value = counters.last()!!
@@ -292,6 +282,10 @@ class MainActivity : ComponentActivity() {
             this@MainActivity.counter.value = counters[index]!!
             counterID = this@MainActivity.counter.value.getCounterId()
         }
+
+        val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
+        database.delete(counter.getCounterEntity())
+
     }
 
     @Composable
@@ -397,8 +391,7 @@ class MainActivity : ComponentActivity() {
         }
 
         if (openEditDialog) {
-            CounterUIHelper.EditAlertDialog(
-                "Counter #${lastCounterID + 1}",
+            CounterUIHelper.EditAlertDialog("Counter #${lastCounterID + 1}",
                 0,
                 onDismissRequest = { openEditDialog = false }) { name, value ->
                 openEditDialog = false
@@ -428,7 +421,7 @@ class MainActivity : ComponentActivity() {
             saveCounterID()
             settingsInstance.saveSettings(this@MainActivity)
             counters.forEach {
-                it?.updateDatabase()
+                it?.updateDatabase(this@MainActivity)
             }
         }
 
@@ -446,7 +439,7 @@ class MainActivity : ComponentActivity() {
     private fun exportToJson() {
         scopeIO.launch {
             counters.forEach {
-                it?.updateDatabase()
+                it?.updateDatabase(this@MainActivity)
             }
             Log.d(TAG_DEBUG, "exportToJson")
 
@@ -464,7 +457,6 @@ class MainActivity : ComponentActivity() {
 
     private fun deleteAll() {
         counters.filterNotNull().forEach {
-            it.delete()
             scopeIO.launch {
                 deleteCounter(it)
             }

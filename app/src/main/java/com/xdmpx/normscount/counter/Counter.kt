@@ -49,7 +49,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.protobuf.value
 import com.xdmpx.normscount.R
 import com.xdmpx.normscount.counter.CounterUIHelper.ConfirmationAlertDialog
 import com.xdmpx.normscount.database.CounterDatabase
@@ -64,12 +63,10 @@ class Counter(
     value: Long,
     name: String,
     private val onDelete: (Counter) -> Unit,
-    context: Context
 ) {
     private val TAG_DEBUG = "Counter"
     private var count: MutableState<Long> = mutableLongStateOf(value)
     private var name: MutableState<String> = mutableStateOf(name)
-    private val database = CounterDatabase.getInstance(context).counterDatabase
     private val settingsInstance = Settings.getInstance()
     private val scope = CoroutineScope(Dispatchers.IO)
 
@@ -304,7 +301,6 @@ class Counter(
                     expanded = false
                     if (!settings.confirmationDialogDelete) {
                         this@Counter.onDelete(this@Counter)
-                        delete()
                     } else openDeleteAlertDialog = true
                 })
             DropdownMenuItem(text = { Text(text = stringResource(R.string.settings_screen)) },
@@ -330,7 +326,6 @@ class Counter(
             DeleteAlertDialog(onDismissRequest = { openDeleteAlertDialog = false }) {
                 openDeleteAlertDialog = false
                 this@Counter.onDelete(this@Counter)
-                delete()
             }
         }
 
@@ -387,22 +382,14 @@ class Counter(
 
     fun getCounterId() = id
 
-    private fun getCounterEntity() = CounterEntity(id, name.value, count.value)
+    fun getCounterEntity() = CounterEntity(id, name.value, count.value)
 
-    suspend fun updateDatabase() {
+    suspend fun updateDatabase(context: Context) {
+        val database = CounterDatabase.getInstance(context).counterDatabase
         val counterEntity = getCounterEntity()
         Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> ${count.value}")
         Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> $counterEntity")
         database.update(counterEntity)
-    }
-
-    fun delete() {
-        scope.launch {
-            updateDatabase()
-            val counterEntity = getCounterEntity()
-            Log.d(TAG_DEBUG, "${this.hashCode()}::delete -> $counterEntity")
-            database.delete(counterEntity)
-        }
     }
 
 }
