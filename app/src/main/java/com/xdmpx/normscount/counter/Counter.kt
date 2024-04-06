@@ -68,7 +68,6 @@ class Counter(
     private var count: MutableState<Long> = mutableLongStateOf(value)
     private var name: MutableState<String> = mutableStateOf(name)
     private val settingsInstance = Settings.getInstance()
-    private val scope = CoroutineScope(Dispatchers.IO)
 
     @Composable
     fun CounterUI(modifier: Modifier = Modifier) {
@@ -374,15 +373,9 @@ class Counter(
         count.value--
     }
 
-    fun getCount() = count.value
-
-    fun setCount(count: Long) {
-        this.count.value = count
-    }
-
     fun getCounterId() = id
 
-    fun getCounterEntity() = CounterEntity(id, name.value, count.value)
+    private fun getCounterEntity() = CounterEntity(id, name.value, count.value)
 
     suspend fun updateDatabase(context: Context) {
         val database = CounterDatabase.getInstance(context).counterDatabase
