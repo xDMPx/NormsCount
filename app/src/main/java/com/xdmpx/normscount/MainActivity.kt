@@ -284,7 +284,7 @@ class MainActivity : ComponentActivity() {
         }
 
         val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
-        database.delete(counter.getCounterEntity())
+        database.deleteByID(counter.getCounterId())
 
     }
 

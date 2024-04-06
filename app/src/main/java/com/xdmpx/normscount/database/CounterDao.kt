@@ -26,6 +26,9 @@ interface CounterDao {
     @Delete
     suspend fun delete(counterEntity: CounterEntity)
 
+    @Query("DELETE FROM Counter WHERE id = :id")
+    suspend fun deleteByID(id: Int)
+
     @Update
     suspend fun update(counterEntity: CounterEntity)
 }
