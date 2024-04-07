@@ -314,51 +314,61 @@ class Counter(
                 })
         }
 
-        if (openResetAlertDialog) {
-            ResetAlertDialog(onDismissRequest = { openResetAlertDialog = false }) {
-                openResetAlertDialog = false
-                reset()
-            }
+        ResetAlertDialog(
+            openResetAlertDialog,
+            onDismissRequest = { openResetAlertDialog = false }) {
+            openResetAlertDialog = false
+            reset()
         }
 
-        if (openDeleteAlertDialog) {
-            DeleteAlertDialog(onDismissRequest = { openDeleteAlertDialog = false }) {
-                openDeleteAlertDialog = false
-                this@Counter.onDelete(this@Counter)
-            }
+        DeleteAlertDialog(
+            openDeleteAlertDialog,
+            onDismissRequest = { openDeleteAlertDialog = false }) {
+            openDeleteAlertDialog = false
+            this@Counter.onDelete(this@Counter)
         }
 
-        if (openEditDialog) {
-            EditAlertDialog(onDismissRequest = { openEditDialog = false }) { name, value ->
-                openEditDialog = false
-                this@Counter.name.value = name
-                this@Counter.count.value = value
-            }
+        EditAlertDialog(
+            openEditDialog,
+            onDismissRequest = { openEditDialog = false }) { name, value ->
+            openEditDialog = false
+            this@Counter.name.value = name
+            this@Counter.count.value = value
         }
 
     }
 
     @Composable
-    private fun ResetAlertDialog(onDismissRequest: () -> Unit, onConfirmation: () -> Unit) {
-        ConfirmationAlertDialog(
-            stringResource(R.string.confirmation_reset), onDismissRequest, onConfirmation
-        )
+    private fun ResetAlertDialog(
+        opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: () -> Unit
+    ) {
+        if (opened) {
+            ConfirmationAlertDialog(
+                stringResource(R.string.confirmation_reset), onDismissRequest, onConfirmation
+            )
+        }
     }
 
     @Composable
-    private fun DeleteAlertDialog(onDismissRequest: () -> Unit, onConfirmation: () -> Unit) {
-        ConfirmationAlertDialog(
-            stringResource(R.string.confirmation_delete), onDismissRequest, onConfirmation
-        )
+    private fun DeleteAlertDialog(
+        opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: () -> Unit
+    ) {
+        if (opened) {
+            ConfirmationAlertDialog(
+                stringResource(R.string.confirmation_delete), onDismissRequest, onConfirmation
+            )
+        }
     }
 
     @Composable
     private fun EditAlertDialog(
-        onDismissRequest: () -> Unit, onConfirmation: (String, Long) -> Unit
+        opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: (String, Long) -> Unit
     ) {
-        CounterUIHelper.EditAlertDialog(
-            counterNameText(), count.value, onDismissRequest, onConfirmation
-        )
+        if (opened) {
+            CounterUIHelper.EditAlertDialog(
+                counterNameText(), count.value, onDismissRequest, onConfirmation
+            )
+        }
     }
 
     private fun reset() {
