@@ -2,6 +2,7 @@ package com.xdmpx.normscount
 
 import android.content.Context
 import android.content.res.Configuration
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -88,58 +89,16 @@ class MainActivity : ComponentActivity() {
     private val scopeIO = CoroutineScope(Dispatchers.IO)
     private val createDocument =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
-            if (uri != null) {
-                scopeIO.launch {
-                    if (Utils.exportToJSON(this@MainActivity, uri)) {
-                        runOnUiThread {
-                            ShortToast(
-                                this@MainActivity, resources.getString(R.string.export_successful)
-                            )
-                        }
-                    } else {
-                        runOnUiThread {
-                            ShortToast(
-                                this@MainActivity, resources.getString(R.string.export_failed)
-                            )
-                        }
-                    }
-                }
-            }
+            exportToJSONCallback(uri)
         }
     private val openDocument =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-            if (uri != null) {
-                val addCounters: (Array<Utils.CounterData>) -> Unit = {
-                    scopeIO.launch {
-                        it.forEach {
-                            addCounter(it.name, it.value)
-                        }
-                    }
-                }
-                scopeIO.launch {
-                    counters.forEach {
-                        it?.updateDatabase(this@MainActivity)
-                    }
-                    if (Utils.importFromJSON(this@MainActivity, uri, addCounters)) {
-                        runOnUiThread {
-                            ShortToast(
-                                this@MainActivity, resources.getString(R.string.import_successful)
-                            )
-                        }
-                    } else {
-                        runOnUiThread {
-                            ShortToast(
-                                this@MainActivity, resources.getString(R.string.import_failed)
-                            )
-                        }
-                    }
-                }
-            }
+            importFromJSONCallback(uri)
         }
 
     init {
-        settingsInstance.registerOnExportClick { this@MainActivity.exportToJson() }
-        settingsInstance.registerOnImportClick { this@MainActivity.importFromJson() }
+        settingsInstance.registerOnExportClick { this@MainActivity.exportToJSON() }
+        settingsInstance.registerOnImportClick { this@MainActivity.importFromJSON() }
         settingsInstance.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
         settingsInstance.registerOnThemeUpdate { usePureDark, useDynamicColor, theme ->
             this@MainActivity.usePureDark.value = usePureDark
@@ -391,7 +350,8 @@ class MainActivity : ComponentActivity() {
         }
 
         if (openEditDialog) {
-            CounterUIHelper.EditAlertDialog("Counter #${lastCounterID + 1}",
+            CounterUIHelper.EditAlertDialog(
+                "Counter #${lastCounterID + 1}",
                 0,
                 onDismissRequest = { openEditDialog = false }) { name, value ->
                 openEditDialog = false
@@ -436,7 +396,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun exportToJson() {
+    private fun exportToJSON() {
         scopeIO.launch {
             counters.forEach {
                 it?.updateDatabase(this@MainActivity)
@@ -451,8 +411,58 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun importFromJson() {
+    private fun exportToJSONCallback(uri: Uri?) {
+        if (uri == null) return
+
+        scopeIO.launch {
+            if (Utils.exportToJSON(this@MainActivity, uri)) {
+                runOnUiThread {
+                    ShortToast(
+                        this@MainActivity, resources.getString(R.string.export_successful)
+                    )
+                }
+            } else {
+                runOnUiThread {
+                    ShortToast(
+                        this@MainActivity, resources.getString(R.string.export_failed)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun importFromJSON() {
         openDocument.launch(arrayOf("application/json"))
+    }
+
+    private fun importFromJSONCallback(uri: Uri?) {
+        if (uri == null) return
+
+        val addCounters: (Array<Utils.CounterData>) -> Unit = {
+            scopeIO.launch {
+                it.forEach {
+                    addCounter(it.name, it.value)
+                }
+            }
+        }
+        scopeIO.launch {
+            counters.forEach {
+                it?.updateDatabase(this@MainActivity)
+            }
+            if (Utils.importFromJSON(this@MainActivity, uri, addCounters)) {
+                runOnUiThread {
+                    ShortToast(
+                        this@MainActivity, resources.getString(R.string.import_successful)
+                    )
+                }
+            } else {
+                runOnUiThread {
+                    ShortToast(
+                        this@MainActivity, resources.getString(R.string.import_failed)
+                    )
+                }
+            }
+        }
     }
 
     private fun deleteAll() {
