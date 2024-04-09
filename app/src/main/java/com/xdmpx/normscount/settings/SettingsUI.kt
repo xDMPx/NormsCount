@@ -126,7 +126,6 @@ object SettingsUI {
                             settingsViewModel.toggleUseDynamicColor()
                         }
 
-
                         HorizontalDivider(Modifier.padding(settingPadding))
 
                         Setting(
@@ -144,8 +143,7 @@ object SettingsUI {
 
                         HorizontalDivider(Modifier.padding(settingPadding))
 
-                        SettingButton(
-                            stringResource(R.string.settings_export_json),
+                        SettingButton(stringResource(R.string.settings_export_json),
                             icon = { modifier ->
                                 Icon(
                                     painter = painterResource(id = R.drawable.rounded_file_save_24),
@@ -153,8 +151,7 @@ object SettingsUI {
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.onExportClick() }
-                        SettingButton(
-                            stringResource(R.string.settings_import_json),
+                        SettingButton(stringResource(R.string.settings_import_json),
                             icon = { modifier ->
                                 Icon(
                                     painter = painterResource(id = R.drawable.rounded_file_open_24),
@@ -162,7 +159,8 @@ object SettingsUI {
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.onImportClick() }
-                        SettingButton(stringResource(R.string.settings_delete_all),
+                        SettingButton(
+                            stringResource(R.string.settings_delete_all),
                             icon = { modifier ->
                                 Icon(
                                     painter = painterResource(id = R.drawable.rounded_delete_forever_24),
@@ -175,17 +173,20 @@ object SettingsUI {
             }
         }
 
-        if (showDeleteAllConfirmationDialog) {
-            DeleteAllAlertDialog(onDismissRequest = { showDeleteAllConfirmationDialog = false }) {
-                showDeleteAllConfirmationDialog = false
-                settingsViewModel.onDeleteAllClick()
-            }
+        DeleteAllAlertDialog(showDeleteAllConfirmationDialog,
+            onDismissRequest = { showDeleteAllConfirmationDialog = false }) {
+            showDeleteAllConfirmationDialog = false
+            settingsViewModel.onDeleteAllClick()
         }
 
     }
 
     @Composable
-    private fun DeleteAllAlertDialog(onDismissRequest: () -> Unit, onConfirmation: () -> Unit) {
+    private fun DeleteAllAlertDialog(
+        opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: () -> Unit
+    ) {
+        if (!opened) return
+
         CounterUIHelper.ConfirmationAlertDialog(
             stringResource(R.string.confirmation_delete_all), onDismissRequest, onConfirmation
         )
@@ -282,7 +283,7 @@ object SettingsUI {
         theme: ThemeType,
         onChange: (ThemeType) -> Unit,
     ) {
-        var openDialog by remember { mutableStateOf(false) }
+        var openThemeSelectorDialog by remember { mutableStateOf(false) }
 
         var themeText = ""
 
@@ -327,7 +328,7 @@ object SettingsUI {
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    openDialog = !openDialog
+                    openThemeSelectorDialog = !openThemeSelectorDialog
                 },
         ) {
             icon()
@@ -346,18 +347,23 @@ object SettingsUI {
             }
         }
 
-        if (openDialog) {
-            ThemeSelectorDialog(theme, onDismissRequest = { openDialog = !openDialog }) {
-                onChange(it)
-                openDialog = !openDialog
-            }
+        ThemeSelectorDialog(openThemeSelectorDialog,
+            theme,
+            onDismissRequest = { openThemeSelectorDialog = !openThemeSelectorDialog }) {
+            onChange(it)
+            openThemeSelectorDialog = !openThemeSelectorDialog
         }
     }
 
     @Composable
     fun ThemeSelectorDialog(
-        theme: ThemeType, onDismissRequest: () -> Unit, onSelect: (ThemeType) -> Unit
+        opened: Boolean,
+        theme: ThemeType,
+        onDismissRequest: () -> Unit,
+        onSelect: (ThemeType) -> Unit
     ) {
+        if (!opened) return
+
         Dialog(onDismissRequest = { onDismissRequest() }) {
             Card(
                 modifier = Modifier
