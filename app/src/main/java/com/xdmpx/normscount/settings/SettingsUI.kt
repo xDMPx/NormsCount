@@ -221,7 +221,6 @@ object SettingsUI {
         icon: @Composable (modifier: Modifier) -> Unit = {},
         onCheckedChange: () -> Unit,
     ) {
-
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -285,44 +284,6 @@ object SettingsUI {
     ) {
         var openThemeSelectorDialog by remember { mutableStateOf(false) }
 
-        var themeText = ""
-
-        val modifier = Modifier.padding(settingPadding)
-        val icon: @Composable () -> Unit = when (theme) {
-            ThemeType.SYSTEM, ThemeType.UNRECOGNIZED -> {
-                {
-                    Icon(
-                        painter = painterResource(id = R.drawable.rounded_brightness_auto_24),
-                        contentDescription = null,
-                        modifier = modifier
-                    )
-                    themeText = stringResource(R.string.settings_theme_system)
-                }
-            }
-
-            ThemeType.DARK -> {
-                {
-                    Icon(
-                        painter = painterResource(id = R.drawable.rounded_dark_mode_24),
-                        contentDescription = null,
-                        modifier = modifier
-                    )
-                    themeText = stringResource(R.string.settings_theme_dark)
-                }
-            }
-
-            ThemeType.LIGHT -> {
-                {
-                    Icon(
-                        painter = painterResource(id = R.drawable.rounded_light_mode_24),
-                        contentDescription = null,
-                        modifier = modifier
-                    )
-                    themeText = stringResource(R.string.settings_theme_light)
-                }
-            }
-        }
-
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -331,7 +292,7 @@ object SettingsUI {
                     openThemeSelectorDialog = !openThemeSelectorDialog
                 },
         ) {
-            icon()
+            ThemeIcon(theme)
             Box(
                 Modifier
                     .fillMaxWidth()
@@ -339,11 +300,7 @@ object SettingsUI {
                     .padding(settingPadding)
             ) {
                 Text(text = text)
-                Text(
-                    text = themeText,
-                    textAlign = TextAlign.Right,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                ThemeText(theme)
             }
         }
 
@@ -353,6 +310,34 @@ object SettingsUI {
             onChange(it)
             openThemeSelectorDialog = !openThemeSelectorDialog
         }
+    }
+
+    @Composable
+    private fun ThemeIcon(theme: ThemeType) {
+        val modifier = Modifier.padding(settingPadding)
+
+        val painter = when (theme) {
+            ThemeType.SYSTEM, ThemeType.UNRECOGNIZED -> painterResource(id = R.drawable.rounded_brightness_auto_24)
+            ThemeType.DARK -> painterResource(id = R.drawable.rounded_dark_mode_24)
+            ThemeType.LIGHT -> painterResource(id = R.drawable.rounded_light_mode_24)
+        }
+
+        Icon(
+            painter = painter, contentDescription = null, modifier = modifier
+        )
+    }
+
+    @Composable
+    private fun ThemeText(theme: ThemeType) {
+        val themeText = when (theme) {
+            ThemeType.SYSTEM, ThemeType.UNRECOGNIZED -> stringResource(R.string.settings_theme_system)
+            ThemeType.DARK -> stringResource(R.string.settings_theme_dark)
+            ThemeType.LIGHT -> stringResource(R.string.settings_theme_light)
+        }
+
+        Text(
+            text = themeText, textAlign = TextAlign.Right, modifier = Modifier.fillMaxWidth()
+        )
     }
 
     @Composable
