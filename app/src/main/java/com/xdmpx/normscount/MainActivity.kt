@@ -349,17 +349,28 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        if (openEditDialog) {
-            CounterUIHelper.EditAlertDialog(
-                "Counter #${lastCounterID + 1}",
-                0,
-                onDismissRequest = { openEditDialog = false }) { name, value ->
-                openEditDialog = false
-                scopeIO.launch {
-                    addCounter(name, value)
-                }
+        EditAlertDialog(
+            opened = openEditDialog,
+            onDismissRequest = { openEditDialog = false }) { name, value ->
+            openEditDialog = false
+            scopeIO.launch {
+                addCounter(name, value)
             }
         }
+    }
+
+    @Composable
+    private fun EditAlertDialog(
+        opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: (String, Long) -> Unit
+    ) {
+        if (!opened) return
+
+        CounterUIHelper.EditAlertDialog(
+            "Counter #${lastCounterID + 1}",
+            0,
+            onDismissRequest = onDismissRequest,
+            onConfirmation = onConfirmation
+        )
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {

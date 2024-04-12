@@ -342,33 +342,33 @@ class Counter(
     private fun ResetAlertDialog(
         opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: () -> Unit
     ) {
-        if (opened) {
-            ConfirmationAlertDialog(
-                stringResource(R.string.confirmation_reset), onDismissRequest, onConfirmation
-            )
-        }
+        if (!opened) return
+
+        ConfirmationAlertDialog(
+            stringResource(R.string.confirmation_reset), onDismissRequest, onConfirmation
+        )
     }
 
     @Composable
     private fun DeleteAlertDialog(
         opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: () -> Unit
     ) {
-        if (opened) {
-            ConfirmationAlertDialog(
-                stringResource(R.string.confirmation_delete), onDismissRequest, onConfirmation
-            )
-        }
+        if (!opened) return
+
+        ConfirmationAlertDialog(
+            stringResource(R.string.confirmation_delete), onDismissRequest, onConfirmation
+        )
     }
 
     @Composable
     private fun EditAlertDialog(
         opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: (String, Long) -> Unit
     ) {
-        if (opened) {
-            CounterUIHelper.EditAlertDialog(
-                counterNameText(), count.value, onDismissRequest, onConfirmation
-            )
-        }
+        if (!opened) return
+
+        CounterUIHelper.EditAlertDialog(
+            counterNameText(), count.value, onDismissRequest, onConfirmation
+        )
     }
 
     private fun reset() {
