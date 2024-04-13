@@ -213,7 +213,6 @@ class Counter(
                     .fillMaxWidth()
             ) {
                 item {
-                    name.value = counterNameText()
                     Text(name.value)
                 }
             }
@@ -230,14 +229,6 @@ class Counter(
         }
     }
 
-    private fun counterNameText(): String {
-        return if (name.value == "Counter #") {
-            "Counter #${id}"
-        } else {
-            name.value
-        }
-    }
-
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CounterTopAppBar(
@@ -249,7 +240,6 @@ class Counter(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ), title = {
-            name.value = counterNameText()
             Text(
                 name.value, maxLines = 1, overflow = TextOverflow.Ellipsis
             )
@@ -367,7 +357,7 @@ class Counter(
         if (!opened) return
 
         CounterUIHelper.EditAlertDialog(
-            counterNameText(), count.value, onDismissRequest, onConfirmation
+            name.value, count.value, onDismissRequest, onConfirmation
         )
     }
 

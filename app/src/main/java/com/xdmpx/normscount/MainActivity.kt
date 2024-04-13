@@ -138,8 +138,7 @@ class MainActivity : ComponentActivity() {
                     ) { deleteCounter(it) }
                 }
             if (counters.isEmpty()) {
-                val counter = CounterEntity(value = 0)
-                CounterDatabase.getInstance(this@MainActivity).counterDatabase.insert(counter)
+                addCounter()
                 counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
                     .map { counterEntity ->
                         Counter(
@@ -212,10 +211,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun addCounter(name: String = "Counter #", value: Long = 0) {
+    private suspend fun addCounter(name: String? = null, value: Long = 0) {
         val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
-
         val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
+
+        val lastID = database.getLastID() ?: 0
+        val name = name ?: "Counter #${lastID+ 1}"
         val counter = CounterEntity(name = name, value = value)
         database.insert(counter)
         val counterEntity = database.getLast()!!
