@@ -56,6 +56,7 @@ import androidx.navigation.compose.rememberNavController
 import com.xdmpx.normscount.Utils.ShortToast
 import com.xdmpx.normscount.about.About
 import com.xdmpx.normscount.counter.Counter
+import com.xdmpx.normscount.counter.CounterUI
 import com.xdmpx.normscount.counter.CounterUIHelper
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
@@ -296,13 +297,13 @@ class MainActivity : ComponentActivity() {
 
         Scaffold(
             topBar = {
-                counter.value.CounterTopAppBar(
-                    onNavigationIconClick, onNavigateToSettings, onNavigateToAbout
+                CounterUI.CounterTopAppBar(counter.value,
+                        onNavigationIconClick, onNavigateToSettings, onNavigateToAbout
                 )
             },
         ) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
-                counter.value.CounterUI()
+                CounterUI.CounterUI(counter.value)
             }
         }
     }
@@ -339,7 +340,7 @@ class MainActivity : ComponentActivity() {
             LazyColumn {
                 items(counters) { counter ->
                     if (counter == null) return@items
-                    NavigationDrawerItem(label = { counter.CounterName() },
+                    NavigationDrawerItem(label = { CounterUI.CounterName(counter) },
                         selected = false,
                         onClick = {
                             this@MainActivity.counter.value = counter
@@ -378,8 +379,8 @@ class MainActivity : ComponentActivity() {
         val settings = settingsInstance.settingsState.value
         if (settings.changeCounterValueVolumeButtons && overrideOnKeyDown) {
             when (keyCode) {
-                KeyEvent.KEYCODE_VOLUME_DOWN -> counter.value.decrement()
-                KeyEvent.KEYCODE_VOLUME_UP -> counter.value.increment()
+                KeyEvent.KEYCODE_VOLUME_DOWN -> counter.value.decrementCounter()
+                KeyEvent.KEYCODE_VOLUME_UP -> counter.value.incrementCounter()
                 else -> return super.onKeyDown(keyCode, event)
             }
             return true

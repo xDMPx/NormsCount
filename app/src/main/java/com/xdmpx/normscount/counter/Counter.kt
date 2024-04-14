@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.res.Configuration
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -33,10 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,29 +46,80 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
 import com.xdmpx.normscount.R
 import com.xdmpx.normscount.counter.CounterUIHelper.ConfirmationAlertDialog
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.settings.Settings
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+data class CounterState(
+    val count: Long = 0, val name: String = ""
+)
 
 class Counter(
     private val id: Int,
     value: Long,
     name: String,
-    private val onDelete: (Counter) -> Unit,
-) {
-    private val TAG_DEBUG = "Counter"
-    private var count: MutableState<Long> = mutableLongStateOf(value)
-    private var name: MutableState<String> = mutableStateOf(name)
+    val onDelete: (Counter) -> Unit,
+) : ViewModel() {
+    private val _counterState = MutableStateFlow(CounterState(value, name))
+    val counterState: StateFlow<CounterState> = _counterState.asStateFlow()
+
+
+    fun resetCounter() {
+        _counterState.value.let {
+            _counterState.value = it.copy(count = 0)
+        }
+    }
+
+    fun incrementCounter() {
+        _counterState.value.let {
+            _counterState.value = it.copy(count = it.count + 1)
+        }
+    }
+
+    fun decrementCounter() {
+        _counterState.value.let {
+            _counterState.value = it.copy(count = it.count - 1)
+        }
+    }
+
+    fun setCounterValue(value: Long) {
+        _counterState.value.let {
+            _counterState.value = it.copy(count = value)
+        }
+    }
+
+    fun setCounterName(name: String) {
+        _counterState.value.let {
+            _counterState.value = it.copy(name = name)
+        }
+    }
+
+    fun getCounterId() = id
+
+    private fun getCounterEntity() =
+        CounterEntity(id, _counterState.value.name, _counterState.value.count)
+
+    suspend fun updateDatabase(context: Context) {
+        val database = CounterDatabase.getInstance(context).counterDatabase
+        val counterEntity = getCounterEntity()
+        database.update(counterEntity)
+    }
+
+}
+
+object CounterUI {
     private val settingsInstance = Settings.getInstance()
 
     @Composable
-    fun CounterUI(modifier: Modifier = Modifier) {
+    fun CounterUI(counterViewModel: Counter, modifier: Modifier = Modifier) {
         val settings by settingsInstance.settingsState.collectAsState()
+
         val context = LocalContext.current
         val vibrator = context.getSystemService(Vibrator::class.java)
         val onClickFeedback = {
@@ -85,7 +133,7 @@ class Counter(
         val textModifier = if (settings.tapCounterValueToIncrement) {
             val interactionSource = remember { MutableInteractionSource() }
             Modifier.clickable(interactionSource, null) {
-                count.value++
+                counterViewModel.incrementCounter()
                 onClickFeedback()
             }
         } else {
@@ -94,15 +142,22 @@ class Counter(
 
         val landscapeOrientation =
             LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
-        if (!landscapeOrientation) CounterUIPortrait(modifier, textModifier, onClickFeedback)
-        else CounterUILandscape(modifier, textModifier, onClickFeedback)
+        if (!landscapeOrientation) CounterUIPortrait(
+            counterViewModel, modifier, textModifier, onClickFeedback
+        )
+        else CounterUILandscape(counterViewModel, modifier, textModifier, onClickFeedback)
 
     }
 
     @Composable
     private fun CounterUIPortrait(
-        modifier: Modifier = Modifier, textModifier: Modifier, onClickFeedback: () -> Unit
+        counterViewModel: Counter,
+        modifier: Modifier = Modifier,
+        textModifier: Modifier,
+        onClickFeedback: () -> Unit
     ) {
+        val counterState by counterViewModel.counterState.collectAsState()
+
         Column(modifier = modifier) {
             LazyRow(
                 horizontalArrangement = Arrangement.Center,
@@ -113,7 +168,7 @@ class Counter(
             ) {
                 item {
                     Text(
-                        text = "${count.value}",
+                        text = "${counterState.count}",
                         fontSize = 150.sp,
                         modifier = textModifier.padding(10.dp)
                     )
@@ -130,7 +185,7 @@ class Counter(
             ) {
                 Button(
                     onClick = {
-                        count.value++
+                        counterViewModel.incrementCounter()
                         onClickFeedback()
                     }, modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -140,7 +195,7 @@ class Counter(
                 }
                 Button(
                     onClick = {
-                        count.value--
+                        counterViewModel.decrementCounter()
                         onClickFeedback()
                     }, modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
@@ -153,8 +208,13 @@ class Counter(
 
     @Composable
     private fun CounterUILandscape(
-        modifier: Modifier = Modifier, textModifier: Modifier, onClickFeedback: () -> Unit
+        counterViewModel: Counter,
+        modifier: Modifier = Modifier,
+        textModifier: Modifier,
+        onClickFeedback: () -> Unit
     ) {
+        val counterState by counterViewModel.counterState.collectAsState()
+
         Row(modifier = modifier) {
             LazyRow(
                 horizontalArrangement = Arrangement.Center,
@@ -165,7 +225,7 @@ class Counter(
             ) {
                 item {
                     Text(
-                        text = "${count.value}",
+                        text = "${counterState.count}",
                         fontSize = 150.sp,
                         modifier = textModifier.padding(10.dp)
                     )
@@ -182,7 +242,7 @@ class Counter(
             ) {
                 Button(
                     onClick = {
-                        count.value++
+                        counterViewModel.incrementCounter()
                         onClickFeedback()
                     }, modifier = Modifier
                         .fillMaxWidth(0.9f)
@@ -192,7 +252,7 @@ class Counter(
                 }
                 Button(
                     onClick = {
-                        count.value--
+                        counterViewModel.decrementCounter()
                         onClickFeedback()
                     }, modifier = Modifier.fillMaxWidth(0.9f)
                 ) {
@@ -204,8 +264,10 @@ class Counter(
     }
 
     @Composable
-    fun CounterName() {
+    fun CounterName(counterViewModel: Counter) {
+        val counterState by counterViewModel.counterState.collectAsState()
         val nameWeight = 0.725f
+
         Row() {
             LazyRow(
                 modifier = Modifier
@@ -213,7 +275,7 @@ class Counter(
                     .fillMaxWidth()
             ) {
                 item {
-                    Text(name.value)
+                    Text(counterState.name)
                 }
             }
             LazyRow(
@@ -223,7 +285,7 @@ class Counter(
                 horizontalArrangement = Arrangement.End
             ) {
                 item {
-                    Text(text = "${count.value}", textAlign = TextAlign.End)
+                    Text(text = "${counterState.count}", textAlign = TextAlign.End)
                 }
             }
         }
@@ -232,28 +294,34 @@ class Counter(
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CounterTopAppBar(
+        counterViewModel: Counter,
         onNavigationIconClick: () -> Unit,
         onNavigateToSettings: () -> Unit,
         onNavigateToAbout: () -> Unit
     ) {
+        val counterState by counterViewModel.counterState.collectAsState()
+
         TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ), title = {
             Text(
-                name.value, maxLines = 1, overflow = TextOverflow.Ellipsis
+                counterState.name, maxLines = 1, overflow = TextOverflow.Ellipsis
             )
         }, navigationIcon = {
             IconButton(onClick = onNavigationIconClick) {
                 Icon(imageVector = Icons.Filled.Menu, contentDescription = null)
             }
         }, actions = {
-            TopAppBarMenu(onNavigateToSettings, onNavigateToAbout)
+            TopAppBarMenu(counterViewModel, onNavigateToSettings, onNavigateToAbout)
         })
     }
 
     @Composable
-    fun TopAppBarMenu(onNavigateToSettings: () -> Unit, onNavigateToAbout: () -> Unit) {
+    fun TopAppBarMenu(
+        counterViewModel: Counter, onNavigateToSettings: () -> Unit, onNavigateToAbout: () -> Unit
+    ) {
+        val counterState by counterViewModel.counterState.collectAsState()
         val settings by settingsInstance.settingsState.collectAsState()
         var expanded by remember { mutableStateOf(false) }
         var openResetAlertDialog by remember { mutableStateOf(false) }
@@ -261,7 +329,7 @@ class Counter(
         var openEditDialog by remember { mutableStateOf(false) }
 
         IconButton(onClick = {
-            if (!settings.confirmationDialogReset) reset()
+            if (!settings.confirmationDialogReset) counterViewModel.resetCounter()
             else openResetAlertDialog = true
         }) {
             Icon(
@@ -289,7 +357,7 @@ class Counter(
                 onClick = {
                     expanded = false
                     if (!settings.confirmationDialogDelete) {
-                        this@Counter.onDelete(this@Counter)
+                        counterViewModel.onDelete(counterViewModel)
                     } else openDeleteAlertDialog = true
                 })
             DropdownMenuItem(text = { Text(text = stringResource(R.string.settings_screen)) },
@@ -304,26 +372,25 @@ class Counter(
                 })
         }
 
-        ResetAlertDialog(
-            openResetAlertDialog,
+        ResetAlertDialog(openResetAlertDialog,
             onDismissRequest = { openResetAlertDialog = false }) {
             openResetAlertDialog = false
-            reset()
+            counterViewModel.resetCounter()
         }
 
-        DeleteAlertDialog(
-            openDeleteAlertDialog,
+        DeleteAlertDialog(openDeleteAlertDialog,
             onDismissRequest = { openDeleteAlertDialog = false }) {
             openDeleteAlertDialog = false
-            this@Counter.onDelete(this@Counter)
+            counterViewModel.onDelete(counterViewModel)
         }
 
-        EditAlertDialog(
-            openEditDialog,
+        EditAlertDialog(openEditDialog,
+            counterState.name,
+            counterState.count,
             onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
-            this@Counter.name.value = name
-            this@Counter.count.value = value
+            counterViewModel.setCounterValue(value)
+            counterViewModel.setCounterName(name)
         }
 
     }
@@ -352,37 +419,17 @@ class Counter(
 
     @Composable
     private fun EditAlertDialog(
-        opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: (String, Long) -> Unit
+        opened: Boolean,
+        counterName: String,
+        counterValue: Long,
+        onDismissRequest: () -> Unit,
+        onConfirmation: (String, Long) -> Unit
     ) {
         if (!opened) return
 
         CounterUIHelper.EditAlertDialog(
-            name.value, count.value, onDismissRequest, onConfirmation
+            counterName, counterValue, onDismissRequest, onConfirmation
         )
-    }
-
-    private fun reset() {
-        count.value = 0
-    }
-
-    fun increment() {
-        count.value++
-    }
-
-    fun decrement() {
-        count.value--
-    }
-
-    fun getCounterId() = id
-
-    private fun getCounterEntity() = CounterEntity(id, name.value, count.value)
-
-    suspend fun updateDatabase(context: Context) {
-        val database = CounterDatabase.getInstance(context).counterDatabase
-        val counterEntity = getCounterEntity()
-        Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> ${count.value}")
-        Log.d(TAG_DEBUG, "${this.hashCode()}::updateDatabase -> $counterEntity")
-        database.update(counterEntity)
     }
 
 }
