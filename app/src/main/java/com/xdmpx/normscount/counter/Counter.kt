@@ -156,53 +156,11 @@ object CounterUI {
         textModifier: Modifier,
         onClickFeedback: () -> Unit
     ) {
-        val counterState by counterViewModel.counterState.collectAsState()
-
         Column(modifier = modifier) {
-            LazyRow(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(0.7f)
-            ) {
-                item {
-                    Text(
-                        text = "${counterState.count}",
-                        fontSize = 150.sp,
-                        modifier = textModifier.padding(10.dp)
-                    )
-                }
-            }
-            Column(
-                verticalArrangement = Arrangement.spacedBy(
-                    space = 10.dp, alignment = Alignment.Bottom
-                ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(0.3f)
-            ) {
-                Button(
-                    onClick = {
-                        counterViewModel.incrementCounter()
-                        onClickFeedback()
-                    }, modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .height(height = 110.dp)
-                ) {
-                    Icon(Icons.Rounded.Add, contentDescription = null)
-                }
-                Button(
-                    onClick = {
-                        counterViewModel.decrementCounter()
-                        onClickFeedback()
-                    }, modifier = Modifier.fillMaxWidth(0.9f)
-                ) {
-                    Text(text = "-", fontSize = 45.sp)
-                }
-                Spacer(modifier = modifier.height(10.dp))
-            }
+            CounterUIValue(counterViewModel, Modifier.weight(0.7f), textModifier)
+            CounterUIButtons(
+                counterViewModel, modifier.weight(0.3f), Alignment.Bottom, onClickFeedback
+            )
         }
     }
 
@@ -213,53 +171,67 @@ object CounterUI {
         textModifier: Modifier,
         onClickFeedback: () -> Unit
     ) {
-        val counterState by counterViewModel.counterState.collectAsState()
-
         Row(modifier = modifier) {
-            LazyRow(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(0.7f)
-            ) {
-                item {
-                    Text(
-                        text = "${counterState.count}",
-                        fontSize = 150.sp,
-                        modifier = textModifier.padding(10.dp)
-                    )
-                }
+            CounterUIValue(counterViewModel, Modifier.weight(0.7f), textModifier)
+            CounterUIButtons(
+                counterViewModel, modifier.weight(0.3f), Alignment.CenterVertically, onClickFeedback
+            )
+        }
+    }
+
+    @Composable
+    private fun CounterUIValue(
+        counterViewModel: Counter,
+        modifier: Modifier = Modifier,
+        textModifier: Modifier,
+    ) {
+        val counterState by counterViewModel.counterState.collectAsState()
+        LazyRow(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = modifier.fillMaxSize()
+        ) {
+            item {
+                Text(
+                    text = "${counterState.count}",
+                    fontSize = 150.sp,
+                    modifier = textModifier.padding(10.dp)
+                )
             }
-            Column(
-                verticalArrangement = Arrangement.spacedBy(
-                    space = 10.dp, alignment = Alignment.CenterVertically
-                ),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .weight(0.3f)
+        }
+    }
+
+    @Composable
+    private fun CounterUIButtons(
+        counterViewModel: Counter,
+        modifier: Modifier = Modifier,
+        verticalArrangementAlignment: Alignment.Vertical,
+        onClickFeedback: () -> Unit
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(
+                space = 10.dp, alignment = verticalArrangementAlignment
+            ), horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.fillMaxSize()
+        ) {
+            Button(
+                onClick = {
+                    counterViewModel.incrementCounter()
+                    onClickFeedback()
+                }, modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .height(height = 110.dp)
             ) {
-                Button(
-                    onClick = {
-                        counterViewModel.incrementCounter()
-                        onClickFeedback()
-                    }, modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .height(height = 110.dp)
-                ) {
-                    Icon(Icons.Rounded.Add, contentDescription = null)
-                }
-                Button(
-                    onClick = {
-                        counterViewModel.decrementCounter()
-                        onClickFeedback()
-                    }, modifier = Modifier.fillMaxWidth(0.9f)
-                ) {
-                    Text(text = "-", fontSize = 45.sp)
-                }
-                Spacer(modifier = modifier.height(10.dp))
+                Icon(Icons.Rounded.Add, contentDescription = null)
             }
+            Button(
+                onClick = {
+                    counterViewModel.decrementCounter()
+                    onClickFeedback()
+                }, modifier = Modifier.fillMaxWidth(0.9f)
+            ) {
+                Text(text = "-", fontSize = 45.sp)
+            }
+            Spacer(modifier = Modifier.height(10.dp))
         }
     }
 
