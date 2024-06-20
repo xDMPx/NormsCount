@@ -34,6 +34,7 @@ object SettingsSerializer : Serializer<SettingsProto> {
             confirmationDialogReset = true
             confirmationDialogDelete = true
             keepScreenOn = true
+            notification = false
             askForInitialValuesWhenNewCounter = true
             usePureDark = false
             useDynamicColor = true

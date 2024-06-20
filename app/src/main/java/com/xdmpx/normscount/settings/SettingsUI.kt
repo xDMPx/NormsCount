@@ -98,6 +98,15 @@ object SettingsUI {
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.toggleKeepScreenOn() }
+                        Setting(stringResource(R.string.settings_notification),
+                            settingsState.notification,
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_circle_notifications_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { settingsViewModel.toggleNotification() }
                         ThemeSelectorSetting(
                             stringResource(R.string.settings_theme), settingsState.theme
                         ) {

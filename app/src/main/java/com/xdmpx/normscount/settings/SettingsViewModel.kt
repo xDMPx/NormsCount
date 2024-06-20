@@ -23,6 +23,7 @@ data class SettingsState(
     val confirmationDialogReset: Boolean = true,
     val confirmationDialogDelete: Boolean = true,
     val keepScreenOn: Boolean = true,
+    val notification: Boolean = false,
     val askForInitialValuesWhenNewCounter: Boolean = true,
     val usePureDark: Boolean = false,
     val useDynamicColor: Boolean = false,
@@ -93,6 +94,12 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
+    fun toggleNotification() {
+        _settingsState.value.let {
+            _settingsState.value = it.copy(notification = !it.notification)
+        }
+    }
+
     fun toggleAskForInitialValuesWhenNewCounter() {
         _settingsState.value.let {
             _settingsState.value =
@@ -143,6 +150,7 @@ class SettingsViewModel : ViewModel() {
                 confirmationDialogReset = settingsData.confirmationDialogReset,
                 confirmationDialogDelete = settingsData.confirmationDialogDelete,
                 keepScreenOn = settingsData.keepScreenOn,
+                notification = settingsData.notification,
                 askForInitialValuesWhenNewCounter = settingsData.askForInitialValuesWhenNewCounter,
                 usePureDark = settingsData.usePureDark,
                 useDynamicColor = settingsData.useDynamicColor,
@@ -165,6 +173,7 @@ class SettingsViewModel : ViewModel() {
                 confirmationDialogDelete =
                     this@SettingsViewModel._settingsState.value.confirmationDialogDelete
                 keepScreenOn = this@SettingsViewModel._settingsState.value.keepScreenOn
+                notification = this@SettingsViewModel._settingsState.value.notification
                 askForInitialValuesWhenNewCounter =
                     this@SettingsViewModel._settingsState.value.askForInitialValuesWhenNewCounter
                 usePureDark = this@SettingsViewModel._settingsState.value.usePureDark

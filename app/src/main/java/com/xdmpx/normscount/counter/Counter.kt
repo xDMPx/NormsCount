@@ -152,34 +152,38 @@ object CounterUI {
         )
         else CounterUILandscape(counterViewModel, modifier, textModifier, onClickFeedback)
 
+        if (settings.notification) {
+            val counterState by counterViewModel.counterState.collectAsState()
 
-        val counterState by counterViewModel.counterState.collectAsState()
+            // TODO: ONGOING NOTIFICATION
+            val name = context.getString(context.applicationInfo.labelRes)
+            val builder =
+                NotificationCompat.Builder(context, name).setContentTitle(counterState.name)
+                    .setSmallIcon(R.mipmap.ic_launcher).setContentText("${counterState.count}")
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT).setOnlyAlertOnce(true)
 
-        // TODO: ONGOING NOTIFICATION
-        val name = context.getString(context.applicationInfo.labelRes)
-        val builder =
-            NotificationCompat.Builder(context, name).setContentTitle(counterState.name)
-                .setSmallIcon(R.mipmap.ic_launcher).setContentText("${counterState.count}")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT).setOnlyAlertOnce(true)
+            with(NotificationManagerCompat.from(context)) {
+                if (ActivityCompat.checkSelfPermission(
+                        context, Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // TODO: Consider calling
+                    // ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    // public fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
+                    //                                        grantResults: IntArray)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
 
-        with(NotificationManagerCompat.from(context)) {
-            if (ActivityCompat.checkSelfPermission(
-                    context, Manifest.permission.POST_NOTIFICATIONS
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                // TODO: Consider calling
-                // ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                // public fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
-                //                                        grantResults: IntArray)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-
-                return@with
+                    return@with
+                }
+                notify(42069, builder.build())
             }
-            notify(42069, builder.build())
+        } else {
+            with(NotificationManagerCompat.from(context)) {
+                cancel(42069)
+            }
         }
-
 
     }
 
