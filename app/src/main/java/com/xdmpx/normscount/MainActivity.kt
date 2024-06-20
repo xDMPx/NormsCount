@@ -1,8 +1,11 @@
 package com.xdmpx.normscount
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -45,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -111,6 +115,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
+        createNotificationChannel()
 
         setKeepScreenOnFlag()
         counter = mutableStateOf(Counter(
@@ -217,7 +222,7 @@ class MainActivity : ComponentActivity() {
         val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
 
         val lastID = database.getLastID() ?: 0
-        val name = name ?: "Counter #${lastID+ 1}"
+        val name = name ?: "Counter #${lastID + 1}"
         val counter = CounterEntity(name = name, value = value)
         database.insert(counter)
         val counterEntity = database.getLast()!!
@@ -297,8 +302,8 @@ class MainActivity : ComponentActivity() {
 
         Scaffold(
             topBar = {
-                CounterUI.CounterTopAppBar(counter.value,
-                        onNavigationIconClick, onNavigateToSettings, onNavigateToAbout
+                CounterUI.CounterTopAppBar(
+                    counter.value, onNavigationIconClick, onNavigateToSettings, onNavigateToAbout
                 )
             },
         ) { innerPadding ->
@@ -484,6 +489,15 @@ class MainActivity : ComponentActivity() {
                 deleteCounter(it)
             }
         }
+    }
+
+    private fun createNotificationChannel() {
+        val name = this.getString(this.applicationInfo.labelRes)
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(name, name, importance)
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
 }

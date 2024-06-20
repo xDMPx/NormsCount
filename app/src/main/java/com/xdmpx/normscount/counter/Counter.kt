@@ -1,6 +1,8 @@
 package com.xdmpx.normscount.counter
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -46,6 +48,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
 import com.xdmpx.normscount.R
 import com.xdmpx.normscount.counter.CounterUIHelper.ConfirmationAlertDialog
@@ -146,6 +151,35 @@ object CounterUI {
             counterViewModel, modifier, textModifier, onClickFeedback
         )
         else CounterUILandscape(counterViewModel, modifier, textModifier, onClickFeedback)
+
+
+        val counterState by counterViewModel.counterState.collectAsState()
+
+        // TODO: ONGOING NOTIFICATION
+        val name = context.getString(context.applicationInfo.labelRes)
+        val builder =
+            NotificationCompat.Builder(context, name).setContentTitle(counterState.name)
+                .setSmallIcon(R.mipmap.ic_launcher).setContentText("${counterState.count}")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT).setOnlyAlertOnce(true)
+
+        with(NotificationManagerCompat.from(context)) {
+            if (ActivityCompat.checkSelfPermission(
+                    context, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                // TODO: Consider calling
+                // ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                // public fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>,
+                //                                        grantResults: IntArray)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+
+                return@with
+            }
+            notify(42069, builder.build())
+        }
+
 
     }
 
