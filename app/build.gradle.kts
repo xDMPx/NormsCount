@@ -1,6 +1,3 @@
-import com.google.protobuf.gradle.id
-import com.google.protobuf.gradle.remove
-
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
