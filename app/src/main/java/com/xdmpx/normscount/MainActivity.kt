@@ -4,6 +4,7 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
@@ -364,7 +365,8 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        EditAlertDialog(opened = openEditDialog,
+        EditAlertDialog(
+            opened = openEditDialog,
             onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
             scopeIO.launch {
@@ -513,7 +515,15 @@ class MainActivity : ComponentActivity() {
                     this@MainActivity, Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_DENIED
             ) {
-                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                if (!shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS)) {
+                    requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    Intent(
+                        android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse(
+                            "package:" + BuildConfig.APPLICATION_ID
+                        )
+                    ).apply { startActivity(this) }
+                }
             } else {
                 settingsInstance.setNotification(true)
             }
