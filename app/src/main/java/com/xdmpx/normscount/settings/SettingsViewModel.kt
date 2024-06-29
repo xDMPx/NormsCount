@@ -38,6 +38,7 @@ class SettingsViewModel : ViewModel() {
     lateinit var onExportClick: () -> Unit
     lateinit var onImportClick: () -> Unit
     lateinit var onDeleteAllClick: () -> Unit
+    lateinit var onNotificationClick: () -> Unit
     lateinit var onThemeUpdate: (Boolean, Boolean, ThemeType) -> Unit
 
     fun registerOnExportClick(onExportClick: () -> Unit) {
@@ -50,6 +51,10 @@ class SettingsViewModel : ViewModel() {
 
     fun registerOnDeleteAllClick(onDeleteAllClick: () -> Unit) {
         this.onDeleteAllClick = onDeleteAllClick
+    }
+
+    fun registerOnNotificationClick(onNotificationClick: () -> Unit) {
+        this.onNotificationClick = onNotificationClick
     }
 
     fun registerOnThemeUpdate(onThemeUpdate: (Boolean, Boolean, ThemeType) -> Unit) {
@@ -94,9 +99,9 @@ class SettingsViewModel : ViewModel() {
         }
     }
 
-    fun toggleNotification() {
+    fun setNotification(notification: Boolean) {
         _settingsState.value.let {
-            _settingsState.value = it.copy(notification = !it.notification)
+            _settingsState.value = it.copy(notification = notification)
         }
     }
 

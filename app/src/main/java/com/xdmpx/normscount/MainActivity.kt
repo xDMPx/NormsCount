@@ -1,8 +1,10 @@
 package com.xdmpx.normscount
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -48,7 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -100,11 +102,17 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
             importFromJSONCallback(uri)
         }
+    private val requestNotificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        settingsInstance.setNotification(isGranted)
+    }
 
     init {
         settingsInstance.registerOnExportClick { this@MainActivity.exportToJSON() }
         settingsInstance.registerOnImportClick { this@MainActivity.importFromJSON() }
         settingsInstance.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
+        settingsInstance.registerOnNotificationClick { this@MainActivity.requestNotificationPermission() }
         settingsInstance.registerOnThemeUpdate { usePureDark, useDynamicColor, theme ->
             this@MainActivity.usePureDark.value = usePureDark
             this@MainActivity.useDynamicColor.value = useDynamicColor
@@ -356,8 +364,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        EditAlertDialog(
-            opened = openEditDialog,
+        EditAlertDialog(opened = openEditDialog,
             onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
             scopeIO.launch {
@@ -498,6 +505,19 @@ class MainActivity : ComponentActivity() {
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    this@MainActivity, Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_DENIED
+            ) {
+                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                settingsInstance.setNotification(true)
+            }
+        }
     }
 
 }

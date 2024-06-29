@@ -168,33 +168,12 @@ object CounterUI {
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT).setOnlyAlertOnce(true)
 
             with(NotificationManagerCompat.from(context)) {
-                val requestPermissionLauncher = rememberLauncherForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-                ) { isGranted ->
-                    if (isGranted) {
-                        notify(42069, builder.build())
-                    } else {
-                        //TODO: Disable setting
-                    }
-                }
-
                 if (ActivityCompat.checkSelfPermission(
                         context, Manifest.permission.POST_NOTIFICATIONS
-                    ) != PackageManager.PERMISSION_GRANTED
+                    ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        if (ContextCompat.checkSelfPermission(
-                                context, Manifest.permission.POST_NOTIFICATIONS
-                            ) == PackageManager.PERMISSION_DENIED
-                        ) {
-                            SideEffect {
-                                requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            }
-                        }
-                    }
-                    return@with
+                    notify(42069, builder.build())
                 }
-                notify(42069, builder.build())
             }
         } else {
             with(NotificationManagerCompat.from(context)) {
@@ -399,15 +378,13 @@ object CounterUI {
                 })
         }
 
-        ResetAlertDialog(
-            openResetAlertDialog,
+        ResetAlertDialog(openResetAlertDialog,
             onDismissRequest = { openResetAlertDialog = false }) {
             openResetAlertDialog = false
             counterViewModel.resetCounter()
         }
 
-        DeleteAlertDialog(
-            openDeleteAlertDialog,
+        DeleteAlertDialog(openDeleteAlertDialog,
             onDismissRequest = { openDeleteAlertDialog = false }) {
             openDeleteAlertDialog = false
             counterViewModel.onDelete(counterViewModel)

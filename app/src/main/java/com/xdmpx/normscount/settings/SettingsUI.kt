@@ -106,7 +106,13 @@ object SettingsUI {
                                     contentDescription = null,
                                     modifier = modifier
                                 )
-                            }) { settingsViewModel.toggleNotification() }
+                            }) {
+                            if (settingsState.notification) {
+                                settingsViewModel.setNotification(false)
+                            } else {
+                                settingsViewModel.onNotificationClick()
+                            }
+                        }
                         ThemeSelectorSetting(
                             stringResource(R.string.settings_theme), settingsState.theme
                         ) {
@@ -401,5 +407,4 @@ object SettingsUI {
             Text(text = text)
         }
     }
-
 }
