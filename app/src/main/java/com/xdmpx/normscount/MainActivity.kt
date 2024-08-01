@@ -67,7 +67,6 @@ import com.xdmpx.normscount.counter.CounterUI
 import com.xdmpx.normscount.counter.CounterUIHelper
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
-import com.xdmpx.normscount.datastore.ThemeType
 import com.xdmpx.normscount.settings.Settings
 import com.xdmpx.normscount.settings.SettingsUI
 import com.xdmpx.normscount.ui.theme.NormsCountTheme
@@ -85,9 +84,6 @@ val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "se
 class MainActivity : ComponentActivity() {
     private val TAG_DEBUG = "MainActivity"
     private var counters = mutableStateListOf<Counter?>()
-    private var usePureDark = mutableStateOf(false)
-    private var useDynamicColor = mutableStateOf(false)
-    private var theme = mutableStateOf(ThemeType.SYSTEM)
     private lateinit var counter: MutableState<Counter>
     private var counterID = 1
     private var lastCounterID = 1
@@ -114,11 +110,6 @@ class MainActivity : ComponentActivity() {
         settingsInstance.registerOnImportClick { this@MainActivity.importFromJSON() }
         settingsInstance.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
         settingsInstance.registerOnNotificationClick { this@MainActivity.requestNotificationPermission() }
-        settingsInstance.registerOnThemeUpdate { usePureDark, useDynamicColor, theme ->
-            this@MainActivity.usePureDark.value = usePureDark
-            this@MainActivity.useDynamicColor.value = useDynamicColor
-            this@MainActivity.theme.value = theme
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,10 +129,6 @@ class MainActivity : ComponentActivity() {
 
         scopeIO.launch {
             settingsInstance.loadSettings(this@MainActivity)
-            val settings = settingsInstance.settingsState.value
-            usePureDark.value = settings.usePureDark
-            useDynamicColor.value = settings.useDynamicColor
-            theme.value = settings.theme
             setKeepScreenOnFlag()
 
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
@@ -180,10 +167,12 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent {
+            val settings by settingsInstance.settingsState.collectAsState()
+
             NormsCountTheme(
-                theme = theme.value,
-                pureDarkTheme = usePureDark.value,
-                dynamicColor = useDynamicColor.value
+                theme = settings.theme,
+                pureDarkTheme =settings.usePureDark,
+                dynamicColor = settings.useDynamicColor
             ) {
                 // A surface container using the 'background' color from the theme
                 Surface(

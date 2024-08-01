@@ -39,7 +39,6 @@ class SettingsViewModel : ViewModel() {
     lateinit var onImportClick: () -> Unit
     lateinit var onDeleteAllClick: () -> Unit
     lateinit var onNotificationClick: () -> Unit
-    lateinit var onThemeUpdate: (Boolean, Boolean, ThemeType) -> Unit
 
     fun registerOnExportClick(onExportClick: () -> Unit) {
         this.onExportClick = onExportClick
@@ -55,10 +54,6 @@ class SettingsViewModel : ViewModel() {
 
     fun registerOnNotificationClick(onNotificationClick: () -> Unit) {
         this.onNotificationClick = onNotificationClick
-    }
-
-    fun registerOnThemeUpdate(onThemeUpdate: (Boolean, Boolean, ThemeType) -> Unit) {
-        this.onThemeUpdate = onThemeUpdate
     }
 
     fun toggleVibrateOnValueChange() {
@@ -116,33 +111,18 @@ class SettingsViewModel : ViewModel() {
         _settingsState.value.let {
             _settingsState.value = it.copy(usePureDark = !it.usePureDark)
         }
-        onThemeUpdate(
-            _settingsState.value.usePureDark,
-            _settingsState.value.useDynamicColor,
-            _settingsState.value.theme
-        )
     }
 
     fun toggleUseDynamicColor() {
         _settingsState.value.let {
             _settingsState.value = it.copy(useDynamicColor = !it.useDynamicColor)
         }
-        onThemeUpdate(
-            _settingsState.value.usePureDark,
-            _settingsState.value.useDynamicColor,
-            _settingsState.value.theme
-        )
     }
 
     fun setTheme(theme: ThemeType) {
         _settingsState.value.let {
             _settingsState.value = it.copy(theme = theme)
         }
-        onThemeUpdate(
-            _settingsState.value.usePureDark,
-            _settingsState.value.useDynamicColor,
-            _settingsState.value.theme
-        )
     }
 
     suspend fun loadSettings(context: Context) {
