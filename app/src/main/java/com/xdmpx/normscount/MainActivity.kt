@@ -421,7 +421,7 @@ class MainActivity : ComponentActivity() {
 
             val date = LocalDate.now()
             val year = date.year
-            val month = String.format("%02d", date.monthValue)
+            val month = String.format(null,"%02d", date.monthValue)
             val day = date.dayOfMonth
             createDocument.launch("counters_export_${year}_${month}_$day.json")
         }
