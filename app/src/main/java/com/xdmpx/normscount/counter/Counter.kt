@@ -1,7 +1,9 @@
 package com.xdmpx.normscount.counter
 
 import android.Manifest
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.VibrationEffect
@@ -52,6 +54,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.ViewModel
+import com.xdmpx.normscount.NotificationReceiver
 import com.xdmpx.normscount.R
 import com.xdmpx.normscount.counter.CounterUIHelper.ConfirmationAlertDialog
 import com.xdmpx.normscount.database.CounterDatabase
@@ -155,11 +158,18 @@ object CounterUI {
             val counterState by counterViewModel.counterState.collectAsState()
 
             // TODO: ONGOING NOTIFICATION
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                putExtra("action", "increase")
+            }
+            val increasePIntent: PendingIntent =
+                PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
             val name = context.getString(context.applicationInfo.labelRes)
             val builder =
                 NotificationCompat.Builder(context, name).setContentTitle(counterState.name)
                     .setSmallIcon(R.mipmap.ic_launcher).setContentText("${counterState.count}")
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT).setOnlyAlertOnce(true)
+                    .addAction(0, "+", increasePIntent)
 
             with(NotificationManagerCompat.from(context)) {
                 if (ActivityCompat.checkSelfPermission(

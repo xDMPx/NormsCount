@@ -114,6 +114,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        CurrentActivity.setInstance(this@MainActivity)
         val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
         createNotificationChannel()
 
@@ -171,7 +172,7 @@ class MainActivity : ComponentActivity() {
 
             NormsCountTheme(
                 theme = settings.theme,
-                pureDarkTheme =settings.usePureDark,
+                pureDarkTheme = settings.usePureDark,
                 dynamicColor = settings.useDynamicColor
             ) {
                 // A surface container using the 'background' color from the theme
@@ -354,8 +355,7 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        EditAlertDialog(
-            opened = openEditDialog,
+        EditAlertDialog(opened = openEditDialog,
             onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
             scopeIO.launch {
@@ -421,7 +421,7 @@ class MainActivity : ComponentActivity() {
 
             val date = LocalDate.now()
             val year = date.year
-            val month = String.format(null,"%02d", date.monthValue)
+            val month = String.format(null, "%02d", date.monthValue)
             val day = date.dayOfMonth
             createDocument.launch("counters_export_${year}_${month}_$day.json")
         }
@@ -487,6 +487,10 @@ class MainActivity : ComponentActivity() {
                 deleteCounter(it)
             }
         }
+    }
+
+    fun getCounterViewModel(): Counter {
+        return counter.value
     }
 
     private fun createNotificationChannel() {
