@@ -158,18 +158,25 @@ object CounterUI {
             val counterState by counterViewModel.counterState.collectAsState()
 
             // TODO: ONGOING NOTIFICATION
-            val intent = Intent(context, NotificationReceiver::class.java).apply {
-                putExtra("action", "increase")
+            val incrementIntent = Intent(context, NotificationReceiver::class.java).apply {
+                putExtra("action", "increment")
             }
-            val increasePIntent: PendingIntent =
-                PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            val decrementIntent = Intent(context, NotificationReceiver::class.java).apply {
+                putExtra("action", "decrement")
+            }
+            val incrementPIntent: PendingIntent = PendingIntent.getBroadcast(
+                context, 0, incrementIntent, PendingIntent.FLAG_MUTABLE
+            )
+            val decrementPIntent: PendingIntent = PendingIntent.getBroadcast(
+                context, 1, decrementIntent, PendingIntent.FLAG_MUTABLE
+            )
 
             val name = context.getString(context.applicationInfo.labelRes)
             val builder =
                 NotificationCompat.Builder(context, name).setContentTitle(counterState.name)
                     .setSmallIcon(R.mipmap.ic_launcher).setContentText("${counterState.count}")
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT).setOnlyAlertOnce(true)
-                    .addAction(0, "+", increasePIntent)
+                    .addAction(0, "-", decrementPIntent).addAction(0, "+", incrementPIntent)
 
             with(NotificationManagerCompat.from(context)) {
                 if (ActivityCompat.checkSelfPermission(

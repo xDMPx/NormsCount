@@ -3,6 +3,7 @@ package com.xdmpx.normscount
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.activity.ComponentActivity
 
 abstract class CurrentActivity {
@@ -27,9 +28,13 @@ class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.getStringExtra("action")
         val activity = CurrentActivity.getInstance()
-        if (action == "increase" && activity != null) {
+        if (action == "increment" && activity != null) {
             val mainActivity = activity as MainActivity
             mainActivity.getCounterViewModel().incrementCounter()
+        }
+        if (action == "decrement" && activity != null) {
+            val mainActivity = activity as MainActivity
+            mainActivity.getCounterViewModel().decrementCounter()
         }
     }
 }
