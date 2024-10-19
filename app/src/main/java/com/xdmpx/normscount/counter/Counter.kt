@@ -63,3 +63,21 @@ class Counter(
     }
 
 }
+
+abstract class CurrentCounter {
+
+    companion object {
+        @Volatile
+        private var INSTANCE: Counter? = null
+
+        fun setInstance(instance: Counter) {
+            INSTANCE = instance
+        }
+
+        fun getInstance(): Counter? {
+            synchronized(this) {
+                return INSTANCE
+            }
+        }
+    }
+}

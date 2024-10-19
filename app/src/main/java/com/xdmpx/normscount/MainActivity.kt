@@ -65,6 +65,7 @@ import com.xdmpx.normscount.about.About
 import com.xdmpx.normscount.counter.Counter
 import com.xdmpx.normscount.counter.CounterUI
 import com.xdmpx.normscount.counter.CounterUIHelper
+import com.xdmpx.normscount.counter.CurrentCounter
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.settings.Settings
@@ -114,7 +115,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        CurrentActivity.setInstance(this@MainActivity)
         val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
         createNotificationChannel()
 
@@ -122,6 +122,7 @@ class MainActivity : ComponentActivity() {
         counter = mutableStateOf(Counter(
             0, 0, "Counter #"
         ) { deleteCounter(it) })
+        CurrentCounter.setInstance(counter.value)
 
         val counterIDKey = intPreferencesKey("counter_id")
         val savedCounterID: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
@@ -159,6 +160,7 @@ class MainActivity : ComponentActivity() {
             counter.value =
                 counters.find { counter -> counterID == counter.getCounterId() } ?: counters.first()
                     .also { counterID = it.getCounterId() }
+            CurrentCounter.setInstance(counter.value)
 
             this@MainActivity.lastCounterID =
                 CounterDatabase.getInstance(this@MainActivity).counterDatabase.getLastID() ?: 1
@@ -233,6 +235,7 @@ class MainActivity : ComponentActivity() {
         counterID = counterEntity.id
         lastCounterID = counterID
         this@MainActivity.counter.value = counters.last()!!
+        CurrentCounter.setInstance(this@MainActivity.counter.value)
     }
 
     private suspend fun deleteCounter(counter: Counter) {
@@ -245,6 +248,7 @@ class MainActivity : ComponentActivity() {
             addCounter()
         } else {
             this@MainActivity.counter.value = counters[index]!!
+            CurrentCounter.setInstance(this@MainActivity.counter.value)
             counterID = this@MainActivity.counter.value.getCounterId()
         }
 
@@ -348,6 +352,7 @@ class MainActivity : ComponentActivity() {
                         selected = false,
                         onClick = {
                             this@MainActivity.counter.value = counter
+                            CurrentCounter.setInstance(this@MainActivity.counter.value)
                             this@MainActivity.counterID = counter.getCounterId()
                             closeDrawer()
                         })
@@ -487,10 +492,6 @@ class MainActivity : ComponentActivity() {
                 deleteCounter(it)
             }
         }
-    }
-
-    fun getCounterViewModel(): Counter {
-        return counter.value
     }
 
     private fun createNotificationChannel() {
