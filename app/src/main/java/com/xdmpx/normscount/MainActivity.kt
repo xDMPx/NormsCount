@@ -92,9 +92,13 @@ class MainActivity : ComponentActivity() {
     private val settingsInstance = Settings.getInstance()
 
     private val scopeIO = CoroutineScope(Dispatchers.IO)
-    private val createDocument =
+    private val createDocumentJSON =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
             exportToJSONCallback(uri)
+        }
+    private val createDocumentCSV =
+        registerForActivityResult(ActivityResultContracts.CreateDocument("text/csv")) { uri ->
+            exportToCSVCallback(uri)
         }
     private val openDocument =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
@@ -107,7 +111,8 @@ class MainActivity : ComponentActivity() {
     }
 
     init {
-        settingsInstance.registerOnExportClick { this@MainActivity.exportToJSON() }
+        settingsInstance.registerOnExportJSONClick { this@MainActivity.exportToJSON() }
+        settingsInstance.registerOnExportCSVClick { this@MainActivity.exportToCSV() }
         settingsInstance.registerOnImportClick { this@MainActivity.importFromJSON() }
         settingsInstance.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
         settingsInstance.registerOnNotificationClick { this@MainActivity.requestNotificationPermission() }
@@ -360,7 +365,8 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        EditAlertDialog(opened = openEditDialog,
+        EditAlertDialog(
+            opened = openEditDialog,
             onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
             scopeIO.launch {
@@ -428,7 +434,22 @@ class MainActivity : ComponentActivity() {
             val year = date.year
             val month = String.format(null, "%02d", date.monthValue)
             val day = date.dayOfMonth
-            createDocument.launch("counters_export_${year}_${month}_$day.json")
+            createDocumentJSON.launch("counters_export_${year}_${month}_$day.json")
+        }
+    }
+
+    private fun exportToCSV() {
+        scopeIO.launch {
+            counters.forEach {
+                it?.updateDatabase(this@MainActivity)
+            }
+            Log.d(TAG_DEBUG, "exportToCSV")
+
+            val date = LocalDate.now()
+            val year = date.year
+            val month = String.format(null, "%02d", date.monthValue)
+            val day = date.dayOfMonth
+            createDocumentCSV.launch("counters_export_${year}_${month}_$day.csv")
         }
     }
 
@@ -437,6 +458,26 @@ class MainActivity : ComponentActivity() {
 
         scopeIO.launch {
             if (Utils.exportToJSON(this@MainActivity, uri)) {
+                runOnUiThread {
+                    ShortToast(
+                        this@MainActivity, resources.getString(R.string.export_successful)
+                    )
+                }
+            } else {
+                runOnUiThread {
+                    ShortToast(
+                        this@MainActivity, resources.getString(R.string.export_failed)
+                    )
+                }
+            }
+        }
+    }
+
+    private fun exportToCSVCallback(uri: Uri?) {
+        if (uri == null) return
+
+        scopeIO.launch {
+            if (Utils.exportToCSV(this@MainActivity, uri)) {
                 runOnUiThread {
                     ShortToast(
                         this@MainActivity, resources.getString(R.string.export_successful)

@@ -30,6 +30,25 @@ object Utils {
         }
     }
 
+    suspend fun exportToCSV(context: Context, uri: Uri): Boolean {
+        val database = CounterDatabase.getInstance(context).counterDatabase
+
+        val repositories = database.getAll().map {
+            val name = if (it.name == "Counter #") "${it.name}${it.id}" else it.name
+            val value = it.value
+            "${name},${value}"
+        }
+        return try {
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.write("name,value\n".toByteArray())
+                outputStream.write(repositories.joinToString("\n").toByteArray())
+            }
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     data class CounterData(val name: String, val value: Long)
 
     fun importFromJSON(

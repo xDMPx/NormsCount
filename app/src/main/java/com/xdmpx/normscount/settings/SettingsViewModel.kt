@@ -35,13 +35,18 @@ class SettingsViewModel : ViewModel() {
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState: StateFlow<SettingsState> = _settingsState.asStateFlow()
 
-    lateinit var onExportClick: () -> Unit
+    lateinit var onExportJSONClick: () -> Unit
+    lateinit var onExportCSVClick: () -> Unit
     lateinit var onImportClick: () -> Unit
     lateinit var onDeleteAllClick: () -> Unit
     lateinit var onNotificationClick: () -> Unit
 
-    fun registerOnExportClick(onExportClick: () -> Unit) {
-        this.onExportClick = onExportClick
+    fun registerOnExportJSONClick(onExportClick: () -> Unit) {
+        this.onExportJSONClick = onExportClick
+    }
+
+    fun registerOnExportCSVClick(onExportClick: () -> Unit) {
+        this.onExportCSVClick = onExportClick
     }
 
     fun registerOnImportClick(onImportClick: () -> Unit) {

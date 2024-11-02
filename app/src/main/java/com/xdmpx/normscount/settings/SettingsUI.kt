@@ -165,7 +165,15 @@ object SettingsUI {
                                     contentDescription = null,
                                     modifier = modifier
                                 )
-                            }) { settingsViewModel.onExportClick() }
+                            }) { settingsViewModel.onExportJSONClick() }
+                        SettingButton(stringResource(R.string.settings_export_csv),
+                            icon = { modifier ->
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_file_save_24),
+                                    contentDescription = null,
+                                    modifier = modifier
+                                )
+                            }) { settingsViewModel.onExportCSVClick() }
                         SettingButton(stringResource(R.string.settings_import_json),
                             icon = { modifier ->
                                 Icon(

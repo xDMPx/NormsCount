@@ -28,6 +28,7 @@
     <string name="settings_delete_dialog">Enable delete confirmation dialog</string>
     <string name="settings_ask_initial_value">Ask for initial value and name when initializing counter</string>
     <string name="settings_export_json">Export all counters to a JSON file</string>
+    <string name="settings_export_csv">Export all counters to a CSV file</string>
     <string name="settings_import_json">"Import counters from a JSON file"</string>
     <string name="settings_delete_all">Delete all counters</string>
 
