@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.xdmpx.normscount"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.xdmpx.normscount"
         minSdk = 30
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -65,7 +65,7 @@ room {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:4.28.0"
+        artifact = "com.google.protobuf:protoc:4.28.3"
     }
     generateProtoTasks {
         all().forEach {
