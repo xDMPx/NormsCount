@@ -8,7 +8,6 @@ import android.content.res.Configuration
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement

@@ -81,6 +81,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import androidx.core.net.toUri
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -573,9 +574,8 @@ class MainActivity : ComponentActivity() {
                     requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 } else {
                     Intent(
-                        android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse(
-                            "package:" + BuildConfig.APPLICATION_ID
-                        )
+                        android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        ("package:" + BuildConfig.APPLICATION_ID).toUri()
                     ).apply { startActivity(this) }
                 }
             } else {
