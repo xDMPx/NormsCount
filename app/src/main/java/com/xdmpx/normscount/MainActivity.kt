@@ -10,6 +10,8 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.util.Log
 import android.view.KeyEvent
 import android.view.WindowManager
@@ -392,9 +394,26 @@ class MainActivity : ComponentActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         val settings = settingsInstance.settingsState.value
         if (settings.changeCounterValueVolumeButtons && overrideOnKeyDown) {
+            val vibrator = this@MainActivity.getSystemService(Vibrator::class.java)
             when (keyCode) {
-                KeyEvent.KEYCODE_VOLUME_DOWN -> counter.value.decrementCounter()
-                KeyEvent.KEYCODE_VOLUME_UP -> counter.value.incrementCounter()
+                KeyEvent.KEYCODE_VOLUME_DOWN -> {
+                    counter.value.decrementCounter()
+                    if (settings.vibrateOnValueChange) vibrator.vibrate(
+                        VibrationEffect.createPredefined(
+                            VibrationEffect.EFFECT_CLICK
+                        )
+                    )
+                }
+
+                KeyEvent.KEYCODE_VOLUME_UP -> {
+                    counter.value.incrementCounter()
+                    if (settings.vibrateOnValueChange) vibrator.vibrate(
+                        VibrationEffect.createPredefined(
+                            VibrationEffect.EFFECT_CLICK
+                        )
+                    )
+                }
+
                 else -> return super.onKeyDown(keyCode, event)
             }
             return true
