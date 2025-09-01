@@ -7,7 +7,9 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -60,6 +62,7 @@ import com.xdmpx.normscount.settings.Settings
 object CounterUI {
     private val settingsInstance = Settings.getInstance()
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Composable
     fun CounterUI(counterViewModel: Counter, modifier: Modifier = Modifier) {
         val settings by settingsInstance.settingsState.collectAsState()
@@ -76,10 +79,13 @@ object CounterUI {
 
         val textModifier = if (settings.tapCounterValueToIncrement) {
             val interactionSource = remember { MutableInteractionSource() }
-            Modifier.clickable(interactionSource, null) {
-                counterViewModel.incrementCounter()
+            Modifier.combinedClickable(interactionSource, null, onClick = {
+                    counterViewModel.incrementCounter()
+                    onClickFeedback()
+            }, onLongClick = {
+                counterViewModel.decrementCounter()
                 onClickFeedback()
-            }
+            })
         } else {
             Modifier
         }
