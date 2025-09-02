@@ -198,7 +198,7 @@ object About {
 
     private fun openURL(context: Context, url: String) {
         val browserIntent = Intent(Intent.ACTION_VIEW, url.toUri())
-        startActivity(context, browserIntent, null)
+        context.startActivity(browserIntent, null)
     }
 
     private fun copyVersionToClipboard(context: Context) {
