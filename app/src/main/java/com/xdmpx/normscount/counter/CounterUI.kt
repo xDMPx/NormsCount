@@ -261,7 +261,7 @@ object CounterUI {
         val counterState by counterViewModel.counterState.collectAsState()
 
         TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            containerColor = MaterialTheme.colorScheme.background,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ), title = {
             Text(
