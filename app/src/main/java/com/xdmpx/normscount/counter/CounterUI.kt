@@ -256,7 +256,8 @@ object CounterUI {
         counterViewModel: Counter,
         onNavigationIconClick: () -> Unit,
         onNavigateToSettings: () -> Unit,
-        onNavigateToAbout: () -> Unit
+        onNavigateToAbout: () -> Unit,
+        onDeleteCounter: () -> Unit,
     ) {
         val counterState by counterViewModel.counterState.collectAsState()
 
@@ -273,13 +274,18 @@ object CounterUI {
                 Icon(imageVector = Icons.Filled.Menu, contentDescription = null)
             }
         }, actions = {
-            TopAppBarMenu(counterViewModel, onNavigateToSettings, onNavigateToAbout)
+            TopAppBarMenu(
+                counterViewModel, onNavigateToSettings, onNavigateToAbout, onDeleteCounter
+            )
         })
     }
 
     @Composable
     fun TopAppBarMenu(
-        counterViewModel: Counter, onNavigateToSettings: () -> Unit, onNavigateToAbout: () -> Unit
+        counterViewModel: Counter,
+        onNavigateToSettings: () -> Unit,
+        onNavigateToAbout: () -> Unit,
+        onDeleteCounter: () -> Unit,
     ) {
         val counterState by counterViewModel.counterState.collectAsState()
         val settings by settingsInstance.settingsState.collectAsState()
@@ -318,7 +324,7 @@ object CounterUI {
                 onClick = {
                     expanded = false
                     if (!settings.confirmationDialogDelete) {
-                        counterViewModel.onDelete(counterViewModel)
+                        onDeleteCounter()
                     } else openDeleteAlertDialog = true
                 })
             DropdownMenuItem(
@@ -344,7 +350,7 @@ object CounterUI {
         DeleteAlertDialog(
             openDeleteAlertDialog, onDismissRequest = { openDeleteAlertDialog = false }) {
             openDeleteAlertDialog = false
-            counterViewModel.onDelete(counterViewModel)
+            onDeleteCounter()
         }
 
         EditAlertDialog(

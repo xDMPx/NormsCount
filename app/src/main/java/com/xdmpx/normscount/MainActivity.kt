@@ -134,7 +134,8 @@ class MainActivity : ComponentActivity() {
         counter = mutableStateOf(
             Counter(
                 0, 0, "Counter #"
-            ) { deleteCounter(it) })
+            )
+        )
         CurrentCounter.setInstance(counter.value)
 
         val counterIDKey = intPreferencesKey("counter_id")
@@ -152,7 +153,7 @@ class MainActivity : ComponentActivity() {
                         counterEntity.id,
                         counterEntity.value,
                         counterEntity.name,
-                    ) { deleteCounter(it) }
+                    )
                 }
             if (counters.isEmpty()) {
                 addCounter()
@@ -162,7 +163,7 @@ class MainActivity : ComponentActivity() {
                             counterEntity.id,
                             counterEntity.value,
                             counterEntity.name,
-                        ) { deleteCounter(it) }
+                        )
                     }
             }
             this@MainActivity.counters.clear()
@@ -232,7 +233,6 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun addCounter(name: String? = null, value: Long = 0) {
-        val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
         val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
 
         val lastID = database.getLastID() ?: 0
@@ -245,7 +245,8 @@ class MainActivity : ComponentActivity() {
                 counterEntity.id,
                 counterEntity.value,
                 counterEntity.name,
-            ) { deleteCounter(it) })
+            )
+        )
         counterID = counterEntity.id
         lastCounterID = counterID
         this@MainActivity.counter.value = counters.last()!!
@@ -305,7 +306,11 @@ class MainActivity : ComponentActivity() {
             },
         ) {
             // Screen content
-            MainUIScreen(openDrawer, onNavigateToSettings, onNavigateToAbout)
+            MainUIScreen(openDrawer, onNavigateToSettings, onNavigateToAbout, onDeleteCounter = {
+                scopeIO.launch {
+                    deleteCounter(counter.value)
+                }
+            })
         }
     }
 
@@ -313,14 +318,19 @@ class MainActivity : ComponentActivity() {
     fun MainUIScreen(
         onNavigationIconClick: () -> Unit,
         onNavigateToSettings: () -> Unit,
-        onNavigateToAbout: () -> Unit
+        onNavigateToAbout: () -> Unit,
+        onDeleteCounter: () -> Unit,
     ) {
         overrideOnKeyDown = true
 
         Scaffold(
             topBar = {
                 CounterUI.CounterTopAppBar(
-                    counter.value, onNavigationIconClick, onNavigateToSettings, onNavigateToAbout
+                    counter.value,
+                    onNavigationIconClick,
+                    onNavigateToSettings,
+                    onNavigateToAbout,
+                    onDeleteCounter
                 )
             },
         ) { innerPadding ->

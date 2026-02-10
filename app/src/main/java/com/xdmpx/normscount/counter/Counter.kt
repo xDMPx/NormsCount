@@ -16,7 +16,6 @@ class Counter(
     private val id: Int,
     value: Long,
     name: String,
-    val onDelete: (Counter) -> Unit,
 ) : ViewModel() {
     private val _counterState = MutableStateFlow(CounterState(value, name))
     val counterState: StateFlow<CounterState> = _counterState.asStateFlow()
