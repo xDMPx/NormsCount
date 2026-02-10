@@ -79,8 +79,8 @@ object CounterUI {
         val textModifier = if (settings.tapCounterValueToIncrement) {
             val interactionSource = remember { MutableInteractionSource() }
             Modifier.combinedClickable(interactionSource, null, onClick = {
-                    counterViewModel.incrementCounter()
-                    onClickFeedback()
+                counterViewModel.incrementCounter()
+                onClickFeedback()
             }, onLongClick = {
                 counterViewModel.decrementCounter()
                 onClickFeedback()
@@ -260,7 +260,8 @@ object CounterUI {
     ) {
         val counterState by counterViewModel.counterState.collectAsState()
 
-        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+        TopAppBar(
+            colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ), title = {
@@ -312,19 +313,22 @@ object CounterUI {
         }
 
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            DropdownMenuItem(text = { Text(text = stringResource(R.string.counter_topappbar_delete)) },
+            DropdownMenuItem(
+                text = { Text(text = stringResource(R.string.counter_topappbar_delete)) },
                 onClick = {
                     expanded = false
                     if (!settings.confirmationDialogDelete) {
                         counterViewModel.onDelete(counterViewModel)
                     } else openDeleteAlertDialog = true
                 })
-            DropdownMenuItem(text = { Text(text = stringResource(R.string.settings_screen)) },
+            DropdownMenuItem(
+                text = { Text(text = stringResource(R.string.settings_screen)) },
                 onClick = {
                     expanded = false
                     onNavigateToSettings()
                 })
-            DropdownMenuItem(text = { Text(text = stringResource(R.string.about_screen)) },
+            DropdownMenuItem(
+                text = { Text(text = stringResource(R.string.about_screen)) },
                 onClick = {
                     expanded = false
                     onNavigateToAbout()
@@ -332,20 +336,19 @@ object CounterUI {
         }
 
         ResetAlertDialog(
-            openResetAlertDialog,
-            onDismissRequest = { openResetAlertDialog = false }) {
+            openResetAlertDialog, onDismissRequest = { openResetAlertDialog = false }) {
             openResetAlertDialog = false
             counterViewModel.resetCounter()
         }
 
         DeleteAlertDialog(
-            openDeleteAlertDialog,
-            onDismissRequest = { openDeleteAlertDialog = false }) {
+            openDeleteAlertDialog, onDismissRequest = { openDeleteAlertDialog = false }) {
             openDeleteAlertDialog = false
             counterViewModel.onDelete(counterViewModel)
         }
 
-        EditAlertDialog(openEditDialog,
+        EditAlertDialog(
+            openEditDialog,
             counterState.name,
             counterState.count,
             onDismissRequest = { openEditDialog = false }) { name, value ->

@@ -131,9 +131,10 @@ class MainActivity : ComponentActivity() {
         createNotificationChannel()
 
         setKeepScreenOnFlag()
-        counter = mutableStateOf(Counter(
-            0, 0, "Counter #"
-        ) { deleteCounter(it) })
+        counter = mutableStateOf(
+            Counter(
+                0, 0, "Counter #"
+            ) { deleteCounter(it) })
         CurrentCounter.setInstance(counter.value)
 
         val counterIDKey = intPreferencesKey("counter_id")
@@ -239,11 +240,12 @@ class MainActivity : ComponentActivity() {
         val counter = CounterEntity(name = name, value = value)
         database.insert(counter)
         val counterEntity = database.getLast()!!
-        counters.add(Counter(
-            counterEntity.id,
-            counterEntity.value,
-            counterEntity.name,
-        ) { deleteCounter(it) })
+        counters.add(
+            Counter(
+                counterEntity.id,
+                counterEntity.value,
+                counterEntity.name,
+            ) { deleteCounter(it) })
         counterID = counterEntity.id
         lastCounterID = counterID
         this@MainActivity.counter.value = counters.last()!!
@@ -360,7 +362,8 @@ class MainActivity : ComponentActivity() {
             LazyColumn {
                 items(counters) { counter ->
                     if (counter == null) return@items
-                    NavigationDrawerItem(label = { CounterUI.CounterName(counter) },
+                    NavigationDrawerItem(
+                        label = { CounterUI.CounterName(counter) },
                         selected = false,
                         onClick = {
                             this@MainActivity.counter.value = counter
@@ -373,8 +376,7 @@ class MainActivity : ComponentActivity() {
         }
 
         EditAlertDialog(
-            opened = openEditDialog,
-            onDismissRequest = { openEditDialog = false }) { name, value ->
+            opened = openEditDialog, onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
             scopeIO.launch {
                 addCounter(name, value)

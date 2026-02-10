@@ -62,7 +62,8 @@ object SettingsUI {
             ) {
                 LazyColumn(Modifier.padding(10.dp)) {
                     item {
-                        Setting(stringResource(R.string.settings_vibrate),
+                        Setting(
+                            stringResource(R.string.settings_vibrate),
                             settingsState.vibrateOnValueChange,
                             icon = { modifier ->
                                 Icon(
@@ -71,7 +72,8 @@ object SettingsUI {
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.toggleVibrateOnValueChange() }
-                        Setting(stringResource(R.string.settings_tap),
+                        Setting(
+                            stringResource(R.string.settings_tap),
                             settingsState.tapCounterValueToIncrement,
                             icon = { modifier ->
                                 Icon(
@@ -80,7 +82,8 @@ object SettingsUI {
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.toggleTapCounterValueToIncrement() }
-                        Setting(stringResource(R.string.settings_hardware_button),
+                        Setting(
+                            stringResource(R.string.settings_hardware_button),
                             settingsState.changeCounterValueVolumeButtons,
                             icon = { modifier ->
                                 Icon(
@@ -89,7 +92,8 @@ object SettingsUI {
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.toggleChangeCounterValueVolumeButtons() }
-                        Setting(stringResource(R.string.settings_keep_screen),
+                        Setting(
+                            stringResource(R.string.settings_keep_screen),
                             settingsState.keepScreenOn,
                             icon = { modifier ->
                                 Icon(
@@ -98,7 +102,8 @@ object SettingsUI {
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.toggleKeepScreenOn() }
-                        Setting(stringResource(R.string.settings_notification),
+                        Setting(
+                            stringResource(R.string.settings_notification),
                             settingsState.notification,
                             icon = { modifier ->
                                 Icon(
@@ -118,7 +123,8 @@ object SettingsUI {
                         ) {
                             settingsViewModel.setTheme(it)
                         }
-                        Setting(stringResource(R.string.settings_pure_dark),
+                        Setting(
+                            stringResource(R.string.settings_pure_dark),
                             settingsState.usePureDark,
                             icon = { modifier ->
                                 Icon(
@@ -129,7 +135,8 @@ object SettingsUI {
                             }) {
                             settingsViewModel.toggleUsePureDark()
                         }
-                        Setting(stringResource(R.string.settings_dynamic_color),
+                        Setting(
+                            stringResource(R.string.settings_dynamic_color),
                             settingsState.useDynamicColor,
                             icon = { modifier ->
                                 Icon(
@@ -158,24 +165,24 @@ object SettingsUI {
 
                         HorizontalDivider(Modifier.padding(settingPadding))
 
-                        SettingButton(stringResource(R.string.settings_export_json),
-                            icon = { modifier ->
+                        SettingButton(
+                            stringResource(R.string.settings_export_json), icon = { modifier ->
                                 Icon(
                                     painter = painterResource(id = R.drawable.rounded_file_save_24),
                                     contentDescription = null,
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.onExportJSONClick() }
-                        SettingButton(stringResource(R.string.settings_export_csv),
-                            icon = { modifier ->
+                        SettingButton(
+                            stringResource(R.string.settings_export_csv), icon = { modifier ->
                                 Icon(
                                     painter = painterResource(id = R.drawable.rounded_file_save_24),
                                     contentDescription = null,
                                     modifier = modifier
                                 )
                             }) { settingsViewModel.onExportCSVClick() }
-                        SettingButton(stringResource(R.string.settings_import_json),
-                            icon = { modifier ->
+                        SettingButton(
+                            stringResource(R.string.settings_import_json), icon = { modifier ->
                                 Icon(
                                     painter = painterResource(id = R.drawable.rounded_file_open_24),
                                     contentDescription = null,
@@ -183,8 +190,7 @@ object SettingsUI {
                                 )
                             }) { settingsViewModel.onImportClick() }
                         SettingButton(
-                            stringResource(R.string.settings_delete_all),
-                            icon = { modifier ->
+                            stringResource(R.string.settings_delete_all), icon = { modifier ->
                                 Icon(
                                     painter = painterResource(id = R.drawable.rounded_delete_forever_24),
                                     contentDescription = null,
@@ -196,7 +202,8 @@ object SettingsUI {
             }
         }
 
-        DeleteAllAlertDialog(showDeleteAllConfirmationDialog,
+        DeleteAllAlertDialog(
+            showDeleteAllConfirmationDialog,
             onDismissRequest = { showDeleteAllConfirmationDialog = false }) {
             showDeleteAllConfirmationDialog = false
             settingsViewModel.onDeleteAllClick()
@@ -219,7 +226,8 @@ object SettingsUI {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun SettingsTopAppBar(onNavigateToMain: () -> Unit) {
-        TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
+        TopAppBar(
+            colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
             titleContentColor = MaterialTheme.colorScheme.primary,
         ), navigationIcon = {
@@ -290,8 +298,7 @@ object SettingsUI {
             val modifier = Modifier.padding(settingPadding)
             icon(modifier)
             Text(
-                text = text,
-                Modifier
+                text = text, Modifier
                     .fillMaxWidth()
                     .weight(0.75f)
                     .padding(settingPadding)
@@ -327,7 +334,8 @@ object SettingsUI {
             }
         }
 
-        ThemeSelectorDialog(openThemeSelectorDialog,
+        ThemeSelectorDialog(
+            openThemeSelectorDialog,
             theme,
             onDismissRequest = { openThemeSelectorDialog = !openThemeSelectorDialog }) {
             onChange(it)
@@ -405,7 +413,8 @@ object SettingsUI {
 
     @Composable
     fun RadioTextButton(text: String, selected: Boolean, onClick: () -> Unit) {
-        Row(verticalAlignment = Alignment.CenterVertically,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .clickable { onClick() }
                 .fillMaxWidth()) {
