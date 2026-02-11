@@ -2,7 +2,7 @@ package com.xdmpx.normscount.settings
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
-import androidx.datastore.preferences.protobuf.InvalidProtocolBufferException
+import com.google.protobuf.InvalidProtocolBufferException
 import com.xdmpx.normscount.datastore.SettingsProto
 import com.xdmpx.normscount.datastore.ThemeType
 import java.io.InputStream
