@@ -42,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,6 +50,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -144,7 +146,6 @@ class MainActivity : ComponentActivity() {
         }
 
         scopeIO.launch {
-            settingsInstance.loadSettings(this@MainActivity)
             setKeepScreenOnFlag()
 
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
@@ -185,6 +186,15 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settings by settingsInstance.settingsState.collectAsState()
+            val loadSettings = rememberSaveable { mutableStateOf(true) }
+
+            LaunchedEffect(loadSettings) {
+                if (loadSettings.value) {
+                    loadSettings.value = false
+                    Log.i("MainActivity", "Setting Load")
+                    settingsInstance.loadSettings(this@MainActivity)
+                }
+            }
 
             NormsCountTheme(
                 theme = settings.theme,
