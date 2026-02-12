@@ -92,7 +92,6 @@ class MainActivity : ComponentActivity() {
     private val TAG_DEBUG = "MainActivity"
     private var counters = mutableStateListOf<Counter?>()
     private lateinit var counter: MutableState<Counter>
-    private var counterID = 1
     private var overrideOnKeyDown = true
     private val settingsInstance = Settings.getInstance()
 
@@ -166,10 +165,9 @@ class MainActivity : ComponentActivity() {
             counters.forEach {
                 this@MainActivity.counters.add(it)
             }
-            counterID = savedCounterID.first()
+            val counterID = savedCounterID.first()
             counter.value =
                 counters.find { counter -> counterID == counter.getCounterId() } ?: counters.first()
-                    .also { counterID = it.getCounterId() }
             CurrentCounter.setInstance(counter.value)
 
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
@@ -251,7 +249,6 @@ class MainActivity : ComponentActivity() {
                 counterEntity.name,
             )
         )
-        counterID = counterEntity.id
         this@MainActivity.counter.value = counters.last()!!
         CurrentCounter.setInstance(this@MainActivity.counter.value)
     }
@@ -267,7 +264,6 @@ class MainActivity : ComponentActivity() {
         } else {
             this@MainActivity.counter.value = counters[index]!!
             CurrentCounter.setInstance(this@MainActivity.counter.value)
-            counterID = this@MainActivity.counter.value.getCounterId()
         }
 
         val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
@@ -388,7 +384,6 @@ class MainActivity : ComponentActivity() {
                         onClick = {
                             this@MainActivity.counter.value = counter
                             CurrentCounter.setInstance(this@MainActivity.counter.value)
-                            this@MainActivity.counterID = counter.getCounterId()
                             closeDrawer()
                         })
                 }
@@ -415,7 +410,7 @@ class MainActivity : ComponentActivity() {
     ) {
         if (!opened) return
         CounterUIHelper.EditAlertDialog(
-            "Counter #${lastCounterID+1}",
+            "Counter #${lastCounterID + 1}",
             0,
             onDismissRequest = onDismissRequest,
             onConfirmation = onConfirmation
@@ -466,6 +461,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun saveCounterID() {
+        val counterID = counter.value.getCounterId()
         val counterIDKey = intPreferencesKey("counter_id")
         this@MainActivity.dataStore.edit { settings ->
             Log.d(TAG_DEBUG, "saveCounterID -> counterID: $counterID")
