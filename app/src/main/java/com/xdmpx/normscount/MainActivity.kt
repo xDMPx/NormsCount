@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -84,7 +85,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import androidx.core.net.toUri
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
@@ -129,10 +129,8 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
-        val deleteCounter: (Counter) -> Unit = { scopeIO.launch { deleteCounter(it) } }
         createNotificationChannel()
 
-        setKeepScreenOnFlag()
         counter = mutableStateOf(
             Counter(
                 0, 0, "Counter #"
@@ -146,8 +144,6 @@ class MainActivity : ComponentActivity() {
         }
 
         scopeIO.launch {
-            setKeepScreenOnFlag()
-
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
                 .map { counterEntity ->
                     Counter(
@@ -195,6 +191,10 @@ class MainActivity : ComponentActivity() {
                     settingsInstance.loadSettings(this@MainActivity)
                 }
             }
+            LaunchedEffect(settings.keepScreenOn) {
+                Log.i("MainActivity", "KeepScreenOn-> ${settings.keepScreenOn}")
+                setKeepScreenOnFlag()
+            }
 
             NormsCountTheme(
                 theme = settings.theme,
@@ -216,14 +216,12 @@ class MainActivity : ComponentActivity() {
                             overrideOnKeyDown = false
                             SettingsUI.SettingsUI(settingsInstance) {
                                 navController.navigate("main")
-                                setKeepScreenOnFlag()
                             }
                         }
                         composable("about") {
                             overrideOnKeyDown = false
                             About.AboutUI {
                                 navController.navigate("main")
-                                setKeepScreenOnFlag()
                             }
                         }
                     }
