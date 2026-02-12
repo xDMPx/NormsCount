@@ -253,8 +253,8 @@ class MainActivity : ComponentActivity() {
         CurrentCounter.setInstance(this@MainActivity.counter.value)
     }
 
-    private suspend fun deleteCounter(counter: Counter) {
-        var index = counters.indexOf(counter)
+    private suspend fun deleteCounter(counterId: Int) {
+        var index = counters.indexOfFirst { it?.getCounterId() == counterId }
         counters[index] = null
         index = if (index > 0) index - 1 else 0
         while (index != 0 && counters[index] == null) index -= 1
@@ -267,8 +267,7 @@ class MainActivity : ComponentActivity() {
         }
 
         val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
-        database.deleteByID(counter.getCounterId())
-
+        database.deleteByID(counterId)
     }
 
     @Composable
@@ -307,7 +306,7 @@ class MainActivity : ComponentActivity() {
             // Screen content
             MainUIScreen(openDrawer, onNavigateToSettings, onNavigateToAbout, onDeleteCounter = {
                 scopeIO.launch {
-                    deleteCounter(counter.value)
+                    deleteCounter(counter.value.getCounterId())
                 }
             })
         }
@@ -576,7 +575,7 @@ class MainActivity : ComponentActivity() {
     private fun deleteAll() {
         counters.filterNotNull().forEach {
             scopeIO.launch {
-                deleteCounter(it)
+                deleteCounter(it.getCounterId())
             }
         }
     }
