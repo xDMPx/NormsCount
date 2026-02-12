@@ -93,7 +93,6 @@ class MainActivity : ComponentActivity() {
     private var counters = mutableStateListOf<Counter?>()
     private lateinit var counter: MutableState<Counter>
     private var counterID = 1
-    private var lastCounterID = 1
     private var overrideOnKeyDown = true
     private val settingsInstance = Settings.getInstance()
 
@@ -173,10 +172,7 @@ class MainActivity : ComponentActivity() {
                     .also { counterID = it.getCounterId() }
             CurrentCounter.setInstance(counter.value)
 
-            this@MainActivity.lastCounterID =
-                CounterDatabase.getInstance(this@MainActivity).counterDatabase.getLastID() ?: 1
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
-            Log.d(TAG_DEBUG, "onCrate -> lastCounterID: $lastCounterID")
             Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size}")
         }
 
@@ -256,7 +252,6 @@ class MainActivity : ComponentActivity() {
             )
         )
         counterID = counterEntity.id
-        lastCounterID = counterID
         this@MainActivity.counter.value = counters.last()!!
         CurrentCounter.setInstance(this@MainActivity.counter.value)
     }
@@ -354,6 +349,13 @@ class MainActivity : ComponentActivity() {
     ) {
         val settings by settingsInstance.settingsState.collectAsState()
         var openEditDialog by remember { mutableStateOf(false) }
+        var lastCounterId by remember { mutableStateOf(1) }
+        LaunchedEffect(counters.filterNotNull().size) {
+            val id = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getLastID() ?: 1
+            lastCounterId = id
+            Log.d(TAG_DEBUG, "Effect -> lastCounterID: $lastCounterId")
+        }
+
 
         ModalDrawerSheet(modifier = modifier) {
             Row {
@@ -394,7 +396,9 @@ class MainActivity : ComponentActivity() {
         }
 
         EditAlertDialog(
-            opened = openEditDialog, onDismissRequest = { openEditDialog = false }) { name, value ->
+            opened = openEditDialog,
+            lastCounterId,
+            onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
             scopeIO.launch {
                 addCounter(name, value)
@@ -404,12 +408,14 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun EditAlertDialog(
-        opened: Boolean, onDismissRequest: () -> Unit, onConfirmation: (String, Long) -> Unit
+        opened: Boolean,
+        lastCounterID: Int,
+        onDismissRequest: () -> Unit,
+        onConfirmation: (String, Long) -> Unit
     ) {
         if (!opened) return
-
         CounterUIHelper.EditAlertDialog(
-            "Counter #${lastCounterID + 1}",
+            "Counter #${lastCounterID+1}",
             0,
             onDismissRequest = onDismissRequest,
             onConfirmation = onConfirmation
