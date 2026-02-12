@@ -13,7 +13,7 @@ data class CounterState(
 )
 
 class Counter(
-    private val id: Int,
+    var id: Int,
     value: Long,
     name: String,
 ) : ViewModel() {
@@ -49,8 +49,6 @@ class Counter(
             _counterState.value = it.copy(name = name)
         }
     }
-
-    fun getCounterId() = id
 
     private fun getCounterEntity() =
         CounterEntity(id, _counterState.value.name, _counterState.value.count)
