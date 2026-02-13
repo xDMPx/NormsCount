@@ -13,9 +13,9 @@ data class CounterState(
 )
 
 class Counter(
-    var id: Int,
-    value: Long,
-    name: String,
+    var id: Int = 0,
+    value: Long = 0,
+    name: String = "Counter #",
 ) : ViewModel() {
     private val _counterState = MutableStateFlow(CounterState(value, name))
     val counterState: StateFlow<CounterState> = _counterState.asStateFlow()
