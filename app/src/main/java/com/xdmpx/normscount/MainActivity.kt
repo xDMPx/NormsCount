@@ -1,6 +1,7 @@
 package com.xdmpx.normscount
 
 import android.Manifest
+import android.app.Activity
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
@@ -14,11 +15,13 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.util.Log
 import android.view.KeyEvent
+import android.view.Window
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,6 +57,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -176,6 +180,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val settings by settingsInstance.settingsState.collectAsState()
+            val view = LocalView.current
             val loadSettings = rememberSaveable { mutableStateOf(true) }
 
             LaunchedEffect(loadSettings) {
@@ -187,7 +192,8 @@ class MainActivity : ComponentActivity() {
             }
             LaunchedEffect(settings.keepScreenOn) {
                 Log.i("MainActivity", "KeepScreenOn-> ${settings.keepScreenOn}")
-                setKeepScreenOnFlag()
+                val window = (view.context as Activity).window
+                setKeepScreenOnFlag(window, settings.keepScreenOn)
             }
 
             NormsCountTheme(
@@ -224,10 +230,9 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun setKeepScreenOnFlag() {
-        val settings = settingsInstance.settingsState.value
-        Log.d(TAG_DEBUG, "setKeepScreenOnFlag -> ${settings.keepScreenOn} ")
-        if (settings.keepScreenOn) {
+    private fun setKeepScreenOnFlag(window: Window, keepScreenOn: Boolean) {
+        Log.d(TAG_DEBUG, "setKeepScreenOnFlag -> $keepScreenOn")
+        if (keepScreenOn) {
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
