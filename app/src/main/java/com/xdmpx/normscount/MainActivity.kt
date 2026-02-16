@@ -48,7 +48,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,9 +70,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.xdmpx.normscount.Utils.ShortToast
 import com.xdmpx.normscount.about.About
-import com.xdmpx.normscount.counter.CounterViewModel
 import com.xdmpx.normscount.counter.CounterUI
 import com.xdmpx.normscount.counter.CounterUIHelper
+import com.xdmpx.normscount.counter.CounterViewModel
+import com.xdmpx.normscount.counter.CountersViewModel
 import com.xdmpx.normscount.counter.CurrentCounter
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
@@ -96,7 +96,7 @@ class MainActivity : ComponentActivity() {
     private var overrideOnKeyDown = true
     private val settingsInstance = Settings.getInstance()
     private val scopeIO = CoroutineScope(Dispatchers.IO)
-    private var counters = mutableStateListOf<CounterViewModel?>()
+    private val counters by viewModels<CountersViewModel>()
     private val counterViewModel by viewModels<CounterViewModel>()
 
     private val createDocumentJSON =
@@ -170,7 +170,7 @@ class MainActivity : ComponentActivity() {
             this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
 
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
-            Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size}")
+            Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size()}")
         }
 
         setContent {
@@ -261,8 +261,8 @@ class MainActivity : ComponentActivity() {
         counters[index] = null
         index = if (index > 0) index - 1 else 0
         while (index != 0 && counters[index] == null) index -= 1
-        while (index != counters.size && counters[index] == null) index += 1
-        if (index == counters.size) {
+        while (index != counters.size() && counters[index] == null) index += 1
+        if (index == counters.size()) {
             addCounter()
         } else {
             val counter = counters[index]!!
@@ -354,9 +354,10 @@ class MainActivity : ComponentActivity() {
         closeDrawer: () -> Unit, modifier: Modifier
     ) {
         val settings by settingsInstance.settingsState.collectAsState()
+        val counters by counters.countersState.collectAsState()
         var openEditDialog by remember { mutableStateOf(false) }
         var lastCounterId by remember { mutableStateOf(1) }
-        LaunchedEffect(counters.filterNotNull().size) {
+        LaunchedEffect(counters.countersViewModels.filterNotNull().size) {
             val id = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getLastID() ?: 1
             lastCounterId = id
             Log.d(TAG_DEBUG, "Effect -> lastCounterID: $lastCounterId")
@@ -386,7 +387,7 @@ class MainActivity : ComponentActivity() {
             }
             HorizontalDivider()
             LazyColumn {
-                items(counters) { counter ->
+                items(counters.countersViewModels) { counter ->
                     if (counter == null) return@items
                     NavigationDrawerItem(
                         label = { CounterUI.CounterName(counter) },
