@@ -48,6 +48,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -325,7 +326,7 @@ class MainActivity : ComponentActivity() {
         val settings by settingsInstance.settingsState.collectAsState()
         val counters by counters.countersState.collectAsState()
         var openEditDialog by remember { mutableStateOf(false) }
-        var lastCounterId by remember { mutableStateOf(1) }
+        var lastCounterId by remember { mutableIntStateOf(1) }
         LaunchedEffect(counters.countersViewModels.filterNotNull().size) {
             val id = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getLastID() ?: 1
             lastCounterId = id

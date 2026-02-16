@@ -14,7 +14,7 @@ interface CounterDao {
     @Query("SELECT * FROM Counter ORDER BY id DESC LIMIT 1")
     suspend fun getLast(): CounterEntity?
 
-    @Query("SELECT id FROM Counter ORDER BY id DESC LIMIT 1")
+    @Query("SELECT seq FROM sqlite_sequence WHERE name='Counter'")
     suspend fun getLastID(): Int?
 
     @Insert
