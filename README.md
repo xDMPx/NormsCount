@@ -41,7 +41,7 @@ To build it, clone the repository, open the project in Android Studio, and the
 
 The application is currently distributed only as APK via [releases](../../releases) page.
 
-<a href="https://github.com/xdmpx/autoinjector/releases"><img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" height="96"></a> 
+<a href="https://github.com/xDMPx/NormsCount/releases"><img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" height="96"></a> 
 
 ## License
 
