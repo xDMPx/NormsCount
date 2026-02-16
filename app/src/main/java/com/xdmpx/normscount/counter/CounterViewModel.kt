@@ -12,7 +12,7 @@ data class CounterState(
     val count: Long = 0, val name: String = ""
 )
 
-class Counter(
+class CounterViewModel(
     var id: Int = 0,
     value: Long = 0,
     name: String = "Counter #",
@@ -65,13 +65,13 @@ abstract class CurrentCounter {
 
     companion object {
         @Volatile
-        private var INSTANCE: Counter? = null
+        private var INSTANCE: CounterViewModel? = null
 
-        fun setInstance(instance: Counter) {
+        fun setInstance(instance: CounterViewModel) {
             INSTANCE = instance
         }
 
-        fun getInstance(): Counter? {
+        fun getInstance(): CounterViewModel? {
             synchronized(this) {
                 return INSTANCE
             }

@@ -46,7 +46,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -72,7 +71,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.xdmpx.normscount.Utils.ShortToast
 import com.xdmpx.normscount.about.About
-import com.xdmpx.normscount.counter.Counter
+import com.xdmpx.normscount.counter.CounterViewModel
 import com.xdmpx.normscount.counter.CounterUI
 import com.xdmpx.normscount.counter.CounterUIHelper
 import com.xdmpx.normscount.counter.CurrentCounter
@@ -97,8 +96,8 @@ class MainActivity : ComponentActivity() {
     private var overrideOnKeyDown = true
     private val settingsInstance = Settings.getInstance()
     private val scopeIO = CoroutineScope(Dispatchers.IO)
-    private var counters = mutableStateListOf<Counter?>()
-    private val counter by viewModels<Counter>()
+    private var counters = mutableStateListOf<CounterViewModel?>()
+    private val counterViewModel by viewModels<CounterViewModel>()
 
     private val createDocumentJSON =
         registerForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
@@ -133,7 +132,7 @@ class MainActivity : ComponentActivity() {
 
         createNotificationChannel()
 
-        CurrentCounter.setInstance(counter)
+        CurrentCounter.setInstance(counterViewModel)
 
         val counterIDKey = intPreferencesKey("counter_id")
         val savedCounterID: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
@@ -143,7 +142,7 @@ class MainActivity : ComponentActivity() {
         scopeIO.launch {
             var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
                 .map { counterEntity ->
-                    Counter(
+                    CounterViewModel(
                         counterEntity.id,
                         counterEntity.value,
                         counterEntity.name,
@@ -153,7 +152,7 @@ class MainActivity : ComponentActivity() {
                 addCounter()
                 counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
                     .map { counterEntity ->
-                        Counter(
+                        CounterViewModel(
                             counterEntity.id,
                             counterEntity.value,
                             counterEntity.name,
@@ -166,9 +165,9 @@ class MainActivity : ComponentActivity() {
             }
             val counterID = savedCounterID.first()
             val counter = counters.find { counter -> counterID == counter.id } ?: counters.first()
-            this@MainActivity.counter.id = counter.id
-            this@MainActivity.counter.setCounterName(counter.counterState.value.name)
-            this@MainActivity.counter.setCounterValue(counter.counterState.value.count)
+            this@MainActivity.counterViewModel.id = counter.id
+            this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
+            this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
 
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
             Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size}")
@@ -244,7 +243,7 @@ class MainActivity : ComponentActivity() {
         database.insert(counterBase)
         val counterEntity = database.getLast()!!
         counters.add(
-            Counter(
+            CounterViewModel(
                 counterEntity.id,
                 counterEntity.value,
                 counterEntity.name,
@@ -252,9 +251,9 @@ class MainActivity : ComponentActivity() {
         )
 
         val counter = counters.last()!!
-        this@MainActivity.counter.id = counter.id
-        this@MainActivity.counter.setCounterName(counter.counterState.value.name)
-        this@MainActivity.counter.setCounterValue(counter.counterState.value.count)
+        this@MainActivity.counterViewModel.id = counter.id
+        this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
+        this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
     }
 
     private suspend fun deleteCounter(counterId: Int) {
@@ -267,9 +266,9 @@ class MainActivity : ComponentActivity() {
             addCounter()
         } else {
             val counter = counters[index]!!
-            this@MainActivity.counter.id = counter.id
-            this@MainActivity.counter.setCounterName(counter.counterState.value.name)
-            this@MainActivity.counter.setCounterValue(counter.counterState.value.count)
+            this@MainActivity.counterViewModel.id = counter.id
+            this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
+            this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
         }
 
         val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
@@ -294,10 +293,10 @@ class MainActivity : ComponentActivity() {
             scope.launch {
                 drawerState.open()
             }
-            val i = counters.indexOfFirst { it?.id == counter.id }
+            val i = counters.indexOfFirst { it?.id == counterViewModel.id }
             if (i != -1) {
-                counters[i]?.setCounterValue(counter.counterState.value.count)
-                counters[i]?.setCounterName(counter.counterState.value.name)
+                counters[i]?.setCounterValue(counterViewModel.counterState.value.count)
+                counters[i]?.setCounterName(counterViewModel.counterState.value.name)
             }
         }
 
@@ -318,7 +317,7 @@ class MainActivity : ComponentActivity() {
             // Screen content
             MainUIScreen(openDrawer, onNavigateToSettings, onNavigateToAbout, onDeleteCounter = {
                 scopeIO.launch {
-                    deleteCounter(this@MainActivity.counter.id)
+                    deleteCounter(this@MainActivity.counterViewModel.id)
                 }
             })
         }
@@ -336,7 +335,7 @@ class MainActivity : ComponentActivity() {
         Scaffold(
             topBar = {
                 CounterUI.CounterTopAppBar(
-                    counter,
+                    counterViewModel,
                     onNavigationIconClick,
                     onNavigateToSettings,
                     onNavigateToAbout,
@@ -345,7 +344,7 @@ class MainActivity : ComponentActivity() {
             },
         ) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
-                CounterUI.CounterUI(counter)
+                CounterUI.CounterUI(counterViewModel)
             }
         }
     }
@@ -393,9 +392,9 @@ class MainActivity : ComponentActivity() {
                         label = { CounterUI.CounterName(counter) },
                         selected = false,
                         onClick = {
-                            this@MainActivity.counter.id = counter.id
-                            this@MainActivity.counter.setCounterName(counter.counterState.value.name)
-                            this@MainActivity.counter.setCounterValue(counter.counterState.value.count)
+                            this@MainActivity.counterViewModel.id = counter.id
+                            this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
+                            this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
                             closeDrawer()
                         })
                 }
@@ -435,7 +434,7 @@ class MainActivity : ComponentActivity() {
             val vibrator = this@MainActivity.getSystemService(Vibrator::class.java)
             when (keyCode) {
                 KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                    counter.decrementCounter()
+                    counterViewModel.decrementCounter()
                     if (settings.vibrateOnValueChange) vibrator.vibrate(
                         VibrationEffect.createPredefined(
                             VibrationEffect.EFFECT_CLICK
@@ -444,7 +443,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 KeyEvent.KEYCODE_VOLUME_UP -> {
-                    counter.incrementCounter()
+                    counterViewModel.incrementCounter()
                     if (settings.vibrateOnValueChange) vibrator.vibrate(
                         VibrationEffect.createPredefined(
                             VibrationEffect.EFFECT_CLICK
@@ -464,10 +463,10 @@ class MainActivity : ComponentActivity() {
         scopeIO.launch {
             saveCounterID()
             settingsInstance.saveSettings(this@MainActivity)
-            val i = counters.indexOfFirst { it?.id == counter.id }
+            val i = counters.indexOfFirst { it?.id == counterViewModel.id }
             if (i != -1) {
-                counters[i]?.setCounterValue(counter.counterState.value.count)
-                counters[i]?.setCounterName(counter.counterState.value.name)
+                counters[i]?.setCounterValue(counterViewModel.counterState.value.count)
+                counters[i]?.setCounterName(counterViewModel.counterState.value.name)
             }
             counters.forEach {
                 it?.updateDatabase(this@MainActivity)
@@ -478,7 +477,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun saveCounterID() {
-        val counterID = counter.id
+        val counterID = counterViewModel.id
         val counterIDKey = intPreferencesKey("counter_id")
         this@MainActivity.dataStore.edit { settings ->
             Log.d(TAG_DEBUG, "saveCounterID -> counterID: $counterID")

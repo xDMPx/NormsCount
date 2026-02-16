@@ -63,7 +63,7 @@ object CounterUI {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun CounterUI(counterViewModel: Counter, modifier: Modifier = Modifier) {
+    fun CounterUI(counterViewModel: CounterViewModel, modifier: Modifier = Modifier) {
         val settings by settingsInstance.settingsState.collectAsState()
 
         val context = LocalContext.current
@@ -138,7 +138,7 @@ object CounterUI {
 
     @Composable
     private fun CounterUIPortrait(
-        counterViewModel: Counter,
+        counterViewModel: CounterViewModel,
         modifier: Modifier = Modifier,
         textModifier: Modifier,
         onClickFeedback: () -> Unit
@@ -153,7 +153,7 @@ object CounterUI {
 
     @Composable
     private fun CounterUILandscape(
-        counterViewModel: Counter,
+        counterViewModel: CounterViewModel,
         modifier: Modifier = Modifier,
         textModifier: Modifier,
         onClickFeedback: () -> Unit
@@ -168,7 +168,7 @@ object CounterUI {
 
     @Composable
     private fun CounterUIValue(
-        counterViewModel: Counter,
+        counterViewModel: CounterViewModel,
         modifier: Modifier = Modifier,
         textModifier: Modifier,
     ) {
@@ -190,7 +190,7 @@ object CounterUI {
 
     @Composable
     private fun CounterUIButtons(
-        counterViewModel: Counter,
+        counterViewModel: CounterViewModel,
         modifier: Modifier = Modifier,
         verticalArrangementAlignment: Alignment.Vertical,
         onClickFeedback: () -> Unit
@@ -223,7 +223,7 @@ object CounterUI {
     }
 
     @Composable
-    fun CounterName(counterViewModel: Counter) {
+    fun CounterName(counterViewModel: CounterViewModel) {
         val counterState by counterViewModel.counterState.collectAsState()
         val nameWeight = 0.725f
 
@@ -253,7 +253,7 @@ object CounterUI {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CounterTopAppBar(
-        counterViewModel: Counter,
+        counterViewModel: CounterViewModel,
         onNavigationIconClick: () -> Unit,
         onNavigateToSettings: () -> Unit,
         onNavigateToAbout: () -> Unit,
@@ -282,7 +282,7 @@ object CounterUI {
 
     @Composable
     fun TopAppBarMenu(
-        counterViewModel: Counter,
+        counterViewModel: CounterViewModel,
         onNavigateToSettings: () -> Unit,
         onNavigateToAbout: () -> Unit,
         onDeleteCounter: () -> Unit,
