@@ -154,7 +154,7 @@ class MainActivity : ComponentActivity() {
                 setKeepScreenOnFlag(window, settings.keepScreenOn)
             }
             LaunchedEffect(loadCounters) {
-                if(loadCounters.value){
+                if (loadCounters.value) {
                     loadCounters.value = false
                     Log.i("MainActivity", "Counters Load")
                     loadCountersFromDatabase()
@@ -228,7 +228,7 @@ class MainActivity : ComponentActivity() {
 
     private suspend fun deleteCounter(counterId: Int) {
         var index = counters.indexOfFirst { it?.id == counterId }
-        counters[index] = null
+        counters.deleteCounterById(this@MainActivity, counterId)
         index = if (index > 0) index - 1 else 0
         while (index != 0 && counters[index] == null) index -= 1
         while (index != counters.size() && counters[index] == null) index += 1
@@ -240,10 +240,6 @@ class MainActivity : ComponentActivity() {
             this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
             this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
         }
-
-        val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
-        database.deleteByID(counterId)
-
     }
 
     @Composable

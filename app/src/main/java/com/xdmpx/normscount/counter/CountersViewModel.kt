@@ -1,6 +1,8 @@
 package com.xdmpx.normscount.counter
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
+import com.xdmpx.normscount.database.CounterDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,6 +45,16 @@ class CountersViewModel : ViewModel() {
 
     suspend fun forEach(action: suspend (CounterViewModel?) -> Unit) {
         _countersState.value.countersViewModels.forEach { action(it) }
+    }
+
+    suspend fun deleteCounterById(context: Context, id: Int) {
+        _countersState.value.let {
+            _countersState.value =
+                it.copy(countersViewModels = it.countersViewModels.map { c -> if (c?.id != id) c else null })
+        }
+
+        val database = CounterDatabase.getInstance(context).counterDatabase
+        database.deleteByID(id)
     }
 
     fun filterNotNull() = _countersState.value.countersViewModels.filterNotNull()
