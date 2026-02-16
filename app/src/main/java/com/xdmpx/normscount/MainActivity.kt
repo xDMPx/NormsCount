@@ -134,49 +134,11 @@ class MainActivity : ComponentActivity() {
 
         CurrentCounter.setInstance(counterViewModel)
 
-        val counterIDKey = intPreferencesKey("counter_id")
-        val savedCounterID: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
-            preferences[counterIDKey] ?: 1
-        }
-
-        scopeIO.launch {
-            var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
-                .map { counterEntity ->
-                    CounterViewModel(
-                        counterEntity.id,
-                        counterEntity.value,
-                        counterEntity.name,
-                    )
-                }
-            if (counters.isEmpty()) {
-                addCounter()
-                counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
-                    .map { counterEntity ->
-                        CounterViewModel(
-                            counterEntity.id,
-                            counterEntity.value,
-                            counterEntity.name,
-                        )
-                    }
-            }
-            this@MainActivity.counters.clear()
-            counters.forEach {
-                this@MainActivity.counters.add(it)
-            }
-            val counterID = savedCounterID.first()
-            val counter = counters.find { counter -> counterID == counter.id } ?: counters.first()
-            this@MainActivity.counterViewModel.id = counter.id
-            this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
-            this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
-
-            Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
-            Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size()}")
-        }
-
         setContent {
             val settings by settingsInstance.settingsState.collectAsState()
             val view = LocalView.current
             val loadSettings = rememberSaveable { mutableStateOf(true) }
+            val loadCounters = rememberSaveable { mutableStateOf(true) }
 
             LaunchedEffect(loadSettings) {
                 if (loadSettings.value) {
@@ -189,6 +151,13 @@ class MainActivity : ComponentActivity() {
                 Log.i("MainActivity", "KeepScreenOn-> ${settings.keepScreenOn}")
                 val window = (view.context as Activity).window
                 setKeepScreenOnFlag(window, settings.keepScreenOn)
+            }
+            LaunchedEffect(loadCounters) {
+                if(loadCounters.value){
+                    loadCounters.value = false
+                    Log.i("MainActivity", "Counters Load")
+                    loadCountersFromDatabase()
+                }
             }
 
             NormsCountTheme(
@@ -624,6 +593,47 @@ class MainActivity : ComponentActivity() {
             } else {
                 settingsInstance.setNotification(true)
             }
+        }
+    }
+
+    private fun loadCountersFromDatabase() {
+        val counterIDKey = intPreferencesKey("counter_id")
+        val savedCounterID: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
+            preferences[counterIDKey] ?: 1
+        }
+
+        scopeIO.launch {
+            var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
+                .map { counterEntity ->
+                    CounterViewModel(
+                        counterEntity.id,
+                        counterEntity.value,
+                        counterEntity.name,
+                    )
+                }
+            if (counters.isEmpty()) {
+                addCounter()
+                counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
+                    .map { counterEntity ->
+                        CounterViewModel(
+                            counterEntity.id,
+                            counterEntity.value,
+                            counterEntity.name,
+                        )
+                    }
+            }
+            this@MainActivity.counters.clear()
+            counters.forEach {
+                this@MainActivity.counters.add(it)
+            }
+            val counterID = savedCounterID.first()
+            val counter = counters.find { counter -> counterID == counter.id } ?: counters.first()
+            this@MainActivity.counterViewModel.id = counter.id
+            this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
+            this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
+
+            Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
+            Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.counters.size()}")
         }
     }
 
