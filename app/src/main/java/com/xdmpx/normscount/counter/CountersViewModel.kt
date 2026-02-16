@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class CountersState(
-    val countersViewModels: List<CounterViewModel?> = listOf()
+    val countersViewModels: List<CounterViewModel> = listOf()
 )
 
 class CountersViewModel : ViewModel() {
@@ -32,31 +32,28 @@ class CountersViewModel : ViewModel() {
 
     fun last() = _countersState.value.countersViewModels.last()
 
-    fun indexOfFirst(predicate: (CounterViewModel?) -> Boolean) =
+    fun indexOfFirst(predicate: (CounterViewModel) -> Boolean) =
         _countersState.value.countersViewModels.indexOfFirst { predicate(it) }
 
     operator fun get(index: Int) = _countersState.value.countersViewModels[index]
-    operator fun set(index: Int, value: CounterViewModel?) {
+    operator fun set(index: Int, value: CounterViewModel) {
         _countersState.value.let {
             _countersState.value =
                 it.copy(countersViewModels = it.countersViewModels.mapIndexed { i, v -> if (i == index) value else v })
         }
     }
 
-    suspend fun forEach(action: suspend (CounterViewModel?) -> Unit) {
+    suspend fun forEach(action: suspend (CounterViewModel) -> Unit) {
         _countersState.value.countersViewModels.forEach { action(it) }
     }
 
     suspend fun deleteCounterById(context: Context, id: Int) {
         _countersState.value.let {
             _countersState.value =
-                it.copy(countersViewModels = it.countersViewModels.map { c -> if (c?.id != id) c else null })
+                it.copy(countersViewModels = it.countersViewModels.mapNotNull { c -> if (c.id != id) c else null })
         }
 
         val database = CounterDatabase.getInstance(context).counterDatabase
         database.deleteByID(id)
     }
-
-    fun filterNotNull() = _countersState.value.countersViewModels.filterNotNull()
-
 }

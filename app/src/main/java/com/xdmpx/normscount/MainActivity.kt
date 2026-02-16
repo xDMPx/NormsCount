@@ -220,22 +220,20 @@ class MainActivity : ComponentActivity() {
             )
         )
 
-        val counter = counters.last()!!
+        val counter = counters.last()
         this@MainActivity.counterViewModel.id = counter.id
         this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
         this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
     }
 
     private suspend fun deleteCounter(counterId: Int) {
-        var index = counters.indexOfFirst { it?.id == counterId }
+        var index = counters.indexOfFirst { it.id == counterId }
         counters.deleteCounterById(this@MainActivity, counterId)
         index = if (index > 0) index - 1 else 0
-        while (index != 0 && counters[index] == null) index -= 1
-        while (index != counters.size() && counters[index] == null) index += 1
         if (index == counters.size()) {
             addCounter()
         } else {
-            val counter = counters[index]!!
+            val counter = counters[index]
             this@MainActivity.counterViewModel.id = counter.id
             this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
             this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
@@ -259,10 +257,10 @@ class MainActivity : ComponentActivity() {
             scope.launch {
                 drawerState.open()
             }
-            val i = counters.indexOfFirst { it?.id == counterViewModel.id }
+            val i = counters.indexOfFirst { it.id == counterViewModel.id }
             if (i != -1) {
-                counters[i]?.setCounterValue(counterViewModel.counterState.value.count)
-                counters[i]?.setCounterName(counterViewModel.counterState.value.name)
+                counters[i].setCounterValue(counterViewModel.counterState.value.count)
+                counters[i].setCounterName(counterViewModel.counterState.value.name)
             }
         }
 
@@ -323,7 +321,7 @@ class MainActivity : ComponentActivity() {
         val counters by counters.countersState.collectAsState()
         var openEditDialog by remember { mutableStateOf(false) }
         var lastCounterId by remember { mutableIntStateOf(1) }
-        LaunchedEffect(counters.countersViewModels.filterNotNull().size) {
+        LaunchedEffect(counters.countersViewModels.size) {
             val id = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getLastID() ?: 1
             lastCounterId = id
             Log.d(TAG_DEBUG, "Effect -> lastCounterID: $lastCounterId")
@@ -354,7 +352,6 @@ class MainActivity : ComponentActivity() {
             HorizontalDivider()
             LazyColumn {
                 items(counters.countersViewModels) { counter ->
-                    if (counter == null) return@items
                     NavigationDrawerItem(
                         label = { CounterUI.CounterName(counter) },
                         selected = false,
@@ -430,13 +427,13 @@ class MainActivity : ComponentActivity() {
         scopeIO.launch {
             saveCounterID()
             settingsInstance.saveSettings(this@MainActivity)
-            val i = counters.indexOfFirst { it?.id == counterViewModel.id }
+            val i = counters.indexOfFirst { it.id == counterViewModel.id }
             if (i != -1) {
-                counters[i]?.setCounterValue(counterViewModel.counterState.value.count)
-                counters[i]?.setCounterName(counterViewModel.counterState.value.name)
+                counters[i].setCounterValue(counterViewModel.counterState.value.count)
+                counters[i].setCounterName(counterViewModel.counterState.value.name)
             }
             counters.forEach {
-                it?.updateDatabase(this@MainActivity)
+                it.updateDatabase(this@MainActivity)
             }
         }
 
@@ -455,7 +452,7 @@ class MainActivity : ComponentActivity() {
     private fun exportToJSON() {
         scopeIO.launch {
             counters.forEach {
-                it?.updateDatabase(this@MainActivity)
+                it.updateDatabase(this@MainActivity)
             }
             Log.d(TAG_DEBUG, "exportToJson")
 
@@ -470,7 +467,7 @@ class MainActivity : ComponentActivity() {
     private fun exportToCSV() {
         scopeIO.launch {
             counters.forEach {
-                it?.updateDatabase(this@MainActivity)
+                it.updateDatabase(this@MainActivity)
             }
             Log.d(TAG_DEBUG, "exportToCSV")
 
@@ -538,7 +535,7 @@ class MainActivity : ComponentActivity() {
         }
         scopeIO.launch {
             counters.forEach {
-                it?.updateDatabase(this@MainActivity)
+                it.updateDatabase(this@MainActivity)
             }
             if (Utils.importFromJSON(this@MainActivity, uri, addCounters)) {
                 runOnUiThread {
@@ -557,8 +554,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun deleteAll() {
-        counters.filterNotNull().forEach {
-            scopeIO.launch {
+        scopeIO.launch {
+            counters.forEach {
                 deleteCounter(it.id)
             }
         }
