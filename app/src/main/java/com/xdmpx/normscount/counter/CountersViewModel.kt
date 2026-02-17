@@ -1,18 +1,12 @@
 package com.xdmpx.normscount.counter
 
 import android.content.Context
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.ViewModel
-import com.xdmpx.normscount.dataStore
 import com.xdmpx.normscount.database.CounterDatabase
-import kotlinx.coroutines.flow.Flow
+import com.xdmpx.normscount.database.CounterEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-
 
 data class CountersState(
     val countersViewModels: List<CounterViewModel> = listOf()
@@ -48,6 +42,23 @@ class CountersViewModel : ViewModel() {
             _countersState.value =
                 it.copy(countersViewModels = it.countersViewModels.mapIndexed { i, v -> if (i == index) value else v })
         }
+    }
+
+    suspend fun addCounter(context: Context, name: String? = null, value: Long = 0) {
+        val database = CounterDatabase.getInstance(context).counterDatabase
+
+        val lastID = database.getLastID() ?: 0
+        val name = name ?: "Counter #${lastID + 1}"
+        val counterBase = CounterEntity(name = name, value = value)
+        database.insert(counterBase)
+        val counterEntity = database.getLast()!!
+        this@CountersViewModel.add(
+            CounterViewModel(
+                counterEntity.id,
+                counterEntity.value,
+                counterEntity.name,
+            )
+        )
     }
 
     suspend fun forEach(action: suspend (CounterViewModel) -> Unit) {

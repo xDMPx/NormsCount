@@ -205,20 +205,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun addCounter(name: String? = null, value: Long = 0) {
-        val database = CounterDatabase.getInstance(this@MainActivity).counterDatabase
-
-        val lastID = database.getLastID() ?: 0
-        val name = name ?: "Counter #${lastID + 1}"
-        val counterBase = CounterEntity(name = name, value = value)
-        database.insert(counterBase)
-        val counterEntity = database.getLast()!!
-        counters.add(
-            CounterViewModel(
-                counterEntity.id,
-                counterEntity.value,
-                counterEntity.name,
-            )
-        )
+        counters.addCounter(this@MainActivity, name, value)
 
         val counter = counters.last()
         this@MainActivity.counterViewModel.id = counter.id
