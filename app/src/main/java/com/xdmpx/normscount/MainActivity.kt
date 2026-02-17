@@ -75,16 +75,14 @@ import com.xdmpx.normscount.counter.CounterUI
 import com.xdmpx.normscount.counter.CounterUIHelper
 import com.xdmpx.normscount.counter.CounterViewModel
 import com.xdmpx.normscount.counter.CountersViewModel
-import com.xdmpx.normscount.counter.CurrentCounter
+import com.xdmpx.normscount.counter.CountersViewModelInstance
 import com.xdmpx.normscount.database.CounterDatabase
-import com.xdmpx.normscount.database.CounterEntity
 import com.xdmpx.normscount.settings.Settings
 import com.xdmpx.normscount.settings.SettingsUI
 import com.xdmpx.normscount.ui.theme.NormsCountTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -133,7 +131,7 @@ class MainActivity : ComponentActivity() {
 
         createNotificationChannel()
 
-        CurrentCounter.setInstance(counterViewModel)
+        CountersViewModelInstance.setInstance(counters, counterViewModel)
 
         setContent {
             val settings by settingsInstance.settingsState.collectAsState()

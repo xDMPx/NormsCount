@@ -91,3 +91,24 @@ class CountersViewModel : ViewModel() {
         }
     }
 }
+
+abstract class CountersViewModelInstance {
+
+    companion object {
+        @Volatile
+        private var INSTANCE: CountersViewModel? = null
+
+        fun setInstance(instance: CountersViewModel, counter: CounterViewModel) {
+            INSTANCE = instance
+            CurrentCounter.setInstance(counter)
+        }
+
+        fun getInstance(): CountersViewModel? {
+            synchronized(this) {
+                return INSTANCE
+            }
+        }
+
+        fun getCurrentCounterInstance(): CounterViewModel? = CurrentCounter.getInstance()
+    }
+}
