@@ -278,12 +278,11 @@ class MainActivity : ComponentActivity() {
         onDeleteCounter: () -> Unit,
     ) {
         overrideOnKeyDown = true
-        val counterViewModel by counters.currentCounterState.collectAsState()
 
         Scaffold(
             topBar = {
                 CounterUI.CounterTopAppBar(
-                    counterViewModel,
+                    counters,
                     onNavigationIconClick,
                     onNavigateToSettings,
                     onNavigateToAbout,
@@ -292,7 +291,7 @@ class MainActivity : ComponentActivity() {
             },
         ) { innerPadding ->
             Box(Modifier.padding(innerPadding)) {
-                CounterUI.CounterUI(counterViewModel)
+                CounterUI.CounterUI(counters)
             }
         }
     }
@@ -384,7 +383,7 @@ class MainActivity : ComponentActivity() {
             val vibrator = this@MainActivity.getSystemService(Vibrator::class.java)
             when (keyCode) {
                 KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                    counters.currentCounterState.value.decrementCounter()
+                    counters.decrementCurrentCounter()
                     if (settings.vibrateOnValueChange) vibrator.vibrate(
                         VibrationEffect.createPredefined(
                             VibrationEffect.EFFECT_CLICK
@@ -393,7 +392,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 KeyEvent.KEYCODE_VOLUME_UP -> {
-                    counters.currentCounterState.value.incrementCounter()
+                    counters.incrementCurrentCounter()
                     if (settings.vibrateOnValueChange) vibrator.vibrate(
                         VibrationEffect.createPredefined(
                             VibrationEffect.EFFECT_CLICK

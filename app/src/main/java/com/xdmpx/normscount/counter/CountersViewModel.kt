@@ -17,14 +17,34 @@ class CountersViewModel : ViewModel() {
     val countersState: StateFlow<CountersState> = _countersState.asStateFlow()
 
     private val _currentCounterState = MutableStateFlow(CounterViewModel())
-    val currentCounterState : StateFlow<CounterViewModel> = _currentCounterState.asStateFlow()
+    val currentCounterState: StateFlow<CounterViewModel> = _currentCounterState.asStateFlow()
 
-    fun setCurrentCounter(id: Int, name: String, value: Long){
+    fun setCurrentCounter(id: Int, name: String, value: Long) {
         _currentCounterState.value.let {
             _currentCounterState.value.id = id
             _currentCounterState.value.setCounterName(name)
             _currentCounterState.value.setCounterValue(value)
         }
+    }
+
+    fun incrementCurrentCounter() {
+        _currentCounterState.value.incrementCounter()
+    }
+
+    fun decrementCurrentCounter() {
+        _currentCounterState.value.decrementCounter()
+    }
+
+    fun resetCurrentCounter() {
+        _currentCounterState.value.resetCounter()
+    }
+
+    fun setCurrentCounterName(name: String) {
+        _currentCounterState.value.setCounterName(name)
+    }
+
+    fun setCurrentCounterValue(value: Long) {
+        _currentCounterState.value.setCounterValue(value)
     }
 
     fun clear() {

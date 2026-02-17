@@ -63,7 +63,7 @@ object CounterUI {
 
     @OptIn(ExperimentalFoundationApi::class)
     @Composable
-    fun CounterUI(counterViewModel: CounterViewModel, modifier: Modifier = Modifier) {
+    fun CounterUI(countersViewModel: CountersViewModel, modifier: Modifier = Modifier) {
         val settings by settingsInstance.settingsState.collectAsState()
 
         val context = LocalContext.current
@@ -79,10 +79,10 @@ object CounterUI {
         val textModifier = if (settings.tapCounterValueToIncrement) {
             val interactionSource = remember { MutableInteractionSource() }
             Modifier.combinedClickable(interactionSource, null, onClick = {
-                counterViewModel.incrementCounter()
+                countersViewModel.incrementCurrentCounter()
                 onClickFeedback()
             }, onLongClick = {
-                counterViewModel.decrementCounter()
+                countersViewModel.decrementCurrentCounter()
                 onClickFeedback()
             })
         } else {
@@ -92,12 +92,13 @@ object CounterUI {
         val landscapeOrientation =
             LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (!landscapeOrientation) CounterUIPortrait(
-            counterViewModel, modifier, textModifier, onClickFeedback
+            countersViewModel, modifier, textModifier, onClickFeedback
         )
-        else CounterUILandscape(counterViewModel, modifier, textModifier, onClickFeedback)
+        else CounterUILandscape(countersViewModel, modifier, textModifier, onClickFeedback)
 
         if (settings.notification) {
-            val counterState by counterViewModel.counterState.collectAsState()
+            val countersState by countersViewModel.currentCounterState.collectAsState()
+            val counterState by countersState.counterState.collectAsState()
 
             // TODO: ONGOING NOTIFICATION
             val incrementIntent = Intent(context, NotificationReceiver::class.java).apply {
@@ -138,41 +139,43 @@ object CounterUI {
 
     @Composable
     private fun CounterUIPortrait(
-        counterViewModel: CounterViewModel,
+        countersViewModel: CountersViewModel,
         modifier: Modifier = Modifier,
         textModifier: Modifier,
         onClickFeedback: () -> Unit
     ) {
         Column(modifier = modifier) {
-            CounterUIValue(counterViewModel, Modifier.weight(0.7f), textModifier)
+            CounterUIValue(countersViewModel, Modifier.weight(0.7f), textModifier)
             CounterUIButtons(
-                counterViewModel, modifier.weight(0.3f), Alignment.Bottom, onClickFeedback
+                countersViewModel, modifier.weight(0.3f), Alignment.Bottom, onClickFeedback
             )
         }
     }
 
     @Composable
     private fun CounterUILandscape(
-        counterViewModel: CounterViewModel,
+        countersViewModel: CountersViewModel,
         modifier: Modifier = Modifier,
         textModifier: Modifier,
         onClickFeedback: () -> Unit
     ) {
         Row(modifier = modifier) {
-            CounterUIValue(counterViewModel, Modifier.weight(0.7f), textModifier)
+            CounterUIValue(countersViewModel, Modifier.weight(0.7f), textModifier)
             CounterUIButtons(
-                counterViewModel, modifier.weight(0.3f), Alignment.CenterVertically, onClickFeedback
+                countersViewModel, modifier.weight(0.3f), Alignment.CenterVertically, onClickFeedback
             )
         }
     }
 
     @Composable
     private fun CounterUIValue(
-        counterViewModel: CounterViewModel,
+        countersViewModel: CountersViewModel,
         modifier: Modifier = Modifier,
         textModifier: Modifier,
     ) {
-        val counterState by counterViewModel.counterState.collectAsState()
+        val countersState by countersViewModel.currentCounterState.collectAsState()
+        val counterState by countersState.counterState.collectAsState()
+
         LazyRow(
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
@@ -190,7 +193,7 @@ object CounterUI {
 
     @Composable
     private fun CounterUIButtons(
-        counterViewModel: CounterViewModel,
+        countersViewModel: CountersViewModel,
         modifier: Modifier = Modifier,
         verticalArrangementAlignment: Alignment.Vertical,
         onClickFeedback: () -> Unit
@@ -202,7 +205,7 @@ object CounterUI {
         ) {
             Button(
                 onClick = {
-                    counterViewModel.incrementCounter()
+                    countersViewModel.incrementCurrentCounter()
                     onClickFeedback()
                 }, modifier = Modifier
                     .fillMaxWidth(0.9f)
@@ -212,7 +215,7 @@ object CounterUI {
             }
             Button(
                 onClick = {
-                    counterViewModel.decrementCounter()
+                    countersViewModel.decrementCurrentCounter()
                     onClickFeedback()
                 }, modifier = Modifier.fillMaxWidth(0.9f)
             ) {
@@ -253,13 +256,14 @@ object CounterUI {
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun CounterTopAppBar(
-        counterViewModel: CounterViewModel,
+        countersViewModel: CountersViewModel,
         onNavigationIconClick: () -> Unit,
         onNavigateToSettings: () -> Unit,
         onNavigateToAbout: () -> Unit,
         onDeleteCounter: () -> Unit,
     ) {
-        val counterState by counterViewModel.counterState.collectAsState()
+        val countersState by countersViewModel.currentCounterState.collectAsState()
+        val counterState by countersState.counterState.collectAsState()
 
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
@@ -275,19 +279,21 @@ object CounterUI {
             }
         }, actions = {
             TopAppBarMenu(
-                counterViewModel, onNavigateToSettings, onNavigateToAbout, onDeleteCounter
+                countersViewModel, onNavigateToSettings, onNavigateToAbout, onDeleteCounter
             )
         })
     }
 
     @Composable
     fun TopAppBarMenu(
-        counterViewModel: CounterViewModel,
+        countersViewModel: CountersViewModel,
         onNavigateToSettings: () -> Unit,
         onNavigateToAbout: () -> Unit,
         onDeleteCounter: () -> Unit,
     ) {
-        val counterState by counterViewModel.counterState.collectAsState()
+        val countersState by countersViewModel.currentCounterState.collectAsState()
+        val counterState by countersState.counterState.collectAsState()
+
         val settings by settingsInstance.settingsState.collectAsState()
         var expanded by remember { mutableStateOf(false) }
         var openResetAlertDialog by remember { mutableStateOf(false) }
@@ -295,7 +301,7 @@ object CounterUI {
         var openEditDialog by remember { mutableStateOf(false) }
 
         IconButton(onClick = {
-            if (!settings.confirmationDialogReset) counterViewModel.resetCounter()
+            if (!settings.confirmationDialogReset) countersViewModel.resetCurrentCounter()
             else openResetAlertDialog = true
         }) {
             Icon(
@@ -344,7 +350,7 @@ object CounterUI {
         ResetAlertDialog(
             openResetAlertDialog, onDismissRequest = { openResetAlertDialog = false }) {
             openResetAlertDialog = false
-            counterViewModel.resetCounter()
+            countersViewModel.resetCurrentCounter()
         }
 
         DeleteAlertDialog(
@@ -359,8 +365,8 @@ object CounterUI {
             counterState.count,
             onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
-            counterViewModel.setCounterValue(value)
-            counterViewModel.setCounterName(name)
+            countersViewModel.setCurrentCounterValue(value)
+            countersViewModel.setCurrentCounterName(name)
         }
 
     }
