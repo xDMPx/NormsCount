@@ -1,11 +1,18 @@
 package com.xdmpx.normscount.counter
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.lifecycle.ViewModel
+import com.xdmpx.normscount.dataStore
 import com.xdmpx.normscount.database.CounterDatabase
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+
 
 data class CountersState(
     val countersViewModels: List<CounterViewModel> = listOf()
@@ -55,5 +62,21 @@ class CountersViewModel : ViewModel() {
 
         val database = CounterDatabase.getInstance(context).counterDatabase
         database.deleteByID(id)
+    }
+
+    suspend fun loadCountersFromDatabase(context: Context) {
+        val counters =
+            CounterDatabase.getInstance(context).counterDatabase.getAll().map { counterEntity ->
+                CounterViewModel(
+                    counterEntity.id,
+                    counterEntity.value,
+                    counterEntity.name,
+                )
+            }
+
+        this@CountersViewModel.clear()
+        counters.forEach {
+            this@CountersViewModel.add(it)
+        }
     }
 }

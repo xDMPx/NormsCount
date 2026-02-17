@@ -592,36 +592,22 @@ class MainActivity : ComponentActivity() {
 
     private fun loadCountersFromDatabase() {
         val counterIDKey = intPreferencesKey("counter_id")
-        val savedCounterID: Flow<Int> = this.dataStore.data.catch { }.map { preferences ->
+        val savedCounterID: Flow<Int> = dataStore.data.map { preferences ->
             preferences[counterIDKey] ?: 1
         }
-
         scopeIO.launch {
-            var counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
-                .map { counterEntity ->
-                    CounterViewModel(
-                        counterEntity.id,
-                        counterEntity.value,
-                        counterEntity.name,
-                    )
-                }
-            if (counters.isEmpty()) {
+            this@MainActivity.counters.loadCountersFromDatabase(this@MainActivity)
+            if (counters.countersState.value.countersViewModels.isEmpty()) {
                 addCounter()
-                counters = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getAll()
-                    .map { counterEntity ->
-                        CounterViewModel(
-                            counterEntity.id,
-                            counterEntity.value,
-                            counterEntity.name,
-                        )
-                    }
+                loadCountersFromDatabase()
+                return@launch
             }
-            this@MainActivity.counters.clear()
-            counters.forEach {
-                this@MainActivity.counters.add(it)
-            }
+
             val counterID = savedCounterID.first()
-            val counter = counters.find { counter -> counterID == counter.id } ?: counters.first()
+            val counter =
+                counters.countersState.value.countersViewModels.find { counter -> counterID == counter.id }
+                    ?: counters.countersState.value.countersViewModels.first()
+
             this@MainActivity.counterViewModel.id = counter.id
             this@MainActivity.counterViewModel.setCounterName(counter.counterState.value.name)
             this@MainActivity.counterViewModel.setCounterValue(counter.counterState.value.count)
