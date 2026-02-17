@@ -138,9 +138,5 @@ abstract class CountersViewModelInstance {
                 return INSTANCE
             }
         }
-
-        fun getCurrentCounterInstance(): CounterViewModel? {
-            return getInstance()?.currentCounterState?.value
-        }
     }
 }

@@ -8,12 +8,12 @@ import com.xdmpx.normscount.counter.CountersViewModelInstance
 class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context?, intent: Intent?) {
         val action = intent?.getStringExtra("action")
-        val counter = CountersViewModelInstance.getCurrentCounterInstance()
+        val counter = CountersViewModelInstance.getInstance()
         if (action == "increment" && counter != null) {
-            counter.incrementCounter()
+            counter.incrementCurrentCounter()
         }
         if (action == "decrement" && counter != null) {
-            counter.decrementCounter()
+            counter.decrementCurrentCounter()
         }
     }
 }

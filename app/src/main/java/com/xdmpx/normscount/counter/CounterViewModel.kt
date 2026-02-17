@@ -60,21 +60,3 @@ class CounterViewModel(
     }
 
 }
-
-abstract class CurrentCounter {
-
-    companion object {
-        @Volatile
-        private var INSTANCE: CounterViewModel? = null
-
-        fun setInstance(instance: CounterViewModel) {
-            INSTANCE = instance
-        }
-
-        fun getInstance(): CounterViewModel? {
-            synchronized(this) {
-                return INSTANCE
-            }
-        }
-    }
-}
