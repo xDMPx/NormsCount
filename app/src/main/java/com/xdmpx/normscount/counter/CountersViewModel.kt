@@ -53,6 +53,21 @@ class CountersViewModel : ViewModel() {
         }
     }
 
+    fun synchronizeCountersWithCurrentCounter() {
+        _currentCounterState.value.let { currentCounter ->
+            _countersState.value.let { counters ->
+                _countersState.value =
+                    counters.copy(countersViewModels = counters.countersViewModels.map {
+                        if (currentCounter.id == it.id) {
+                            it.setCounterName(currentCounter.counterState.value.name)
+                            it.setCounterValue(currentCounter.counterState.value.count)
+                        }
+                        it
+                    })
+            }
+        }
+    }
+
     fun add(counterViewModel: CounterViewModel) {
         _countersState.value.let {
             _countersState.value =
@@ -66,14 +81,6 @@ class CountersViewModel : ViewModel() {
 
     fun indexOfFirst(predicate: (CounterViewModel) -> Boolean) =
         _countersState.value.countersViewModels.indexOfFirst { predicate(it) }
-
-    operator fun get(index: Int) = _countersState.value.countersViewModels[index]
-    operator fun set(index: Int, value: CounterViewModel) {
-        _countersState.value.let {
-            _countersState.value =
-                it.copy(countersViewModels = it.countersViewModels.mapIndexed { i, v -> if (i == index) value else v })
-        }
-    }
 
     suspend fun addCounter(context: Context, name: String? = null, value: Long = 0) {
         val database = CounterDatabase.getInstance(context).counterDatabase

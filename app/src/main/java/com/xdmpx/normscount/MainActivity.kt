@@ -217,11 +217,7 @@ class MainActivity : ComponentActivity() {
             scope.launch {
                 drawerState.open()
             }
-            val i = counters.indexOfFirst { it.id == counters.currentCounterState.value.id }
-            if (i != -1) {
-                counters[i].setCounterValue(counters.currentCounterState.value.counterState.value.count)
-                counters[i].setCounterName(counters.currentCounterState.value.counterState.value.name)
-            }
+            this@MainActivity.counters.synchronizeCountersWithCurrentCounter()
         }
 
         val landscapeOrientation =
@@ -391,11 +387,7 @@ class MainActivity : ComponentActivity() {
         scopeIO.launch {
             saveCounterID()
             settingsInstance.saveSettings(this@MainActivity)
-            val i = counters.indexOfFirst { it.id == counters.currentCounterState.value.id }
-            if (i != -1) {
-                counters[i].setCounterValue(counters.currentCounterState.value.counterState.value.count)
-                counters[i].setCounterName(counters.currentCounterState.value.counterState.value.name)
-            }
+            this@MainActivity.counters.synchronizeCountersWithCurrentCounter()
             counters.forEach {
                 it.updateDatabase(this@MainActivity)
             }
