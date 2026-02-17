@@ -16,6 +16,17 @@ class CountersViewModel : ViewModel() {
     private val _countersState = MutableStateFlow(CountersState())
     val countersState: StateFlow<CountersState> = _countersState.asStateFlow()
 
+    private val _currentCounterState = MutableStateFlow(CounterViewModel())
+    val currentCounterState : StateFlow<CounterViewModel> = _currentCounterState.asStateFlow()
+
+    fun setCurrentCounter(id: Int, name: String, value: Long){
+        _currentCounterState.value.let {
+            _currentCounterState.value.id = id
+            _currentCounterState.value.setCounterName(name)
+            _currentCounterState.value.setCounterValue(value)
+        }
+    }
+
     fun clear() {
         _countersState.value.let {
             _countersState.value = it.copy(countersViewModels = listOf())
@@ -98,9 +109,8 @@ abstract class CountersViewModelInstance {
         @Volatile
         private var INSTANCE: CountersViewModel? = null
 
-        fun setInstance(instance: CountersViewModel, counter: CounterViewModel) {
+        fun setInstance(instance: CountersViewModel) {
             INSTANCE = instance
-            CurrentCounter.setInstance(counter)
         }
 
         fun getInstance(): CountersViewModel? {
@@ -109,6 +119,8 @@ abstract class CountersViewModelInstance {
             }
         }
 
-        fun getCurrentCounterInstance(): CounterViewModel? = CurrentCounter.getInstance()
+        fun getCurrentCounterInstance(): CounterViewModel? {
+            return getInstance()?.currentCounterState?.value
+        }
     }
 }
