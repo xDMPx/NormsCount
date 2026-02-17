@@ -90,6 +90,10 @@ class CountersViewModel : ViewModel() {
                 counterEntity.name,
             )
         )
+
+        this@CountersViewModel.setCurrentCounter(
+            id = counterEntity.id, counterEntity.name, counterEntity.value
+        )
     }
 
     suspend fun forEach(action: suspend (CounterViewModel) -> Unit) {
@@ -97,13 +101,23 @@ class CountersViewModel : ViewModel() {
     }
 
     suspend fun deleteCounterById(context: Context, id: Int) {
+        var index = _countersState.value.countersViewModels.indexOfFirst { it.id == id }
         _countersState.value.let {
             _countersState.value =
                 it.copy(countersViewModels = it.countersViewModels.mapNotNull { c -> if (c.id != id) c else null })
         }
-
         val database = CounterDatabase.getInstance(context).counterDatabase
         database.deleteByID(id)
+
+        index = if (index > 0) index - 1 else 0
+        if (index == _countersState.value.countersViewModels.size) {
+            this@CountersViewModel.addCounter(context, null, 0)
+        } else {
+            val counter = _countersState.value.countersViewModels[index]
+            this@CountersViewModel.setCurrentCounter(
+                counter.id, counter.counterState.value.name, counter.counterState.value.count
+            )
+        }
     }
 
     suspend fun loadCountersFromDatabase(context: Context) {

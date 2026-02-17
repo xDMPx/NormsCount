@@ -200,29 +200,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private suspend fun addCounter(name: String? = null, value: Long = 0) {
-        counters.addCounter(this@MainActivity, name, value)
-
-        val counter = counters.last()
-        this@MainActivity.counters.setCurrentCounter(
-            counter.id, counter.counterState.value.name, counter.counterState.value.count
-        )
-    }
-
-    private suspend fun deleteCounter(counterId: Int) {
-        var index = counters.indexOfFirst { it.id == counterId }
-        counters.deleteCounterById(this@MainActivity, counterId)
-        index = if (index > 0) index - 1 else 0
-        if (index == counters.size()) {
-            addCounter()
-        } else {
-            val counter = counters[index]
-            this@MainActivity.counters.setCurrentCounter(
-                counter.id, counter.counterState.value.name, counter.counterState.value.count
-            )
-        }
-    }
-
     @Composable
     fun MainUI(
         onNavigateToSettings: () -> Unit, onNavigateToAbout: () -> Unit
@@ -264,7 +241,9 @@ class MainActivity : ComponentActivity() {
             // Screen content
             MainUIScreen(openDrawer, onNavigateToSettings, onNavigateToAbout, onDeleteCounter = {
                 scopeIO.launch {
-                    deleteCounter(this@MainActivity.counters.currentCounterState.value.id)
+                    this@MainActivity.counters.deleteCounterById(
+                        this@MainActivity, this@MainActivity.counters.currentCounterState.value.id
+                    )
                 }
             })
         }
@@ -324,7 +303,7 @@ class MainActivity : ComponentActivity() {
                         openEditDialog = true
                     } else {
                         scopeIO.launch {
-                            addCounter()
+                            this@MainActivity.counters.addCounter(this@MainActivity, null, 0)
                         }
                     }
                     closeDrawer()
@@ -356,7 +335,7 @@ class MainActivity : ComponentActivity() {
             onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
             scopeIO.launch {
-                addCounter(name, value)
+                this@MainActivity.counters.addCounter(this@MainActivity, null, 0)
             }
         }
     }
@@ -513,8 +492,8 @@ class MainActivity : ComponentActivity() {
 
         val addCounters: (Array<Utils.CounterData>) -> Unit = {
             scopeIO.launch {
-                it.forEach {
-                    addCounter(it.name, it.value)
+                it.forEach { c ->
+                    this@MainActivity.counters.addCounter(this@MainActivity, c.name, c.value)
                 }
             }
         }
@@ -541,7 +520,7 @@ class MainActivity : ComponentActivity() {
     private fun deleteAll() {
         scopeIO.launch {
             counters.forEach {
-                deleteCounter(it.id)
+                this@MainActivity.counters.deleteCounterById(this@MainActivity, it.id)
             }
         }
     }
@@ -583,7 +562,7 @@ class MainActivity : ComponentActivity() {
         scopeIO.launch {
             this@MainActivity.counters.loadCountersFromDatabase(this@MainActivity)
             if (counters.countersState.value.countersViewModels.isEmpty()) {
-                addCounter()
+                this@MainActivity.counters.addCounter(this@MainActivity, null, 0)
                 loadCountersFromDatabase()
                 return@launch
             }
