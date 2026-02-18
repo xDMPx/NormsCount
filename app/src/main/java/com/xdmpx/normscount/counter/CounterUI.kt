@@ -162,7 +162,10 @@ object CounterUI {
         Row(modifier = modifier) {
             CounterUIValue(countersViewModel, Modifier.weight(0.7f), textModifier)
             CounterUIButtons(
-                countersViewModel, modifier.weight(0.3f), Alignment.CenterVertically, onClickFeedback
+                countersViewModel,
+                modifier.weight(0.3f),
+                Alignment.CenterVertically,
+                onClickFeedback
             )
         }
     }
@@ -226,8 +229,7 @@ object CounterUI {
     }
 
     @Composable
-    fun CounterName(counterViewModel: CounterViewModel) {
-        val counterState by counterViewModel.counterState.collectAsState()
+    fun CounterName(counterState: CounterState) {
         val nameWeight = 0.725f
 
         Row {

@@ -319,8 +319,9 @@ class MainActivity : ComponentActivity() {
             HorizontalDivider()
             LazyColumn {
                 items(counters.countersViewModels) { counter ->
+                    val counterState by counter.counterState.collectAsState()
                     NavigationDrawerItem(
-                        label = { CounterUI.CounterName(counter) },
+                        label = { CounterUI.CounterName(counterState) },
                         selected = false,
                         onClick = {
                             this@MainActivity.countersViewModel.setCurrentCounter(
