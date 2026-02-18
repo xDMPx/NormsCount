@@ -9,15 +9,15 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class CounterState(
-    val count: Long = 0, val name: String = ""
+    val id: Int, val count: Long = 0, val name: String = ""
 )
 
 class CounterViewModel(
-    var id: Int = 0,
+    id: Int = 0,
     value: Long = 0,
     name: String = "Counter #",
 ) : ViewModel() {
-    private val _counterState = MutableStateFlow(CounterState(value, name))
+    private val _counterState = MutableStateFlow(CounterState(id, value, name))
     val counterState: StateFlow<CounterState> = _counterState.asStateFlow()
 
     fun resetCounter() {
@@ -38,6 +38,12 @@ class CounterViewModel(
         }
     }
 
+    fun setCounterId(id: Int) {
+        _counterState.value.let {
+            _counterState.value = it.copy(id = id)
+        }
+    }
+
     fun setCounterValue(value: Long) {
         _counterState.value.let {
             _counterState.value = it.copy(count = value)
@@ -50,8 +56,10 @@ class CounterViewModel(
         }
     }
 
+    fun getCounterId() = _counterState.value.id
+
     private fun getCounterEntity() =
-        CounterEntity(id, _counterState.value.name, _counterState.value.count)
+        CounterEntity(_counterState.value.id, _counterState.value.name, _counterState.value.count)
 
     suspend fun updateDatabase(context: Context) {
         val database = CounterDatabase.getInstance(context).counterDatabase

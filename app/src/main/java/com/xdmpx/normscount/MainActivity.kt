@@ -245,7 +245,7 @@ class MainActivity : ComponentActivity() {
                 scopeIO.launch {
                     this@MainActivity.countersViewModel.deleteCounterById(
                         this@MainActivity,
-                        this@MainActivity.countersViewModel.currentCounterState.value.id
+                        this@MainActivity.countersViewModel.currentCounterState.value.getCounterId()
                     )
                 }
             })
@@ -324,7 +324,7 @@ class MainActivity : ComponentActivity() {
                         selected = false,
                         onClick = {
                             this@MainActivity.countersViewModel.setCurrentCounter(
-                                counter.id,
+                                counter.getCounterId(),
                                 counter.counterState.value.name,
                                 counter.counterState.value.count
                             )
@@ -404,7 +404,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun saveCounterID() {
-        val counterID = countersViewModel.currentCounterState.value.id
+        val counterID = countersViewModel.currentCounterState.value.getCounterId()
         val counterIDKey = intPreferencesKey("counter_id")
         this@MainActivity.dataStore.edit { settings ->
             Log.d(TAG_DEBUG, "saveCounterID -> counterID: $counterID")
@@ -556,11 +556,13 @@ class MainActivity : ComponentActivity() {
 
             val counterID = savedCounterID.first()
             val counter =
-                countersViewModel.countersState.value.countersViewModels.find { counter -> counterID == counter.id }
+                countersViewModel.countersState.value.countersViewModels.find { counter -> counterID == counter.getCounterId() }
                     ?: countersViewModel.countersState.value.countersViewModels.first()
 
             this@MainActivity.countersViewModel.setCurrentCounter(
-                counter.id, counter.counterState.value.name, counter.counterState.value.count
+                counter.getCounterId(),
+                counter.counterState.value.name,
+                counter.counterState.value.count
             )
 
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")

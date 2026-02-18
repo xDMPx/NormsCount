@@ -21,7 +21,7 @@ class CountersViewModel : ViewModel() {
 
     fun setCurrentCounter(id: Int, name: String, value: Long) {
         _currentCounterState.value.let {
-            _currentCounterState.value.id = id
+            _currentCounterState.value.setCounterId(id)
             _currentCounterState.value.setCounterName(name)
             _currentCounterState.value.setCounterValue(value)
         }
@@ -58,7 +58,7 @@ class CountersViewModel : ViewModel() {
             _countersState.value.let { counters ->
                 _countersState.value =
                     counters.copy(countersViewModels = counters.countersViewModels.map {
-                        if (currentCounter.id == it.id) {
+                        if (currentCounter.getCounterId() == it.getCounterId()) {
                             it.setCounterName(currentCounter.counterState.value.name)
                             it.setCounterValue(currentCounter.counterState.value.count)
                         }
@@ -103,10 +103,10 @@ class CountersViewModel : ViewModel() {
     }
 
     suspend fun deleteCounterById(context: Context, id: Int) {
-        var index = _countersState.value.countersViewModels.indexOfFirst { it.id == id }
+        var index = _countersState.value.countersViewModels.indexOfFirst { it.getCounterId() == id }
         _countersState.value.let {
             _countersState.value =
-                it.copy(countersViewModels = it.countersViewModels.mapNotNull { c -> if (c.id != id) c else null })
+                it.copy(countersViewModels = it.countersViewModels.mapNotNull { c -> if (c.getCounterId() != id) c else null })
         }
         val database = CounterDatabase.getInstance(context).counterDatabase
         database.deleteByID(id)
@@ -117,7 +117,9 @@ class CountersViewModel : ViewModel() {
         } else {
             val counter = _countersState.value.countersViewModels[index]
             this@CountersViewModel.setCurrentCounter(
-                counter.id, counter.counterState.value.name, counter.counterState.value.count
+                counter.getCounterId(),
+                counter.counterState.value.name,
+                counter.counterState.value.count
             )
         }
     }
