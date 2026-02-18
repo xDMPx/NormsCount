@@ -127,6 +127,17 @@ class CountersViewModel : ViewModel() {
         }
     }
 
+    suspend fun deleteAllCounters(context: Context) {
+        this@CountersViewModel._countersState.value.let {
+            this@CountersViewModel._countersState.value = it.copy(countersViewModels = listOf())
+        }
+
+        val database = CounterDatabase.getInstance(context).counterDatabase
+        database.deleteAll()
+
+        addCounter(context)
+    }
+
     suspend fun loadCountersFromDatabase(context: Context) {
         val counters =
             CounterDatabase.getInstance(context).counterDatabase.getAll().map { counterEntity ->

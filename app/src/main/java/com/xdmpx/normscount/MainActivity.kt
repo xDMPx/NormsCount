@@ -118,7 +118,13 @@ class MainActivity : ComponentActivity() {
         settingsInstance.registerOnExportJSONClick { this@MainActivity.exportToJSON() }
         settingsInstance.registerOnExportCSVClick { this@MainActivity.exportToCSV() }
         settingsInstance.registerOnImportClick { this@MainActivity.importFromJSON() }
-        settingsInstance.registerOnDeleteAllClick { this@MainActivity.deleteAll() }
+        settingsInstance.registerOnDeleteAllClick {
+            scopeIO.launch {
+                this@MainActivity.counters.deleteAllCounters(
+                    this@MainActivity
+                )
+            }
+        }
         settingsInstance.registerOnNotificationClick { this@MainActivity.requestNotificationPermission() }
     }
 
@@ -505,14 +511,6 @@ class MainActivity : ComponentActivity() {
                         this@MainActivity, resources.getString(R.string.import_failed)
                     )
                 }
-            }
-        }
-    }
-
-    private fun deleteAll() {
-        scopeIO.launch {
-            counters.forEach {
-                this@MainActivity.counters.deleteCounterById(this@MainActivity, it.id)
             }
         }
     }
