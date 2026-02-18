@@ -75,13 +75,6 @@ class CountersViewModel : ViewModel() {
         }
     }
 
-    fun size() = _countersState.value.countersViewModels.size
-
-    fun last() = _countersState.value.countersViewModels.last()
-
-    fun indexOfFirst(predicate: (CounterViewModel) -> Boolean) =
-        _countersState.value.countersViewModels.indexOfFirst { predicate(it) }
-
     suspend fun addCounter(context: Context, name: String? = null, value: Long = 0) {
         val database = CounterDatabase.getInstance(context).counterDatabase
 
@@ -101,10 +94,6 @@ class CountersViewModel : ViewModel() {
         this@CountersViewModel.setCurrentCounter(
             id = counterEntity.id, counterEntity.name, counterEntity.value
         )
-    }
-
-    suspend fun forEach(action: suspend (CounterViewModel) -> Unit) {
-        _countersState.value.countersViewModels.forEach { action(it) }
     }
 
     suspend fun updateDatabase(context: Context) {

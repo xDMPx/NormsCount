@@ -564,7 +564,10 @@ class MainActivity : ComponentActivity() {
             )
 
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
-            Log.d(TAG_DEBUG, "onCrate -> counters: ${this@MainActivity.countersViewModel.size()}")
+            Log.d(
+                TAG_DEBUG,
+                "onCrate -> counters: ${this@MainActivity.countersViewModel.countersState.value.countersViewModels.size}"
+            )
         }
     }
 
