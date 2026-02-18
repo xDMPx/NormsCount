@@ -394,9 +394,7 @@ class MainActivity : ComponentActivity() {
             saveCounterID()
             settingsInstance.saveSettings(this@MainActivity)
             this@MainActivity.counters.synchronizeCountersWithCurrentCounter()
-            counters.forEach {
-                it.updateDatabase(this@MainActivity)
-            }
+            this@MainActivity.counters.updateDatabase(this@MainActivity)
         }
 
         super.onStop()
@@ -413,9 +411,7 @@ class MainActivity : ComponentActivity() {
 
     private fun exportToJSON() {
         scopeIO.launch {
-            counters.forEach {
-                it.updateDatabase(this@MainActivity)
-            }
+            this@MainActivity.counters.updateDatabase(this@MainActivity)
             Log.d(TAG_DEBUG, "exportToJson")
 
             val date = LocalDate.now()
@@ -428,9 +424,7 @@ class MainActivity : ComponentActivity() {
 
     private fun exportToCSV() {
         scopeIO.launch {
-            counters.forEach {
-                it.updateDatabase(this@MainActivity)
-            }
+            this@MainActivity.counters.updateDatabase(this@MainActivity)
             Log.d(TAG_DEBUG, "exportToCSV")
 
             val date = LocalDate.now()
@@ -496,9 +490,7 @@ class MainActivity : ComponentActivity() {
             }
         }
         scopeIO.launch {
-            counters.forEach {
-                it.updateDatabase(this@MainActivity)
-            }
+            this@MainActivity.counters.updateDatabase(this@MainActivity)
             if (Utils.importFromJSON(this@MainActivity, uri, addCounters)) {
                 runOnUiThread {
                     ShortToast(

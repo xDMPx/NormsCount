@@ -107,6 +107,12 @@ class CountersViewModel : ViewModel() {
         _countersState.value.countersViewModels.forEach { action(it) }
     }
 
+    suspend fun updateDatabase(context: Context) {
+        _countersState.value.countersViewModels.forEach {
+            it.updateDatabase(context)
+        }
+    }
+
     suspend fun deleteCounterById(context: Context, id: Int) {
         var index = _countersState.value.countersViewModels.indexOfFirst { it.id == id }
         _countersState.value.let {
