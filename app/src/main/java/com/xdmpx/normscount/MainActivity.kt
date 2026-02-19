@@ -323,6 +323,9 @@ class MainActivity : ComponentActivity() {
                         label = { CounterUI.CounterName(counter) },
                         selected = false,
                         onClick = {
+                            this@MainActivity.countersViewModel.synchronizeCurrentCounterWithDatabase(
+                                this@MainActivity
+                            )
                             this@MainActivity.countersViewModel.setCurrentCounter(
                                 counter.id, counter.name, counter.count
                             )
@@ -338,6 +341,7 @@ class MainActivity : ComponentActivity() {
             onDismissRequest = { openEditDialog = false }) { name, value ->
             openEditDialog = false
             scopeIO.launch {
+                this@MainActivity.countersViewModel.synchronizeCurrentCounterWithDatabase(this@MainActivity)
                 this@MainActivity.countersViewModel.addCounter(this@MainActivity, null, 0)
             }
         }

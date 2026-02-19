@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import com.xdmpx.normscount.database.CounterDatabase
 import com.xdmpx.normscount.database.CounterEntity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 data class CountersState(
     val countStates: List<CounterState> = listOf()
@@ -66,6 +69,18 @@ class CountersViewModel : ViewModel() {
                         it
                     }
                 })
+            }
+        }
+    }
+
+    fun synchronizeCurrentCounterWithDatabase(context: Context) {
+        val database = CounterDatabase.getInstance(context).counterDatabase
+        _currentCounterState.value.let {
+            val counterEntity = CounterEntity(
+                it.counterState.value.id, it.counterState.value.name, it.counterState.value.count
+            )
+            CoroutineScope(Dispatchers.IO).launch {
+                database.update(counterEntity)
             }
         }
     }
