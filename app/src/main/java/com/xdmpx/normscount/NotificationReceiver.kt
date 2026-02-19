@@ -11,9 +11,11 @@ class NotificationReceiver : BroadcastReceiver() {
         val counter = CountersViewModelInstance.getInstance()
         if (action == "increment" && counter != null) {
             counter.incrementCurrentCounter()
+            counter.synchronizeCountersWithCurrentCounter()
         }
         if (action == "decrement" && counter != null) {
             counter.decrementCurrentCounter()
+            counter.synchronizeCountersWithCurrentCounter()
         }
     }
 }
