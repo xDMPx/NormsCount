@@ -19,39 +19,49 @@ class CountersViewModel : ViewModel() {
     private val _countersState = MutableStateFlow(CountersState())
     val countersState: StateFlow<CountersState> = _countersState.asStateFlow()
 
-    private val _currentCounterState = MutableStateFlow(CounterViewModel())
-    val currentCounterState: StateFlow<CounterViewModel> = _currentCounterState.asStateFlow()
+    private val _currentCounterState = MutableStateFlow(CounterState(0, 0, "Counter #"))
+    val currentCounterState: StateFlow<CounterState> = _currentCounterState.asStateFlow()
 
     fun getCountersState() = countersState.value.countStates
 
-    fun getCurrentCounterId() = _currentCounterState.value.counterState.value.id
+    fun getCurrentCounterId() = currentCounterState.value.id
 
     fun setCurrentCounter(id: Int, name: String, value: Long) {
         _currentCounterState.value.let {
-            _currentCounterState.value.setCounterId(id)
-            _currentCounterState.value.setCounterName(name)
-            _currentCounterState.value.setCounterValue(value)
+            _currentCounterState.value = it.copy(
+                id = id, count = value, name = name
+            )
         }
     }
 
     fun incrementCurrentCounter() {
-        _currentCounterState.value.incrementCounter()
+        _currentCounterState.value.let {
+            _currentCounterState.value = it.copy(count = it.count + 1)
+        }
     }
 
     fun decrementCurrentCounter() {
-        _currentCounterState.value.decrementCounter()
+        _currentCounterState.value.let {
+            _currentCounterState.value = it.copy(count = it.count - 1)
+        }
     }
 
     fun resetCurrentCounter() {
-        _currentCounterState.value.resetCounter()
+        _currentCounterState.value.let {
+            _currentCounterState.value = it.copy(count = 0)
+        }
     }
 
     fun setCurrentCounterName(name: String) {
-        _currentCounterState.value.setCounterName(name)
+        _currentCounterState.value.let {
+            _currentCounterState.value = it.copy(name = name)
+        }
     }
 
     fun setCurrentCounterValue(value: Long) {
-        _currentCounterState.value.setCounterValue(value)
+        _currentCounterState.value.let {
+            _currentCounterState.value = it.copy(count = value)
+        }
     }
 
     fun clear() {
@@ -64,10 +74,9 @@ class CountersViewModel : ViewModel() {
         _currentCounterState.value.let { currentCounter ->
             _countersState.value.let { counters ->
                 _countersState.value = counters.copy(countStates = counters.countStates.map {
-                    if (currentCounter.getCounterId() == it.id) {
+                    if (currentCounter.id == it.id) {
                         it.copy(
-                            name = currentCounter.counterState.value.name,
-                            count = currentCounter.counterState.value.count
+                            name = currentCounter.name, count = currentCounter.count
                         )
                     } else {
                         it
@@ -80,9 +89,7 @@ class CountersViewModel : ViewModel() {
     fun synchronizeCurrentCounterWithDatabase(context: Context) {
         val database = CounterDatabase.getInstance(context).counterDatabase
         _currentCounterState.value.let {
-            val counterEntity = CounterEntity(
-                it.counterState.value.id, it.counterState.value.name, it.counterState.value.count
-            )
+            val counterEntity = CounterEntity(it.id, it.name, it.count)
             CoroutineScope(Dispatchers.IO).launch {
                 database.update(counterEntity)
             }

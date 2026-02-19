@@ -97,8 +97,7 @@ object CounterUI {
         else CounterUILandscape(countersViewModel, modifier, textModifier, onClickFeedback)
 
         if (settings.notification) {
-            val countersState by countersViewModel.currentCounterState.collectAsState()
-            val counterState by countersState.counterState.collectAsState()
+            val counterState by countersViewModel.currentCounterState.collectAsState()
 
             // TODO: ONGOING NOTIFICATION
             val incrementIntent = Intent(context, NotificationReceiver::class.java).apply {
@@ -176,8 +175,7 @@ object CounterUI {
         modifier: Modifier = Modifier,
         textModifier: Modifier,
     ) {
-        val countersState by countersViewModel.currentCounterState.collectAsState()
-        val counterState by countersState.counterState.collectAsState()
+        val counterState by countersViewModel.currentCounterState.collectAsState()
 
         LazyRow(
             horizontalArrangement = Arrangement.Center,
@@ -264,8 +262,7 @@ object CounterUI {
         onNavigateToAbout: () -> Unit,
         onDeleteCounter: () -> Unit,
     ) {
-        val countersState by countersViewModel.currentCounterState.collectAsState()
-        val counterState by countersState.counterState.collectAsState()
+        val counterState by countersViewModel.currentCounterState.collectAsState()
 
         TopAppBar(
             colors = TopAppBarDefaults.topAppBarColors(
@@ -293,8 +290,7 @@ object CounterUI {
         onNavigateToAbout: () -> Unit,
         onDeleteCounter: () -> Unit,
     ) {
-        val countersState by countersViewModel.currentCounterState.collectAsState()
-        val counterState by countersState.counterState.collectAsState()
+        val counterState by countersViewModel.currentCounterState.collectAsState()
 
         val settings by settingsInstance.settingsState.collectAsState()
         var expanded by remember { mutableStateOf(false) }
