@@ -245,7 +245,7 @@ class MainActivity : ComponentActivity() {
                 scopeIO.launch {
                     this@MainActivity.countersViewModel.deleteCounterById(
                         this@MainActivity,
-                        this@MainActivity.countersViewModel.currentCounterState.value.getCounterId()
+                        this@MainActivity.countersViewModel.getCurrentCounterId()
                     )
                 }
             })
@@ -406,7 +406,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private suspend fun saveCounterID() {
-        val counterID = countersViewModel.currentCounterState.value.getCounterId()
+        val counterID = countersViewModel.getCurrentCounterId()
         val counterIDKey = intPreferencesKey("counter_id")
         this@MainActivity.dataStore.edit { settings ->
             Log.d(TAG_DEBUG, "saveCounterID -> counterID: $counterID")
@@ -550,7 +550,7 @@ class MainActivity : ComponentActivity() {
         }
         scopeIO.launch {
             this@MainActivity.countersViewModel.loadCountersFromDatabase(this@MainActivity)
-            if (countersViewModel.countersState.value.countStates.isEmpty()) {
+            if (countersViewModel.getCountersState().isEmpty()) {
                 this@MainActivity.countersViewModel.addCounter(this@MainActivity, null, 0)
                 loadCountersFromDatabase()
                 return@launch
@@ -558,8 +558,8 @@ class MainActivity : ComponentActivity() {
 
             val counterID = savedCounterID.first()
             val counter =
-                countersViewModel.countersState.value.countStates.find { counter -> counterID == counter.id }
-                    ?: countersViewModel.countersState.value.countStates.first()
+                countersViewModel.getCountersState().find { counter -> counterID == counter.id }
+                    ?: countersViewModel.getCountersState().first()
 
             this@MainActivity.countersViewModel.setCurrentCounter(
                 counter.id, counter.name, counter.count
@@ -568,7 +568,7 @@ class MainActivity : ComponentActivity() {
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
             Log.d(
                 TAG_DEBUG,
-                "onCrate -> counters: ${this@MainActivity.countersViewModel.countersState.value.countStates.size}"
+                "onCrate -> counters: ${this@MainActivity.countersViewModel.getCountersState().size}"
             )
         }
     }
