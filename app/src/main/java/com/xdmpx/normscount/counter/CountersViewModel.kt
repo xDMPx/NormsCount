@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 data class CountersState(
-    val countersViewModels: List<CounterViewModel> = listOf()
+    val countStates: List<CounterState> = listOf()
 )
 
 class CountersViewModel : ViewModel() {
@@ -49,29 +49,30 @@ class CountersViewModel : ViewModel() {
 
     fun clear() {
         _countersState.value.let {
-            _countersState.value = it.copy(countersViewModels = listOf())
+            _countersState.value = it.copy(countStates = listOf())
         }
     }
 
     fun synchronizeCountersWithCurrentCounter() {
         _currentCounterState.value.let { currentCounter ->
             _countersState.value.let { counters ->
-                _countersState.value =
-                    counters.copy(countersViewModels = counters.countersViewModels.map {
-                        if (currentCounter.getCounterId() == it.getCounterId()) {
-                            it.setCounterName(currentCounter.counterState.value.name)
-                            it.setCounterValue(currentCounter.counterState.value.count)
-                        }
+                _countersState.value = counters.copy(countStates = counters.countStates.map {
+                    if (currentCounter.getCounterId() == it.id) {
+                        it.copy(
+                            name = currentCounter.counterState.value.name,
+                            count = currentCounter.counterState.value.count
+                        )
+                    } else {
                         it
-                    })
+                    }
+                })
             }
         }
     }
 
-    fun add(counterViewModel: CounterViewModel) {
+    fun add(counterState: CounterState) {
         _countersState.value.let {
-            _countersState.value =
-                it.copy(countersViewModels = it.countersViewModels.plus(counterViewModel))
+            _countersState.value = it.copy(countStates = it.countStates.plus(counterState))
         }
     }
 
@@ -84,10 +85,8 @@ class CountersViewModel : ViewModel() {
         database.insert(counterBase)
         val counterEntity = database.getLast()!!
         this@CountersViewModel.add(
-            CounterViewModel(
-                counterEntity.id,
-                counterEntity.value,
-                counterEntity.name,
+            CounterState(
+                counterEntity.id, counterEntity.value, counterEntity.name
             )
         )
 
@@ -97,36 +96,36 @@ class CountersViewModel : ViewModel() {
     }
 
     suspend fun updateDatabase(context: Context) {
-        _countersState.value.countersViewModels.forEach {
-            it.updateDatabase(context)
+        val database = CounterDatabase.getInstance(context).counterDatabase
+        _countersState.value.countStates.forEach {
+            val counterEntity = CounterEntity(it.id, it.name, it.count)
+            database.update(counterEntity)
         }
     }
 
     suspend fun deleteCounterById(context: Context, id: Int) {
-        var index = _countersState.value.countersViewModels.indexOfFirst { it.getCounterId() == id }
+        var index = _countersState.value.countStates.indexOfFirst { it.id == id }
         _countersState.value.let {
             _countersState.value =
-                it.copy(countersViewModels = it.countersViewModels.mapNotNull { c -> if (c.getCounterId() != id) c else null })
+                it.copy(countStates = it.countStates.mapNotNull { c -> if (c.id != id) c else null })
         }
         val database = CounterDatabase.getInstance(context).counterDatabase
         database.deleteByID(id)
 
         index = if (index > 0) index - 1 else 0
-        if (index == _countersState.value.countersViewModels.size) {
+        if (index == _countersState.value.countStates.size) {
             this@CountersViewModel.addCounter(context, null, 0)
         } else {
-            val counter = _countersState.value.countersViewModels[index]
+            val counter = _countersState.value.countStates[index]
             this@CountersViewModel.setCurrentCounter(
-                counter.getCounterId(),
-                counter.counterState.value.name,
-                counter.counterState.value.count
+                counter.id, counter.name, counter.count
             )
         }
     }
 
     suspend fun deleteAllCounters(context: Context) {
         this@CountersViewModel._countersState.value.let {
-            this@CountersViewModel._countersState.value = it.copy(countersViewModels = listOf())
+            this@CountersViewModel._countersState.value = it.copy(countStates = listOf())
         }
 
         val database = CounterDatabase.getInstance(context).counterDatabase
@@ -138,7 +137,7 @@ class CountersViewModel : ViewModel() {
     suspend fun loadCountersFromDatabase(context: Context) {
         val counters =
             CounterDatabase.getInstance(context).counterDatabase.getAll().map { counterEntity ->
-                CounterViewModel(
+                CounterState(
                     counterEntity.id,
                     counterEntity.value,
                     counterEntity.name,

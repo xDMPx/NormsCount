@@ -286,7 +286,7 @@ class MainActivity : ComponentActivity() {
         val counters by countersViewModel.countersState.collectAsState()
         var openEditDialog by remember { mutableStateOf(false) }
         var lastCounterId by remember { mutableIntStateOf(1) }
-        LaunchedEffect(counters.countersViewModels.size) {
+        LaunchedEffect(counters.countStates.size) {
             val id = CounterDatabase.getInstance(this@MainActivity).counterDatabase.getLastID() ?: 1
             lastCounterId = id
             Log.d(TAG_DEBUG, "Effect -> lastCounterID: $lastCounterId")
@@ -318,16 +318,13 @@ class MainActivity : ComponentActivity() {
             }
             HorizontalDivider()
             LazyColumn {
-                items(counters.countersViewModels) { counter ->
-                    val counterState by counter.counterState.collectAsState()
+                items(counters.countStates) { counter ->
                     NavigationDrawerItem(
-                        label = { CounterUI.CounterName(counterState) },
+                        label = { CounterUI.CounterName(counter) },
                         selected = false,
                         onClick = {
                             this@MainActivity.countersViewModel.setCurrentCounter(
-                                counter.getCounterId(),
-                                counter.counterState.value.name,
-                                counter.counterState.value.count
+                                counter.id, counter.name, counter.count
                             )
                             closeDrawer()
                         })
@@ -549,7 +546,7 @@ class MainActivity : ComponentActivity() {
         }
         scopeIO.launch {
             this@MainActivity.countersViewModel.loadCountersFromDatabase(this@MainActivity)
-            if (countersViewModel.countersState.value.countersViewModels.isEmpty()) {
+            if (countersViewModel.countersState.value.countStates.isEmpty()) {
                 this@MainActivity.countersViewModel.addCounter(this@MainActivity, null, 0)
                 loadCountersFromDatabase()
                 return@launch
@@ -557,19 +554,17 @@ class MainActivity : ComponentActivity() {
 
             val counterID = savedCounterID.first()
             val counter =
-                countersViewModel.countersState.value.countersViewModels.find { counter -> counterID == counter.getCounterId() }
-                    ?: countersViewModel.countersState.value.countersViewModels.first()
+                countersViewModel.countersState.value.countStates.find { counter -> counterID == counter.id }
+                    ?: countersViewModel.countersState.value.countStates.first()
 
             this@MainActivity.countersViewModel.setCurrentCounter(
-                counter.getCounterId(),
-                counter.counterState.value.name,
-                counter.counterState.value.count
+                counter.id, counter.name, counter.count
             )
 
             Log.d(TAG_DEBUG, "onCrate -> counterID: $counterID")
             Log.d(
                 TAG_DEBUG,
-                "onCrate -> counters: ${this@MainActivity.countersViewModel.countersState.value.countersViewModels.size}"
+                "onCrate -> counters: ${this@MainActivity.countersViewModel.countersState.value.countStates.size}"
             )
         }
     }
