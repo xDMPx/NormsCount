@@ -30,8 +30,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -55,8 +53,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -244,8 +244,7 @@ class MainActivity : ComponentActivity() {
             MainUIScreen(openDrawer, onNavigateToSettings, onNavigateToAbout, onDeleteCounter = {
                 scopeIO.launch {
                     this@MainActivity.countersViewModel.deleteCounterById(
-                        this@MainActivity,
-                        this@MainActivity.countersViewModel.getCurrentCounterId()
+                        this@MainActivity, this@MainActivity.countersViewModel.getCurrentCounterId()
                     )
                 }
             })
@@ -313,7 +312,11 @@ class MainActivity : ComponentActivity() {
                     }
                     closeDrawer()
                 }) {
-                    Icon(Icons.Filled.Add, null)
+                    Icon(
+                        painterResource(R.drawable.sharp_add_24),
+                        null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
             HorizontalDivider()

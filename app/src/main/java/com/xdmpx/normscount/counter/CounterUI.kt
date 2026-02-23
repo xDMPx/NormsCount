@@ -19,12 +19,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -45,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -212,7 +207,9 @@ object CounterUI {
                     .fillMaxWidth(0.9f)
                     .height(height = 110.dp)
             ) {
-                Icon(Icons.Rounded.Add, contentDescription = null)
+                Icon(painterResource(R.drawable.sharp_add_24), contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                    )
             }
             Button(
                 onClick = {
@@ -274,7 +271,11 @@ object CounterUI {
             )
         }, navigationIcon = {
             IconButton(onClick = onNavigationIconClick) {
-                Icon(imageVector = Icons.Filled.Menu, contentDescription = null)
+                Icon(
+                    painterResource(R.drawable.sharp_menu_24),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
             }
         }, actions = {
             TopAppBarMenu(
@@ -303,22 +304,25 @@ object CounterUI {
             else openResetAlertDialog = true
         }) {
             Icon(
-                imageVector = Icons.Filled.Refresh,
-                contentDescription = stringResource(R.string.counter_topappbar_reset)
+                painterResource(R.drawable.sharp_refresh_24),
+                contentDescription = stringResource(R.string.counter_topappbar_reset),
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
         IconButton(onClick = {
             openEditDialog = true
         }) {
             Icon(
-                imageVector = Icons.Filled.Create,
-                contentDescription = stringResource(R.string.counter_topappbar_edit)
+                painterResource(R.drawable.sharp_edit_24),
+                contentDescription = stringResource(R.string.counter_topappbar_edit),
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
         IconButton(onClick = { expanded = !expanded }) {
             Icon(
-                imageVector = Icons.Filled.MoreVert,
-                contentDescription = stringResource(R.string.counter_topappbar_menu)
+                painterResource(R.drawable.sharp_more_vert_24),
+                contentDescription = stringResource(R.string.counter_topappbar_menu),
+                tint = MaterialTheme.colorScheme.onSurface
             )
         }
 
