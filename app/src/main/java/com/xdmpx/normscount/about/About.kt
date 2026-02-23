@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -55,59 +56,62 @@ object About {
         Scaffold(
             topBar = { AboutTopAppBar(onNavigateToMain) },
         ) { innerPadding ->
-            Box(
+            LazyColumn(
                 Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
             ) {
-                OutlinedCard(
-                    border = BorderStroke(0.25.dp, Color.Gray), modifier = Modifier.padding(12.dp)
-                ) {
-                    AppInfo()
-                    AboutButton(
-                        text = "${stringResource(R.string.about_version)} v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                        icon = {
+                item {
+                    OutlinedCard(
+                        border = BorderStroke(0.25.dp, Color.Gray),
+                        modifier = Modifier.padding(12.dp)
+                    ) {
+                        AppInfo()
+                        AboutButton(
+                            text = "${stringResource(R.string.about_version)} v${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_info_24),
+                                    contentDescription = stringResource(id = R.string.about_version),
+                                    modifier = it
+                                )
+                            }) {
+                            copyVersionToClipboard(context)
+                        }
+                        AboutButton(text = stringResource(R.string.about_source_code), icon = {
                             Icon(
-                                painter = painterResource(id = R.drawable.rounded_info_24),
-                                contentDescription = stringResource(id = R.string.about_version),
+                                painter = painterResource(id = R.drawable.rounded_code_24),
+                                contentDescription = stringResource(id = R.string.about_source_code),
                                 modifier = it
                             )
                         }) {
-                        copyVersionToClipboard(context)
-                    }
-                    AboutButton(text = stringResource(R.string.about_source_code), icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.rounded_code_24),
-                            contentDescription = stringResource(id = R.string.about_source_code),
-                            modifier = it
-                        )
-                    }) {
-                        openURL(context, getString(context, R.string.about_source_code_url))
-                    }
-                    AboutButton(
-                        text = "${stringResource(R.string.about_license)}: ${
-                            stringResource(
-                                R.string.about_license_name
-                            )
-                        }", icon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_license_24),
-                                contentDescription = stringResource(id = R.string.about_license),
-                                modifier = it
-                            )
-                        }) {
-                        openURL(context, getString(context, R.string.about_license_url))
-                    }
-                    AboutButton(
-                        text = "${stringResource(R.string.about_author)}: ${stringResource(R.string.about_author_name)}",
-                        icon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.rounded_account_circle_24),
-                                contentDescription = stringResource(id = R.string.about_author),
-                                modifier = it
-                            )
-                        }) {
-                        openURL(context, getString(context, R.string.about_author_url))
+                            openURL(context, getString(context, R.string.about_source_code_url))
+                        }
+                        AboutButton(
+                            text = "${stringResource(R.string.about_license)}: ${
+                                stringResource(
+                                    R.string.about_license_name
+                                )
+                            }", icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_license_24),
+                                    contentDescription = stringResource(id = R.string.about_license),
+                                    modifier = it
+                                )
+                            }) {
+                            openURL(context, getString(context, R.string.about_license_url))
+                        }
+                        AboutButton(
+                            text = "${stringResource(R.string.about_author)}: ${stringResource(R.string.about_author_name)}",
+                            icon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.rounded_account_circle_24),
+                                    contentDescription = stringResource(id = R.string.about_author),
+                                    modifier = it
+                                )
+                            }) {
+                            openURL(context, getString(context, R.string.about_author_url))
+                        }
                     }
                 }
             }
