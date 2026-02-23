@@ -11,6 +11,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+data class CounterState(
+    val id: Int, val count: Long = 0, val name: String = ""
+)
+
 data class CountersState(
     val countStates: List<CounterState> = listOf()
 )
