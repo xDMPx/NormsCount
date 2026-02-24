@@ -25,6 +25,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -207,17 +208,25 @@ object CounterUI {
                     .fillMaxWidth(0.9f)
                     .height(height = 110.dp)
             ) {
-                Icon(painterResource(R.drawable.sharp_add_24), contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
-                    )
+                Icon(
+                    painterResource(R.drawable.sharp_add_24),
+                    contentDescription = null,
+                    tint = LocalContentColor.current
+                )
             }
             Button(
                 onClick = {
                     countersViewModel.decrementCurrentCounter()
                     onClickFeedback()
-                }, modifier = Modifier.fillMaxWidth(0.9f)
+                }, modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .height(69.dp)
             ) {
-                Text(text = "-", fontSize = 45.sp)
+                Icon(
+                    painterResource(R.drawable.sharp_remove_24),
+                    contentDescription = null,
+                    tint = LocalContentColor.current,
+                )
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
