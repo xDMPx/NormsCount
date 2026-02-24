@@ -41,7 +41,7 @@ To build it, clone the repository, open the project in Android Studio, and the
 
 The application is currently distributed only as APK via [releases](../../releases) page.
 
-<p align="center">
+<p style="display: flex; align-items: center;">
 <a href="https://github.com/xDMPx/NormsCount/releases"><img src="https://raw.githubusercontent.com/rubenpgrady/get-it-on-github/refs/heads/main/get-it-on-github.png" alt="Get it on GitHub" height="96"></a> 
 <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://add/https://github.com/xDMPx/NormsCount"><img src="https://github.com/ImranR98/Obtainium/blob/main/assets/graphics/badge_obtainium.png?raw=true" alt="Get it on Obtainium" width="220"  height="65" style="padding: 2%"/></a>
 </p>
